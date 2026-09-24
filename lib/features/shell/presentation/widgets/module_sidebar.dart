@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_logo.dart';
+import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/domain/app_modules.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
 
+/// Maglo-inspired left rail: wordmark, orange active pills, help/logout footer.
 class ModuleSidebar extends StatelessWidget {
   const ModuleSidebar({
     this.compact = false,
@@ -15,7 +17,6 @@ class ModuleSidebar extends StatelessWidget {
     super.key,
   });
 
-  /// When true, used inside a drawer — tapping a leaf closes the drawer.
   final bool compact;
   final VoidCallback? onNavigate;
 
@@ -28,42 +29,64 @@ class ModuleSidebar extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md,
+              const Padding(
+                padding: EdgeInsets.fromLTRB(
                   AppSpacing.lg,
-                  AppSpacing.md,
-                  AppSpacing.md,
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
                 ),
-                child: Row(
-                  children: [
-                    // Tab-bar / app icon mark
-                    const AppLogoMark(size: 32),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        'Workspace',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                  ],
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: AppLogoWordmark(height: 28),
                 ),
               ),
-              const Divider(height: 1),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.sm,
-                    horizontal: AppSpacing.xs,
+                    horizontal: AppSpacing.sm,
                   ),
                   children: [
                     for (final module in AppModules.all)
                       _ModuleSection(
                         module: module,
                         location: state.location,
-                        expanded: state.expandedModuleIds.contains(module.id),
+                        expanded:
+                            state.expandedModuleIds.contains(module.id),
                         onNavigate: onNavigate,
                       ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                  AppSpacing.lg,
+                ),
+                child: Column(
+                  children: [
+                    _NavTile(
+                      label: 'Help',
+                      icon: Icons.help_outline,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Help center coming soon.'),
+                          ),
+                        );
+                        onNavigate?.call();
+                      },
+                    ),
+                    _NavTile(
+                      label: 'Logout',
+                      icon: Icons.logout,
+                      onTap: () {
+                        context.read<AuthCubit>().logout();
+                        onNavigate?.call();
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -116,7 +139,7 @@ class _ModuleSection extends StatelessWidget {
           key: ValueKey('nav-${module.id}'),
           label: module.label,
           icon: moduleActive ? module.selectedIcon : module.icon,
-          active: moduleActive && !expanded,
+          active: false,
           trailing: Icon(
             expanded ? Icons.expand_less : Icons.expand_more,
             size: 20,
@@ -169,29 +192,24 @@ class _NavTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final foreground =
-        active ? AppColors.accent : AppColors.inkSecondary;
-    final background =
-        active ? AppColors.accentMuted : Colors.transparent;
+    // Maglo-style: solid orange pill, black label when active.
+    final foreground = active ? AppColors.ink : AppColors.inkSecondary;
+    final background = active ? AppColors.accent : Colors.transparent;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xs,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Material(
         color: background,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-          // Ensure the full row receives pointer events on Flutter web.
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           mouseCursor: SystemMouseCursors.click,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 44),
+            constraints: const BoxConstraints(minHeight: 48),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
+                horizontal: AppSpacing.md,
                 vertical: dense ? AppSpacing.xs : AppSpacing.sm,
               ),
               child: Row(
@@ -204,13 +222,10 @@ class _NavTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label,
-                      style: (dense
-                              ? theme.textTheme.bodyMedium
-                              : theme.textTheme.titleSmall)
-                          ?.copyWith(
-                        color: active ? AppColors.accent : AppColors.ink,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: foreground,
                         fontWeight:
-                            active ? FontWeight.w600 : FontWeight.w500,
+                            active ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                   ),

@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
-import 'package:saasify/core/theme/app_spacing.dart';
-import 'package:saasify/core/widgets/app_logo.dart';
 import 'package:saasify/core/widgets/app_scaffold.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
+import 'package:saasify/features/shell/presentation/widgets/dashboard_header.dart';
 import 'package:saasify/features/shell/presentation/widgets/module_sidebar.dart';
 
 class ShellPage extends StatelessWidget {
@@ -15,79 +14,22 @@ class ShellPage extends StatelessWidget {
 
   final Widget child;
 
-  static const double sidebarWidth = 260;
+  static const double sidebarWidth = 248;
 
   @override
   Widget build(BuildContext context) {
     final compact = context.isCompact;
+    final location = context.watch<ShellCubit>().state.location;
     final user = switch (context.watch<AuthCubit>().state) {
       AuthAuthenticated(:final user) => user,
       _ => null,
     };
 
     return AppScaffold(
-      appBar: AppBar(
-        titleSpacing: compact ? 0 : AppSpacing.md,
-        title: const Align(
-          alignment: Alignment.centerLeft,
-          child: AppLogoWordmark(height: 28),
-        ),
-        leading: compact
-            ? Builder(
-                builder: (context) => IconButton(
-                  tooltip: 'Menu',
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
-              )
-            : null,
-        actions: [
-          if (user != null)
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.sm),
-              child: PopupMenuButton<_ShellMenuAction>(
-                tooltip: 'Account',
-                onSelected: (action) {
-                  if (action == _ShellMenuAction.signOut) {
-                    context.read<AuthCubit>().logout();
-                  }
-                },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(
-                    value: _ShellMenuAction.signOut,
-                    child: Text('Sign out'),
-                  ),
-                ],
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundColor: AppColors.accentMuted,
-                      foregroundColor: AppColors.accent,
-                      child: Text(
-                        user.name.isNotEmpty ? user.name[0] : 'A',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: AppColors.accent,
-                            ),
-                      ),
-                    ),
-                    if (!compact) ...[
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(user.name),
-                      const Icon(Icons.arrow_drop_down),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-        ],
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1),
-        ),
-      ),
+      backgroundColor: AppColors.canvas,
       drawer: compact
           ? Drawer(
+              backgroundColor: AppColors.surface,
               child: ModuleSidebar(
                 compact: true,
                 onNavigate: () => Navigator.of(context).pop(),
@@ -95,6 +37,7 @@ class ShellPage extends StatelessWidget {
             )
           : null,
       body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (!compact) ...[
             const SizedBox(
@@ -103,14 +46,45 @@ class ShellPage extends StatelessWidget {
             ),
             const VerticalDivider(width: 1),
           ],
-          Expanded(child: child),
+          Expanded(
+            child: Builder(
+              builder: (scaffoldContext) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    DashboardHeader(
+                      title: dashboardTitleFor(location),
+                      userName: user?.name,
+                      showMenu: compact,
+                      onMenu: compact
+                          ? () => Scaffold.of(scaffoldContext).openDrawer()
+                          : null,
+                    ),
+                    Expanded(child: child),
+                  ],
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-enum _ShellMenuAction { signOut }
+String dashboardTitleFor(String location) {
+  if (location == '/') return 'Dashboard';
+  if (location.startsWith('/ticketing/tickets/')) {
+    final id = location.split('/').last;
+    return 'Ticket: $id';
+  }
+  if (location == '/ticketing') return 'All tickets';
+  if (location == '/ticketing/open') return 'Open tickets';
+  if (location == '/ticketing/pending') return 'Pending tickets';
+  if (location == '/ticketing/resolved') return 'Resolved tickets';
+  if (location == '/settings') return 'Settings';
+  return 'Workspace';
+}
 
 /// Syncs [ShellCubit] with the active router location.
 class ShellLocationSync extends StatefulWidget {

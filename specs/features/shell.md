@@ -6,7 +6,7 @@
 
 ## Summary
 
-Authenticated admin chrome with a left module bar. Top-level modules expand to reveal submodules. Compact widths use a drawer with the same hierarchy.
+Authenticated admin chrome with a Maglo-inspired layout: left module sidebar (wordmark, orange active pills, Help/Logout), top dashboard header (title, search, notifications, account), and page content filling the remaining column. Top-level modules expand to reveal submodules. Compact widths use a drawer with the same hierarchy.
 
 ## Modules (v1)
 

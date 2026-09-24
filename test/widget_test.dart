@@ -103,6 +103,6 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('nav-ticketing-open')));
     await tester.pumpAndSettle();
-    expect(find.text('Open tickets'), findsOneWidget);
+    expect(find.text('Open tickets'), findsWidgets);
   });
 }
