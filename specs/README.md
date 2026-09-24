@@ -12,6 +12,7 @@ Specs define what agents and humans may build. Code follows specs, not the other
 | [responsive.md](./responsive.md) | Breakpoints and adaptive layout rules |
 | [features/_template.md](./features/_template.md) | Template for new feature specs |
 | [features/shell.md](./features/shell.md) | App shell / navigation scaffold |
+| [features/settings.md](./features/settings.md) | Settings placeholder route |
 
 ## How to add a requirement
 
