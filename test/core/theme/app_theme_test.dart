@@ -11,6 +11,7 @@ void main() {
     expect(theme.colorScheme.primary, AppColors.accent);
     expect(theme.scaffoldBackgroundColor, AppColors.canvas);
     expect(AppColors.canvas, const Color(0xFFFFFFFF));
+    expect(AppColors.accent, const Color(0xFFFF6542));
     expect(theme.brightness, Brightness.light);
     expect(theme.useMaterial3, isTrue);
   });

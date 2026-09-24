@@ -19,7 +19,7 @@ Defined in `lib/core/theme/`:
 
 - **Canvas / surface**: pure white (`#FFFFFF`) everywhere
 - **Ink**: near-black for primary text
-- **Accent**: orange (`#E85D04`) for primary actions and brand marks
+- **Accent**: orange (`#FF6542`) matching brand mark
 - **Danger / success / warning**: semantic only
 
 ## Typography

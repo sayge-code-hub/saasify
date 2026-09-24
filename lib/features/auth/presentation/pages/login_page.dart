@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
+import 'package:saasify/core/widgets/app_logo.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 
@@ -59,7 +59,6 @@ class _LoginPageState extends State<LoginPage>
       backgroundColor: AppColors.canvas,
       body: Stack(
         children: [
-          // Sharp orange brand edge — atmosphere without muddy gradients.
           const Positioned(
             top: 0,
             left: 0,
@@ -69,21 +68,6 @@ class _LoginPageState extends State<LoginPage>
               child: SizedBox(height: 4),
             ),
           ),
-          if (wide)
-            Positioned(
-              right: -80,
-              bottom: -40,
-              child: IgnorePointer(
-                child: Text(
-                  'S',
-                  style: theme.textTheme.displayLarge?.copyWith(
-                    fontSize: 420,
-                    height: 0.8,
-                    color: AppColors.ink.withValues(alpha: 0.03),
-                  ),
-                ),
-              ),
-            ),
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -106,23 +90,16 @@ class _LoginPageState extends State<LoginPage>
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Text(
-                                AppConstants.appName,
-                                style: theme.textTheme.displaySmall?.copyWith(
-                                  color: AppColors.ink,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                              Align(
+                              // group.svg mark
+                              const Align(
                                 alignment: Alignment.centerLeft,
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 400),
-                                  curve: Curves.easeOutCubic,
-                                  width: 48,
-                                  height: 3,
-                                  color: AppColors.accent,
-                                ),
+                                child: AppLogoMark(size: 64),
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+                              // Wordmark lockup
+                              const Align(
+                                alignment: Alignment.centerLeft,
+                                child: AppLogoWordmark(height: 44),
                               ),
                               const SizedBox(height: AppSpacing.md),
                               Text(

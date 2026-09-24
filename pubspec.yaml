@@ -25,3 +25,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/brand/logo_mark.png
+    - assets/brand/logo_mark_256.png
+    - assets/brand/logo_wordmark.png
+    - assets/brand/logo_mark.svg

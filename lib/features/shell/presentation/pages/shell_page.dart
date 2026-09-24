@@ -5,6 +5,7 @@ import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
+import 'package:saasify/core/widgets/app_logo.dart';
 import 'package:saasify/core/widgets/app_scaffold.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
@@ -27,9 +28,18 @@ class ShellPage extends StatelessWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: Text(
-          AppConstants.appName,
-          style: Theme.of(context).textTheme.headlineSmall,
+        titleSpacing: compact ? 0 : AppSpacing.md,
+        title: Row(
+          children: [
+            if (!compact) ...[
+              const AppLogoMark(size: 28),
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            Text(
+              AppConstants.appName,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ],
         ),
         leading: compact
             ? Builder(

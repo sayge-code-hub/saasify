@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
+import 'package:saasify/core/widgets/app_logo.dart';
 import 'package:saasify/features/shell/domain/app_modules.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
 
@@ -36,18 +37,7 @@ class ModuleSidebar extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: AppColors.accentMuted,
-                      foregroundColor: AppColors.accent,
-                      child: Text(
-                        'S',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: AppColors.accent,
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                    ),
+                    const AppLogoMark(size: 32),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:saasify/app/app.dart';
-import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/features/auth/domain/auth_user.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
@@ -13,7 +12,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sign in to the admin workspace'), findsOneWidget);
-    expect(find.text(AppConstants.appName), findsOneWidget);
+    expect(find.byType(Image), findsWidgets);
+    expect(find.text('Sign in'), findsOneWidget);
   });
 
   testWidgets('login enters overview with module sidebar', (tester) async {

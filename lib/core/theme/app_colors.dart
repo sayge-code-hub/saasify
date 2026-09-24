@@ -13,9 +13,9 @@ abstract final class AppColors {
   static const Color inkTertiary = Color(0xFF737373);
   static const Color border = Color(0xFFE5E5E5);
 
-  static const Color accent = Color(0xFFE85D04);
-  static const Color accentHover = Color(0xFFC44D03);
-  static const Color accentMuted = Color(0xFFFFF0E6);
+  static const Color accent = Color(0xFFFF6542);
+  static const Color accentHover = Color(0xFFE85A3A);
+  static const Color accentMuted = Color(0xFFFFF0EC);
 
   static const Color danger = Color(0xFFB42318);
   static const Color dangerMuted = Color(0xFFFEE4E2);
