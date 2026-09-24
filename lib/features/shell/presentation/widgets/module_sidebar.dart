@@ -22,7 +22,7 @@ class ModuleSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ShellCubit, ShellState>(
       builder: (context, state) {
-        return ColoredBox(
+        return Material(
           color: AppColors.surface,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,19 +97,22 @@ class _ModuleSection extends StatelessWidget {
   final bool expanded;
   final VoidCallback? onNavigate;
 
+  void _go(BuildContext context, String location) {
+    context.go(location);
+    onNavigate?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!module.hasChildren) {
       final active =
           AppModules.isLocationActive(location, module.location ?? '');
       return _NavTile(
+        key: ValueKey('nav-${module.id}'),
         label: module.label,
         icon: active ? module.selectedIcon : module.icon,
         active: active,
-        onTap: () {
-          context.go(module.location!);
-          onNavigate?.call();
-        },
+        onTap: () => _go(context, module.location!),
       );
     }
 
@@ -119,6 +122,7 @@ class _ModuleSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _NavTile(
+          key: ValueKey('nav-${module.id}'),
           label: module.label,
           icon: moduleActive ? module.selectedIcon : module.icon,
           active: moduleActive && !expanded,
@@ -136,16 +140,14 @@ class _ModuleSection extends StatelessWidget {
               children: [
                 for (final child in module.children)
                   _NavTile(
+                    key: ValueKey('nav-${child.id}'),
                     label: child.label,
                     dense: true,
                     active: AppModules.isLocationActive(
                       location,
                       child.location,
                     ),
-                    onTap: () {
-                      context.go(child.location);
-                      onNavigate?.call();
-                    },
+                    onTap: () => _go(context, child.location),
                   ),
               ],
             ),
@@ -163,6 +165,7 @@ class _NavTile extends StatelessWidget {
     this.trailing,
     this.active = false,
     this.dense = false,
+    super.key,
   });
 
   final String label;
@@ -191,33 +194,38 @@ class _NavTile extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: dense ? AppSpacing.xs : AppSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 20, color: foreground),
-                  const SizedBox(width: AppSpacing.sm),
-                ] else
-                  const SizedBox(width: AppSpacing.lg + AppSpacing.xs),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: (dense
-                            ? theme.textTheme.bodyMedium
-                            : theme.textTheme.titleSmall)
-                        ?.copyWith(
-                      color: active ? AppColors.accent : AppColors.ink,
-                      fontWeight:
-                          active ? FontWeight.w600 : FontWeight.w500,
+          // Ensure the full row receives pointer events on Flutter web.
+          mouseCursor: SystemMouseCursors.click,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 44),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: dense ? AppSpacing.xs : AppSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 20, color: foreground),
+                    const SizedBox(width: AppSpacing.sm),
+                  ] else
+                    const SizedBox(width: AppSpacing.lg + AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: (dense
+                              ? theme.textTheme.bodyMedium
+                              : theme.textTheme.titleSmall)
+                          ?.copyWith(
+                        color: active ? AppColors.accent : AppColors.ink,
+                        fontWeight:
+                            active ? FontWeight.w600 : FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-                ?trailing,
-              ],
+                  ?trailing,
+                ],
+              ),
             ),
           ),
         ),

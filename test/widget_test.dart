@@ -77,4 +77,32 @@ void main() {
 
     expect(tickets.state.byId('TCK-1042')!.status.name, 'inProgress');
   });
+
+  testWidgets('overview CTA and sidebar keys navigate to ticketing', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final auth = AuthCubit(
+      delay: Duration.zero,
+      initialState: const AuthAuthenticated(
+        AuthUser(id: '1', name: 'Alex', email: 'alex@saasify.io'),
+      ),
+    );
+    addTearDown(auth.close);
+
+    await tester.pumpWidget(SaasifyApp(authCubit: auth));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open ticketing'));
+    await tester.pumpAndSettle();
+    expect(find.text('Triage and resolve customer support requests.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('nav-ticketing-open')));
+    await tester.pumpAndSettle();
+    expect(find.text('Open tickets'), findsOneWidget);
+  });
 }
