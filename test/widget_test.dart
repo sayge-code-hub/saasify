@@ -3,57 +3,78 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:saasify/app/app.dart';
 import 'package:saasify/core/constants/app_constants.dart';
+import 'package:saasify/features/auth/domain/auth_user.dart';
+import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 
 void main() {
-  testWidgets('app boots to home with brand', (tester) async {
-    await tester.pumpWidget(SaasifyApp());
+  testWidgets('unauthenticated users land on login', (tester) async {
+    await tester.pumpWidget(const SaasifyApp());
     await tester.pumpAndSettle();
 
-    expect(find.text(AppConstants.appName), findsWidgets);
-    expect(find.textContaining('Foundation ready'), findsOneWidget);
+    expect(find.text('Sign in to the admin workspace'), findsOneWidget);
+    expect(find.text(AppConstants.appName), findsOneWidget);
   });
 
-  testWidgets('compact layout shows bottom navigation', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(SaasifyApp());
-    await tester.pumpAndSettle();
-
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(NavigationRail), findsNothing);
-  });
-
-  testWidgets('expanded layout shows navigation rail', (tester) async {
+  testWidgets('login enters overview with module sidebar', (tester) async {
     tester.view.physicalSize = const Size(1280, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(SaasifyApp());
+    final auth = AuthCubit(delay: Duration.zero);
+    addTearDown(auth.close);
+
+    await tester.pumpWidget(SaasifyApp(authCubit: auth));
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationRail), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    await tester.tap(find.text('Sign in'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Overview'), findsWidgets);
+    expect(find.text('Ticketing'), findsOneWidget);
+    expect(find.text('Open tickets'), findsNothing);
   });
 
-  testWidgets('navigates to settings from bottom bar', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
+  testWidgets('ticketing list opens detail and advances workflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(SaasifyApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
-
-    expect(
-      find.textContaining('Workspace preferences will land here'),
-      findsOneWidget,
+    final auth = AuthCubit(
+      delay: Duration.zero,
+      initialState: const AuthAuthenticated(
+        AuthUser(id: '1', name: 'Alex', email: 'alex@saasify.io'),
+      ),
     );
+    final tickets = TicketListCubit();
+    addTearDown(auth.close);
+    addTearDown(tickets.close);
+
+    await tester.pumpWidget(
+      SaasifyApp(authCubit: auth, ticketListCubit: tickets),
+    );
+    await tester.pumpAndSettle();
+
+    // Expand already open; navigate via submodule label.
+    await tester.tap(find.text('All tickets'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('All tickets'), findsWidgets);
+    expect(find.textContaining('TCK-'), findsWidgets);
+
+    await tester.tap(find.text('TCK-1042').first);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Cannot reset password'), findsOneWidget);
+    expect(find.text('Workflow'), findsOneWidget);
+
+    await tester.tap(find.text('Mark in progress'));
+    await tester.pumpAndSettle();
+
+    expect(tickets.state.byId('TCK-1042')!.status.name, 'inProgress');
   });
 }

@@ -11,8 +11,11 @@ Specs define what agents and humans may build. Code follows specs, not the other
 | [theme.md](./theme.md) | Colors, type, spacing, motion tokens |
 | [responsive.md](./responsive.md) | Breakpoints and adaptive layout rules |
 | [features/_template.md](./features/_template.md) | Template for new feature specs |
-| [features/shell.md](./features/shell.md) | App shell / navigation scaffold |
-| [features/settings.md](./features/settings.md) | Settings placeholder route |
+| [features/auth.md](./features/auth.md) | Mocked login / session gate |
+| [features/shell.md](./features/shell.md) | SaaS module sidebar + submodules |
+| [features/overview.md](./features/overview.md) | Post-login dashboard |
+| [features/ticketing.md](./features/ticketing.md) | Admin ticketing UI (mocked) |
+| [features/settings.md](./features/settings.md) | Settings placeholder |
 
 ## How to add a requirement
 

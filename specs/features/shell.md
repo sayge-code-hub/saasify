@@ -1,34 +1,30 @@
-# Feature: App shell
+# Feature: App shell (SaaS modules)
 
 ## Status
 
-`done` (foundation)
+`done`
 
 ## Summary
 
-Responsive application chrome for Saasify: branded top bar, adaptive navigation, and a home placeholder route. Product features plug into this shell later.
+Authenticated admin chrome with a left module bar. Top-level modules expand to reveal submodules. Compact widths use a drawer with the same hierarchy.
 
-## Out of scope
+## Modules (v1)
 
-- Auth
-- Real product modules
-- Persistence
+| Module | Submodules | Route prefix |
+|--------|------------|--------------|
+| Overview | — | `/` |
+| Ticketing | All tickets, Open, Pending, Resolved | `/ticketing…` |
+| Settings | — | `/settings` |
 
 ## Acceptance criteria
 
-- [x] Compact: bottom navigation
-- [x] Medium/expanded: navigation rail
-- [x] Home route renders branded placeholder
-- [x] Theme applied globally
-- [x] Shell navigation Cubit tested
-- [x] Responsive helpers tested
+- [ ] Expanded/medium: persistent left sidebar with expand/collapse modules
+- [ ] Compact: menu opens drawer with same nav
+- [ ] Active submodule highlighted from current route
+- [ ] Sign-out control available in shell header
+- [ ] No bottom-nav dual-destination pattern for admin
 
-## State
+## Out of scope
 
-- `ShellCubit` tracks selected destination index
-- Destinations: Home, Settings (extensible list in `ShellDestinations`)
-
-## UI notes
-
-- Brand name "Saasify" visible in shell header
-- Content area uses `AppPage` padding and max-width
+- Per-role module permissions
+- Drag-reorder modules

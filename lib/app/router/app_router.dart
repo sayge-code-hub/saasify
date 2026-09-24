@@ -1,21 +1,42 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:saasify/features/home/presentation/pages/home_page.dart';
+import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:saasify/features/auth/presentation/pages/login_page.dart';
+import 'package:saasify/features/overview/presentation/pages/overview_page.dart';
 import 'package:saasify/features/settings/presentation/pages/settings_page.dart';
-import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
 import 'package:saasify/features/shell/presentation/pages/shell_page.dart';
+import 'package:saasify/features/ticketing/presentation/pages/ticket_detail_page.dart';
+import 'package:saasify/features/ticketing/presentation/pages/ticket_list_page.dart';
 
-/// Central route table. Feature pages must not define their own graphs.
-GoRouter createAppRouter({GlobalKey<NavigatorState>? navigatorKey}) {
+GoRouter createAppRouter({
+  required AuthCubit authCubit,
+  required Listenable refreshListenable,
+  GlobalKey<NavigatorState>? navigatorKey,
+}) {
   return GoRouter(
     navigatorKey: navigatorKey,
     initialLocation: '/',
+    refreshListenable: refreshListenable,
+    redirect: (context, state) {
+      final authed = authCubit.state is AuthAuthenticated;
+      final loggingIn = state.matchedLocation == '/login';
+
+      if (!authed && !loggingIn) return '/login';
+      if (authed && loggingIn) return '/';
+      return null;
+    },
     routes: [
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
-          return _ShellLocationSync(
+          return ShellLocationSync(
             location: state.uri.path,
             child: ShellPage(child: child),
           );
@@ -23,10 +44,49 @@ GoRouter createAppRouter({GlobalKey<NavigatorState>? navigatorKey}) {
         routes: [
           GoRoute(
             path: '/',
-            name: 'home',
+            name: 'overview',
             pageBuilder: (context, state) => const NoTransitionPage<void>(
-              child: HomePage(),
+              child: OverviewPage(),
             ),
+          ),
+          GoRoute(
+            path: '/ticketing',
+            name: 'ticketing',
+            pageBuilder: (context, state) => const NoTransitionPage<void>(
+              child: TicketListPage(),
+            ),
+            routes: [
+              GoRoute(
+                path: 'open',
+                name: 'ticketing-open',
+                pageBuilder: (context, state) => const NoTransitionPage<void>(
+                  child: TicketListPage(routeFilter: 'open'),
+                ),
+              ),
+              GoRoute(
+                path: 'pending',
+                name: 'ticketing-pending',
+                pageBuilder: (context, state) => const NoTransitionPage<void>(
+                  child: TicketListPage(routeFilter: 'pending'),
+                ),
+              ),
+              GoRoute(
+                path: 'resolved',
+                name: 'ticketing-resolved',
+                pageBuilder: (context, state) => const NoTransitionPage<void>(
+                  child: TicketListPage(routeFilter: 'resolved'),
+                ),
+              ),
+              GoRoute(
+                path: 'tickets/:id',
+                name: 'ticket-detail',
+                pageBuilder: (context, state) => NoTransitionPage<void>(
+                  child: TicketDetailPage(
+                    ticketId: state.pathParameters['id']!,
+                  ),
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: '/settings',
@@ -41,35 +101,17 @@ GoRouter createAppRouter({GlobalKey<NavigatorState>? navigatorKey}) {
   );
 }
 
-/// Keeps [ShellCubit] aligned when the router location changes.
-class _ShellLocationSync extends StatefulWidget {
-  const _ShellLocationSync({required this.location, required this.child});
-
-  final String location;
-  final Widget child;
-
-  @override
-  State<_ShellLocationSync> createState() => _ShellLocationSyncState();
-}
-
-class _ShellLocationSyncState extends State<_ShellLocationSync> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<ShellCubit>().selectLocation(widget.location);
-    });
+class AuthRouterRefresh extends ChangeNotifier {
+  AuthRouterRefresh(this._authCubit) {
+    _subscription = _authCubit.stream.listen((_) => notifyListeners());
   }
 
-  @override
-  void didUpdateWidget(covariant _ShellLocationSync oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.location != widget.location) {
-      context.read<ShellCubit>().selectLocation(widget.location);
-    }
-  }
+  final AuthCubit _authCubit;
+  late final StreamSubscription<AuthState> _subscription;
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 }

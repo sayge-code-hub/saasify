@@ -59,4 +59,4 @@ flutter run  # device / emulator
 
 ## Current phase
 
-**Foundation only.** Product requirements arrive in follow-up prompts. Scaffold shell + theme + agent specs first; feature work waits for explicit requirements.
+**Admin SaaS shell + Ticketing (UI mocked).** Auth is in-memory. Next slices may wire APIs; do not invent backend packages unless asked.

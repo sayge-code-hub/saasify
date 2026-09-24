@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_page.dart';
 
-/// Placeholder settings surface — expand when product specs arrive.
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -16,8 +15,8 @@ class SettingsPage extends StatelessWidget {
         child: AppEmptyState(
           title: 'Settings',
           message:
-              'Workspace preferences will land here once product '
-              'requirements are specified.',
+              'Workspace preferences will land here in a later slice. '
+              'Ticketing admin UI is the current focus.',
           icon: Icons.settings_outlined,
         ),
       ),

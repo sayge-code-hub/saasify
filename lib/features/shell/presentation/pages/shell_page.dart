@@ -1,112 +1,149 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_scaffold.dart';
+import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
+import 'package:saasify/features/shell/presentation/widgets/module_sidebar.dart';
 
-/// Adaptive chrome: bottom bar on compact, rail on medium/expanded.
 class ShellPage extends StatelessWidget {
   const ShellPage({required this.child, super.key});
 
   final Widget child;
 
+  static const double sidebarWidth = 260;
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ShellCubit, ShellState>(
-      builder: (context, state) {
-        final isCompact = context.isCompact;
-        return AppScaffold(
-          appBar: AppBar(
-            title: Text(
-              AppConstants.appName,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            bottom: const PreferredSize(
-              preferredSize: Size.fromHeight(1),
-              child: Divider(height: 1),
-            ),
-          ),
-          body: Row(
-            children: [
-              if (!isCompact) ...[
-                _ShellRail(selectedIndex: state.selectedIndex),
-                const VerticalDivider(width: 1),
-              ],
-              Expanded(child: child),
-            ],
-          ),
-          bottomNavigationBar: isCompact
-              ? NavigationBar(
-                  selectedIndex: state.selectedIndex,
-                  onDestinationSelected: (index) =>
-                      _onSelect(context, index),
-                  destinations: [
-                    for (final destination in ShellDestinations.all)
-                      NavigationDestination(
-                        icon: Icon(destination.icon),
-                        selectedIcon: Icon(destination.selectedIcon),
-                        label: destination.label,
-                      ),
-                  ],
-                )
-              : null,
-        );
-      },
-    );
-  }
+    final compact = context.isCompact;
+    final user = switch (context.watch<AuthCubit>().state) {
+      AuthAuthenticated(:final user) => user,
+      _ => null,
+    };
 
-  void _onSelect(BuildContext context, int index) {
-    context.read<ShellCubit>().selectIndex(index);
-    context.go(ShellDestinations.all[index].location);
+    return AppScaffold(
+      appBar: AppBar(
+        title: Text(
+          AppConstants.appName,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        leading: compact
+            ? Builder(
+                builder: (context) => IconButton(
+                  tooltip: 'Menu',
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              )
+            : null,
+        actions: [
+          if (user != null)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: PopupMenuButton<_ShellMenuAction>(
+                tooltip: 'Account',
+                onSelected: (action) {
+                  if (action == _ShellMenuAction.signOut) {
+                    context.read<AuthCubit>().logout();
+                  }
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: _ShellMenuAction.signOut,
+                    child: Text('Sign out'),
+                  ),
+                ],
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: AppColors.accentMuted,
+                      foregroundColor: AppColors.accent,
+                      child: Text(
+                        user.name.isNotEmpty ? user.name[0] : 'A',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: AppColors.accent,
+                            ),
+                      ),
+                    ),
+                    if (!compact) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(user.name),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+        ],
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1),
+        ),
+      ),
+      drawer: compact
+          ? Drawer(
+              child: ModuleSidebar(
+                compact: true,
+                onNavigate: () => Navigator.of(context).pop(),
+              ),
+            )
+          : null,
+      body: Row(
+        children: [
+          if (!compact) ...[
+            const SizedBox(
+              width: sidebarWidth,
+              child: ModuleSidebar(),
+            ),
+            const VerticalDivider(width: 1),
+          ],
+          Expanded(child: child),
+        ],
+      ),
+    );
   }
 }
 
-class _ShellRail extends StatelessWidget {
-  const _ShellRail({required this.selectedIndex});
+enum _ShellMenuAction { signOut }
 
-  final int selectedIndex;
+/// Syncs [ShellCubit] with the active router location.
+class ShellLocationSync extends StatefulWidget {
+  const ShellLocationSync({
+    required this.location,
+    required this.child,
+    super.key,
+  });
+
+  final String location;
+  final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final extended = context.isExpanded;
-    return NavigationRail(
-      selectedIndex: selectedIndex,
-      extended: extended,
-      minExtendedWidth: 200,
-      labelType: extended
-          ? NavigationRailLabelType.none
-          : NavigationRailLabelType.all,
-      leading: Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-        child: CircleAvatar(
-          backgroundColor: AppColors.accentMuted,
-          foregroundColor: AppColors.accent,
-          child: Text(
-            'S',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppColors.accent,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-        ),
-      ),
-      onDestinationSelected: (index) {
-        context.read<ShellCubit>().selectIndex(index);
-        context.go(ShellDestinations.all[index].location);
-      },
-      destinations: [
-        for (final destination in ShellDestinations.all)
-          NavigationRailDestination(
-            icon: Icon(destination.icon),
-            selectedIcon: Icon(destination.selectedIcon),
-            label: Text(destination.label),
-          ),
-      ],
-    );
+  State<ShellLocationSync> createState() => _ShellLocationSyncState();
+}
+
+class _ShellLocationSyncState extends State<ShellLocationSync> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ShellCubit>().setLocation(widget.location);
+    });
   }
+
+  @override
+  void didUpdateWidget(covariant ShellLocationSync oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.location != widget.location) {
+      context.read<ShellCubit>().setLocation(widget.location);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

@@ -6,35 +6,24 @@ import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
 void main() {
   group('ShellCubit', () {
     blocTest<ShellCubit, ShellState>(
-      'starts at index 0',
+      'setLocation expands ticketing for ticket paths',
       build: ShellCubit.new,
-      expect: () => <ShellState>[],
-      verify: (cubit) => expect(cubit.state.selectedIndex, 0),
-    );
-
-    blocTest<ShellCubit, ShellState>(
-      'selectIndex emits when index changes',
-      build: ShellCubit.new,
-      act: (cubit) => cubit.selectIndex(1),
-      expect: () => const <ShellState>[ShellState(selectedIndex: 1)],
-    );
-
-    blocTest<ShellCubit, ShellState>(
-      'ignores out-of-range index',
-      build: ShellCubit.new,
-      act: (cubit) => cubit.selectIndex(99),
-      expect: () => <ShellState>[],
-      verify: (cubit) => expect(cubit.state.selectedIndex, 0),
-    );
-
-    blocTest<ShellCubit, ShellState>(
-      'selectLocation maps path to index',
-      build: ShellCubit.new,
-      act: (cubit) => cubit.selectLocation('/'),
-      expect: () => <ShellState>[],
+      act: (cubit) => cubit.setLocation('/ticketing/open'),
       verify: (cubit) {
-        expect(cubit.state.selectedIndex, 0);
-        expect(cubit.state.selected.label, 'Home');
+        expect(cubit.state.location, '/ticketing/open');
+        expect(cubit.state.expandedModuleIds, contains('ticketing'));
+      },
+    );
+
+    blocTest<ShellCubit, ShellState>(
+      'toggleModule collapses and expands',
+      build: ShellCubit.new,
+      act: (cubit) {
+        cubit.toggleModule('ticketing');
+        cubit.toggleModule('ticketing');
+      },
+      verify: (cubit) {
+        expect(cubit.state.expandedModuleIds, contains('ticketing'));
       },
     );
   });

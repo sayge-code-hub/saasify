@@ -5,18 +5,70 @@ import 'package:go_router/go_router.dart';
 import 'package:saasify/app/router/app_router.dart';
 import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/theme/app_theme.dart';
+import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
+import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 
-class SaasifyApp extends StatelessWidget {
-  SaasifyApp({super.key, GoRouter? router})
-      : _router = router ?? createAppRouter();
+class SaasifyApp extends StatefulWidget {
+  const SaasifyApp({
+    super.key,
+    this.authCubit,
+    this.ticketListCubit,
+    this.shellCubit,
+  });
 
-  final GoRouter _router;
+  final AuthCubit? authCubit;
+  final TicketListCubit? ticketListCubit;
+  final ShellCubit? shellCubit;
+
+  @override
+  State<SaasifyApp> createState() => _SaasifyAppState();
+}
+
+class _SaasifyAppState extends State<SaasifyApp> {
+  late final AuthCubit _authCubit;
+  late final TicketListCubit _ticketListCubit;
+  late final ShellCubit _shellCubit;
+  late final AuthRouterRefresh _authRefresh;
+  late final GoRouter _router;
+  late final bool _ownsAuth;
+  late final bool _ownsTickets;
+  late final bool _ownsShell;
+
+  @override
+  void initState() {
+    super.initState();
+    _ownsAuth = widget.authCubit == null;
+    _ownsTickets = widget.ticketListCubit == null;
+    _ownsShell = widget.shellCubit == null;
+    _authCubit = widget.authCubit ?? AuthCubit();
+    _ticketListCubit = widget.ticketListCubit ?? TicketListCubit();
+    _shellCubit = widget.shellCubit ?? ShellCubit();
+    _authRefresh = AuthRouterRefresh(_authCubit);
+    _router = createAppRouter(
+      authCubit: _authCubit,
+      refreshListenable: _authRefresh,
+    );
+  }
+
+  @override
+  void dispose() {
+    _authRefresh.dispose();
+    if (_ownsAuth) _authCubit.close();
+    if (_ownsTickets) _ticketListCubit.close();
+    if (_ownsShell) _shellCubit.close();
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ShellCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _authCubit),
+        BlocProvider.value(value: _ticketListCubit),
+        BlocProvider.value(value: _shellCubit),
+      ],
       child: MaterialApp.router(
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,

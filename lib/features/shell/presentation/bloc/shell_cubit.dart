@@ -1,74 +1,62 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Destination shown in the adaptive shell navigation.
-class ShellDestination extends Equatable {
-  const ShellDestination({
-    required this.label,
-    required this.icon,
-    required this.selectedIcon,
-    required this.location,
+import 'package:saasify/features/shell/domain/app_modules.dart';
+
+class ShellState extends Equatable {
+  const ShellState({
+    this.location = '/',
+    this.expandedModuleIds = const {'ticketing'},
   });
 
-  final String label;
-  final IconData icon;
-  final IconData selectedIcon;
   final String location;
+  final Set<String> expandedModuleIds;
 
-  @override
-  List<Object?> get props => [label, icon, selectedIcon, location];
-}
-
-/// Default destinations for the foundation shell.
-abstract final class ShellDestinations {
-  static const home = ShellDestination(
-    label: 'Home',
-    icon: Icons.home_outlined,
-    selectedIcon: Icons.home,
-    location: '/',
-  );
-
-  static const settings = ShellDestination(
-    label: 'Settings',
-    icon: Icons.settings_outlined,
-    selectedIcon: Icons.settings,
-    location: '/settings',
-  );
-
-  static const List<ShellDestination> all = [home, settings];
-}
-
-final class ShellState extends Equatable {
-  const ShellState({this.selectedIndex = 0});
-
-  final int selectedIndex;
-
-  ShellDestination get selected => ShellDestinations.all[selectedIndex];
-
-  ShellState copyWith({int? selectedIndex}) {
-    return ShellState(selectedIndex: selectedIndex ?? this.selectedIndex);
+  ShellState copyWith({
+    String? location,
+    Set<String>? expandedModuleIds,
+  }) {
+    return ShellState(
+      location: location ?? this.location,
+      expandedModuleIds: expandedModuleIds ?? this.expandedModuleIds,
+    );
   }
 
   @override
-  List<Object?> get props => [selectedIndex];
+  List<Object?> get props => [location, expandedModuleIds];
 }
 
 class ShellCubit extends Cubit<ShellState> {
-  ShellCubit({int initialIndex = 0})
-      : super(ShellState(selectedIndex: initialIndex));
+  ShellCubit({String initialLocation = '/'})
+      : super(
+          ShellState(
+            location: initialLocation,
+            expandedModuleIds: {
+              for (final module in AppModules.all)
+                if (AppModules.isModuleExpandedForPath(module, initialLocation))
+                  module.id,
+              'ticketing',
+            },
+          ),
+        );
 
-  void selectIndex(int index) {
-    if (index < 0 || index >= ShellDestinations.all.length) return;
-    if (index == state.selectedIndex) return;
-    emit(state.copyWith(selectedIndex: index));
+  void setLocation(String location) {
+    final expanded = {...state.expandedModuleIds};
+    for (final module in AppModules.all) {
+      if (AppModules.isModuleExpandedForPath(module, location)) {
+        expanded.add(module.id);
+      }
+    }
+    emit(state.copyWith(location: location, expandedModuleIds: expanded));
   }
 
-  void selectLocation(String location) {
-    final index = ShellDestinations.all.indexWhere(
-      (d) => d.location == location,
-    );
-    if (index == -1) return;
-    selectIndex(index);
+  void toggleModule(String moduleId) {
+    final expanded = {...state.expandedModuleIds};
+    if (expanded.contains(moduleId)) {
+      expanded.remove(moduleId);
+    } else {
+      expanded.add(moduleId);
+    }
+    emit(state.copyWith(expandedModuleIds: expanded));
   }
 }
