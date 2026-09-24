@@ -2,7 +2,7 @@
 
 ## Direction
 
-Enterprise SaaS, calm and precise. Cool slate surfaces with a teal accent. Not purple-gradient, not cream/terracotta editorial, not dark-by-default.
+Orange · black · pure white. Sharp and commercial — not teal SaaS, not cream editorial, not purple gradient.
 
 ## Tokens (source of truth)
 
@@ -17,18 +17,15 @@ Defined in `lib/core/theme/`:
 
 ## Color roles
 
-- **Canvas**: cool off-white with a faint blue cast
-- **Surface**: white / elevated white
-- **Ink**: near-slate for primary text
-- **Accent**: teal (`#0F766E` family) for primary actions
-- **Danger / success / warning**: semantic only, not decoration
-
-Light theme is primary. Dark theme may be added later via the same token files — do not invent a parallel dark palette in widgets.
+- **Canvas / surface**: pure white (`#FFFFFF`) everywhere
+- **Ink**: near-black for primary text
+- **Accent**: orange (`#E85D04`) for primary actions and brand marks
+- **Danger / success / warning**: semantic only
 
 ## Typography
 
-- Display / titles: **Fraunces** (expressive, brand-forward)
-- Body / UI: **Source Sans 3** (readable, neutral)
+- Display / titles: **Fraunces**
+- Body / UI: **Source Sans 3**
 
 Access only through `Theme.of(context).textTheme` or `AppTypography`.
 
@@ -40,8 +37,8 @@ Access only through `Theme.of(context).textTheme` or `AppTypography`.
 
 Subtle, purposeful:
 
-- Page fade/slide via router transitions (short)
-- Primary button press scale (subtle)
-- Shell navigation indicator animation
+- Login entrance fade + slide
+- Orange accent underline settle
+- Shell navigation indicator
 
 Do not add continuous decorative animations.

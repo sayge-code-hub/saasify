@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 
 enum AppButtonVariant { filled, outlined, text }
@@ -26,10 +27,15 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final child = isLoading
-        ? const SizedBox(
+        ? SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: variant == AppButtonVariant.filled
+                  ? Colors.white
+                  : AppColors.accent,
+            ),
           )
         : _labelRow();
 

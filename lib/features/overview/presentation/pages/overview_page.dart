@@ -51,12 +51,12 @@ class OverviewPage extends StatelessWidget {
                   _StatTile(
                     label: 'Open',
                     value: '$open',
-                    color: const Color(0xFF075985),
+                    color: AppColors.accent,
                   ),
                   _StatTile(
                     label: 'In progress',
                     value: '$inProgress',
-                    color: AppColors.accent,
+                    color: AppColors.ink,
                   ),
                   _StatTile(
                     label: 'Pending',

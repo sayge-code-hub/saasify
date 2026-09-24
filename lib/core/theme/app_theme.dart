@@ -4,15 +4,15 @@ import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
 
-/// Assembles [ThemeData] from Saasify tokens.
+/// Assembles [ThemeData] from Saasify tokens (white · black · orange).
 abstract final class AppTheme {
   static ThemeData light() {
     const colorScheme = ColorScheme.light(
       primary: AppColors.accent,
       onPrimary: Colors.white,
       primaryContainer: AppColors.accentMuted,
-      onPrimaryContainer: AppColors.accent,
-      secondary: AppColors.inkSecondary,
+      onPrimaryContainer: AppColors.accentHover,
+      secondary: AppColors.ink,
       onSecondary: Colors.white,
       surface: AppColors.surface,
       onSurface: AppColors.ink,
@@ -20,7 +20,7 @@ abstract final class AppTheme {
       error: AppColors.danger,
       onError: Colors.white,
       outline: AppColors.border,
-      outlineVariant: AppColors.canvasTint,
+      outlineVariant: AppColors.border,
     );
 
     final textTheme = AppTypography.textTheme();
@@ -30,6 +30,7 @@ abstract final class AppTheme {
       brightness: Brightness.light,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.canvas,
+      canvasColor: AppColors.canvas,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         elevation: 0,
@@ -77,11 +78,16 @@ abstract final class AppTheme {
           borderSide: const BorderSide(color: AppColors.danger),
         ),
         hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.inkTertiary),
+        labelStyle: textTheme.bodyMedium?.copyWith(color: AppColors.inkSecondary),
+        prefixIconColor: AppColors.inkSecondary,
+        suffixIconColor: AppColors.inkSecondary,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.accent,
           foregroundColor: Colors.white,
+          disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.5),
+          disabledForegroundColor: Colors.white,
           minimumSize: const Size(48, 48),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
@@ -90,7 +96,7 @@ abstract final class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
-          textStyle: textTheme.labelLarge,
+          textStyle: textTheme.labelLarge?.copyWith(color: Colors.white),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -101,7 +107,7 @@ abstract final class AppTheme {
             horizontal: AppSpacing.lg,
             vertical: AppSpacing.sm,
           ),
-          side: const BorderSide(color: AppColors.border),
+          side: const BorderSide(color: AppColors.ink),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
@@ -114,6 +120,9 @@ abstract final class AppTheme {
           minimumSize: const Size(48, 40),
           textStyle: textTheme.labelLarge,
         ),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.accent,
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surface,
@@ -135,6 +144,12 @@ abstract final class AppTheme {
           color: AppColors.accent,
         ),
         unselectedLabelTextStyle: textTheme.labelMedium,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surface,
+        selectedColor: AppColors.accentMuted,
+        side: const BorderSide(color: AppColors.border),
+        labelStyle: textTheme.labelMedium,
       ),
     );
   }

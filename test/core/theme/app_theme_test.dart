@@ -5,11 +5,12 @@ import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_theme.dart';
 
 void main() {
-  test('light theme uses teal primary and canvas scaffold', () {
+  test('light theme uses orange primary and pure white scaffold', () {
     final theme = AppTheme.light();
 
     expect(theme.colorScheme.primary, AppColors.accent);
     expect(theme.scaffoldBackgroundColor, AppColors.canvas);
+    expect(AppColors.canvas, const Color(0xFFFFFFFF));
     expect(theme.brightness, Brightness.light);
     expect(theme.useMaterial3, isTrue);
   });
