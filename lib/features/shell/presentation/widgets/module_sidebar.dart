@@ -37,6 +37,7 @@ class ModuleSidebar extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
+                    // Tab-bar / app icon mark
                     const AppLogoMark(size: 32),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(

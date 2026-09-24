@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:saasify/core/constants/app_constants.dart';
 
-/// Brand mark from `assets/brand/logo_mark.png` (group.svg source).
+/// App icon / tab-bar mark (`assets/brand/logo_mark.png`).
 class AppLogoMark extends StatelessWidget {
   const AppLogoMark({
     this.size = 40,
-    this.semanticLabel = '${AppConstants.appName} logo',
+    this.semanticLabel = '${AppConstants.appName} icon',
     super.key,
   });
 
@@ -25,7 +25,7 @@ class AppLogoMark extends StatelessWidget {
   }
 }
 
-/// Horizontal wordmark from `assets/brand/logo_wordmark.png`.
+/// Primary logo / wordmark from group export (`assets/brand/logo_wordmark.png`).
 class AppLogoWordmark extends StatelessWidget {
   const AppLogoWordmark({
     this.height = 36,

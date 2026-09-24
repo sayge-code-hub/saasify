@@ -90,16 +90,10 @@ class _LoginPageState extends State<LoginPage>
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // group.svg mark
+                              // group.svg wordmark as primary logo
                               const Align(
                                 alignment: Alignment.centerLeft,
-                                child: AppLogoMark(size: 64),
-                              ),
-                              const SizedBox(height: AppSpacing.lg),
-                              // Wordmark lockup
-                              const Align(
-                                alignment: Alignment.centerLeft,
-                                child: AppLogoWordmark(height: 44),
+                                child: AppLogoWordmark(height: 48),
                               ),
                               const SizedBox(height: AppSpacing.md),
                               Text(

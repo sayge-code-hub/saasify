@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
@@ -29,17 +28,9 @@ class ShellPage extends StatelessWidget {
     return AppScaffold(
       appBar: AppBar(
         titleSpacing: compact ? 0 : AppSpacing.md,
-        title: Row(
-          children: [
-            if (!compact) ...[
-              const AppLogoMark(size: 28),
-              const SizedBox(width: AppSpacing.sm),
-            ],
-            Text(
-              AppConstants.appName,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
+        title: const Align(
+          alignment: Alignment.centerLeft,
+          child: AppLogoWordmark(height: 28),
         ),
         leading: compact
             ? Builder(
