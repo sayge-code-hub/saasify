@@ -1,0 +1,13 @@
+---
+description: BLoC and Cubit patterns for saasify
+globs: lib/**/*bloc*.dart,lib/**/*cubit*.dart,lib/**/presentation/**/*.dart
+alwaysApply: false
+---
+
+# BLoC rules
+
+- Immutable events/states with `Equatable` or sealed classes.
+- No business logic in widgets — dispatch events / call cubit methods.
+- Use `BlocBuilder` / `BlocListener` / `BlocConsumer` appropriately; avoid rebuilding large trees.
+- Prefer Cubit for simple local UI state with few intents.
+- Every new Bloc/Cubit ships with `bloc_test` coverage.

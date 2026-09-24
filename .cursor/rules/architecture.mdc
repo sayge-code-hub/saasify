@@ -1,0 +1,14 @@
+---
+description: Flutter architecture and layering for saasify
+globs: lib/**/*.dart
+alwaysApply: true
+---
+
+# Saasify architecture
+
+- Follow `AGENTS.md` and `specs/architecture.md`.
+- Features live under `lib/features/<feature>/` with clean layers.
+- Shared widgets only in `lib/core/widgets/`.
+- State management is BLoC/Cubit only — do not add other state libraries.
+- Do not invent features not present in `specs/` or the user prompt.
+- Keep `main.dart` limited to bootstrap (`WidgetsFlutterBinding`, `runApp`).

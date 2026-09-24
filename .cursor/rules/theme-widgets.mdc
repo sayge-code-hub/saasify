@@ -1,0 +1,12 @@
+---
+description: Theme and widget reuse rules
+globs: lib/**/*.dart
+alwaysApply: false
+---
+
+# Theme & widgets
+
+- Use `AppColors`, `AppSpacing`, `AppTypography`, and `Theme.of(context)` — no raw hex or ad-hoc TextStyles in features.
+- Reuse `AppButton`, `AppTextField`, `AppScaffold`, `AppPage`, `AppEmptyState`, `AppLoading`, `AppErrorView` before creating new primitives.
+- Responsive: `AppBreakpoints` + `ResponsiveLayout`; never assume phone width.
+- Cards only when the container aids interaction/understanding.
