@@ -6,10 +6,16 @@ Spec-driven Flutter SaaS admin for **web and mobile**. Current slice: mocked log
 
 ```bash
 flutter pub get
-flutter run -d chrome --web-port 43123
+# Reliable web preview (release build + local CanvasKit):
+bash tool/serve_web.sh
+# Open http://127.0.0.1:43123 and hard-refresh once (Ctrl+Shift+R)
 ```
 
+Or device/emulator: `flutter run`
+
 Mock login: any non-empty email/password (prefilled `admin@saasify.io` / `password`).
+
+If you see “Loading workspace…” forever, hard-refresh to clear a stale Flutter service worker from an older debug run.
 
 ## What’s built
 
