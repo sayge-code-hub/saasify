@@ -215,6 +215,9 @@ class _NavTile extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           mouseCursor: SystemMouseCursors.click,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          hoverColor: AppColors.surfaceMuted,
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: active
