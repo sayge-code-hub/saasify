@@ -72,9 +72,6 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final compact = context.isCompact;
-    final horizontal = compact
-        ? AppSpacing.pagePaddingCompact
-        : AppSpacing.pagePaddingExpanded;
 
     return ColoredBox(
       color: AppColors.canvas,
@@ -84,243 +81,254 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  horizontal,
-                  AppSpacing.lg,
-                  horizontal,
-                  AppSpacing.lg,
-                ),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 960),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusLg),
-                        border: Border.all(color: AppColors.border),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x0A000000),
-                            blurRadius: 16,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          AppSpacing.xl,
-                          AppSpacing.lg,
-                          AppSpacing.lg,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Create Ticket',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final cardWidth = constraints.maxWidth * 0.85;
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        width: cardWidth,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius:
+                                BorderRadius.circular(AppSpacing.radiusLg),
+                            border: Border.all(color: AppColors.border),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x0A000000),
+                                blurRadius: 16,
+                                offset: Offset(0, 4),
                               ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.lg,
+                              AppSpacing.xl,
+                              AppSpacing.lg,
+                              AppSpacing.lg,
                             ),
-                            const SizedBox(height: AppSpacing.xl),
-                            _FormGrid(
-                              compact: compact,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                Text(
+                                  'Create Ticket',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.xl),
+                                _FormGrid(
+                                  compact: compact,
+                                  children: [
+                                    _LabeledField(
+                                      label: 'Header',
+                                      required: true,
+                                      child: TextFormField(
+                                        key: const ValueKey('ticket-header'),
+                                        controller: _header,
+                                        textInputAction: TextInputAction.next,
+                                        decoration: _inputDecoration(),
+                                        validator: (value) {
+                                          if (value == null ||
+                                              value.trim().isEmpty) {
+                                            return 'Header is required';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                    _LabeledField(
+                                      label: 'Application',
+                                      required: true,
+                                      child: DropdownButtonFormField<String>(
+                                        key: const ValueKey(
+                                          'ticket-application',
+                                        ),
+                                        // ignore: deprecated_member_use
+                                        value: _application,
+                                        isExpanded: true,
+                                        decoration: _inputDecoration(
+                                          hint: '--- select application ---',
+                                        ),
+                                        items: [
+                                          for (final app
+                                              in MockTickets.applications)
+                                            DropdownMenuItem(
+                                              value: app,
+                                              child: Text(
+                                                app,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                        ],
+                                        onChanged: (value) => setState(
+                                          () => _application = value,
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Application is required';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                    _LabeledField(
+                                      label: 'Priority',
+                                      required: true,
+                                      child: DropdownButtonFormField<
+                                          TicketPriority>(
+                                        key: const ValueKey('ticket-priority'),
+                                        // ignore: deprecated_member_use
+                                        value: _priority,
+                                        isExpanded: true,
+                                        decoration: _inputDecoration(
+                                          hint: '--- select priority ---',
+                                        ),
+                                        items: [
+                                          for (final p
+                                              in TicketPriority.values)
+                                            DropdownMenuItem(
+                                              value: p,
+                                              child: Text(p.label),
+                                            ),
+                                        ],
+                                        onChanged: (value) =>
+                                            setState(() => _priority = value),
+                                        validator: (value) {
+                                          if (value == null) {
+                                            return 'Priority is required';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                    _LabeledField(
+                                      label: 'Bug',
+                                      required: true,
+                                      child: DropdownButtonFormField<String>(
+                                        key: const ValueKey('ticket-bug'),
+                                        // ignore: deprecated_member_use
+                                        value: _bug,
+                                        isExpanded: true,
+                                        decoration: _inputDecoration(),
+                                        items: const [
+                                          DropdownMenuItem(
+                                            value: 'No',
+                                            child: Text('No'),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: 'Yes',
+                                            child: Text('Yes'),
+                                          ),
+                                        ],
+                                        onChanged: (value) {
+                                          if (value != null) {
+                                            setState(() => _bug = value);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    _LabeledField(
+                                      label: 'Responsibility',
+                                      child: TextFormField(
+                                        key: const ValueKey(
+                                          'ticket-responsibility',
+                                        ),
+                                        controller: _responsibility,
+                                        textInputAction: TextInputAction.next,
+                                        decoration: _inputDecoration(),
+                                      ),
+                                    ),
+                                    _LabeledField(
+                                      label: 'Affected Equipment',
+                                      child: TextFormField(
+                                        key: const ValueKey(
+                                          'ticket-equipment',
+                                        ),
+                                        controller: _affectedEquipment,
+                                        textInputAction: TextInputAction.next,
+                                        decoration: _inputDecoration(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
                                 _LabeledField(
-                                  label: 'Header',
+                                  label: 'Description',
                                   required: true,
+                                  labelWidth: compact ? null : 140,
                                   child: TextFormField(
-                                    key: const ValueKey('ticket-header'),
-                                    controller: _header,
-                                    textInputAction: TextInputAction.next,
+                                    key: const ValueKey('ticket-description'),
+                                    controller: _description,
+                                    maxLines: 6,
                                     decoration: _inputDecoration(),
                                     validator: (value) {
                                       if (value == null ||
                                           value.trim().isEmpty) {
-                                        return 'Header is required';
+                                        return 'Description is required';
                                       }
                                       return null;
                                     },
                                   ),
                                 ),
+                                const SizedBox(height: AppSpacing.lg),
                                 _LabeledField(
-                                  label: 'Application',
+                                  label: 'Distribution List',
                                   required: true,
+                                  labelWidth: compact ? null : 140,
                                   child: DropdownButtonFormField<String>(
-                                    key: const ValueKey('ticket-application'),
+                                    key: const ValueKey('ticket-distribution'),
                                     // ignore: deprecated_member_use
-                                    value: _application,
+                                    value: _distributionList,
                                     isExpanded: true,
                                     decoration: _inputDecoration(
-                                      hint: '--- select application ---',
+                                      hint: 'Choose option',
                                     ),
                                     items: [
-                                      for (final app
-                                          in MockTickets.applications)
+                                      for (final list
+                                          in MockTickets.distributionLists)
                                         DropdownMenuItem(
-                                          value: app,
+                                          value: list,
                                           child: Text(
-                                            app,
+                                            list,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                     ],
-                                    onChanged: (value) =>
-                                        setState(() => _application = value),
+                                    onChanged: (value) => setState(
+                                      () => _distributionList = value,
+                                    ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Application is required';
+                                        return 'Distribution list is required';
                                       }
                                       return null;
                                     },
                                   ),
                                 ),
-                                _LabeledField(
-                                  label: 'Priority',
-                                  required: true,
-                                  child:
-                                      DropdownButtonFormField<TicketPriority>(
-                                    key: const ValueKey('ticket-priority'),
-                                    // ignore: deprecated_member_use
-                                    value: _priority,
-                                    isExpanded: true,
-                                    decoration: _inputDecoration(
-                                      hint: '--- select priority ---',
-                                    ),
-                                    items: [
-                                      for (final p in TicketPriority.values)
-                                        DropdownMenuItem(
-                                          value: p,
-                                          child: Text(p.label),
-                                        ),
-                                    ],
-                                    onChanged: (value) =>
-                                        setState(() => _priority = value),
-                                    validator: (value) {
-                                      if (value == null) {
-                                        return 'Priority is required';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                _LabeledField(
-                                  label: 'Bug',
-                                  required: true,
-                                  child: DropdownButtonFormField<String>(
-                                    key: const ValueKey('ticket-bug'),
-                                    // ignore: deprecated_member_use
-                                    value: _bug,
-                                    isExpanded: true,
-                                    decoration: _inputDecoration(),
-                                    items: const [
-                                      DropdownMenuItem(
-                                        value: 'No',
-                                        child: Text('No'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: 'Yes',
-                                        child: Text('Yes'),
-                                      ),
-                                    ],
-                                    onChanged: (value) {
-                                      if (value != null) {
-                                        setState(() => _bug = value);
-                                      }
-                                    },
-                                  ),
-                                ),
-                                _LabeledField(
-                                  label: 'Responsibility',
-                                  child: TextFormField(
-                                    key: const ValueKey('ticket-responsibility'),
-                                    controller: _responsibility,
-                                    textInputAction: TextInputAction.next,
-                                    decoration: _inputDecoration(),
-                                  ),
-                                ),
-                                _LabeledField(
-                                  label: 'Affected Equipment',
-                                  child: TextFormField(
-                                    key: const ValueKey('ticket-equipment'),
-                                    controller: _affectedEquipment,
-                                    textInputAction: TextInputAction.next,
-                                    decoration: _inputDecoration(),
+                                const SizedBox(height: AppSpacing.xl),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: AppButton(
+                                    label: 'Save',
+                                    isLoading: _submitting,
+                                    onPressed: _submitting ? null : _submit,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: AppSpacing.lg),
-                            _LabeledField(
-                              label: 'Description',
-                              required: true,
-                              labelWidth: compact ? null : 140,
-                              child: TextFormField(
-                                key: const ValueKey('ticket-description'),
-                                controller: _description,
-                                maxLines: 6,
-                                decoration: _inputDecoration(),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Description is required';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            _LabeledField(
-                              label: 'Distribution List',
-                              required: true,
-                              labelWidth: compact ? null : 140,
-                              child: DropdownButtonFormField<String>(
-                                key: const ValueKey('ticket-distribution'),
-                                // ignore: deprecated_member_use
-                                value: _distributionList,
-                                isExpanded: true,
-                                decoration: _inputDecoration(
-                                  hint: 'Choose option',
-                                ),
-                                items: [
-                                  for (final list
-                                      in MockTickets.distributionLists)
-                                    DropdownMenuItem(
-                                      value: list,
-                                      child: Text(
-                                        list,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                ],
-                                onChanged: (value) => setState(
-                                  () => _distributionList = value,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Distribution list is required';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.xl),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: AppButton(
-                                label: 'Save',
-                                isLoading: _submitting,
-                                onPressed: _submitting ? null : _submit,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],
