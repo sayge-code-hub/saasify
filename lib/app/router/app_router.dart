@@ -116,25 +116,23 @@ GoRouter createAppRouter({
                 pageBuilder: (context, state) => const NoTransitionPage<void>(
                   child: TicketConfigPage(),
                 ),
-                routes: [
-                  GoRoute(
-                    path: ':kind',
-                    name: 'ticketing-config-list',
-                    pageBuilder: (context, state) {
-                      final kind = TicketConfigListKindX.tryParse(
-                        state.pathParameters['kind'] ?? '',
-                      );
-                      if (kind == null) {
-                        return const NoTransitionPage<void>(
-                          child: TicketConfigPage(),
-                        );
-                      }
-                      return NoTransitionPage<void>(
-                        child: TicketConfigListPage(kind: kind),
-                      );
-                    },
-                  ),
-                ],
+              ),
+              GoRoute(
+                path: 'config/:kind',
+                name: 'ticketing-config-list',
+                pageBuilder: (context, state) {
+                  final kind = TicketConfigListKindX.tryParse(
+                    state.pathParameters['kind'] ?? '',
+                  );
+                  if (kind == null) {
+                    return const NoTransitionPage<void>(
+                      child: TicketConfigPage(),
+                    );
+                  }
+                  return NoTransitionPage<void>(
+                    child: TicketConfigListPage(kind: kind),
+                  );
+                },
               ),
               GoRoute(
                 path: 'tickets/:id',
