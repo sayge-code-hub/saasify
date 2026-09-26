@@ -229,17 +229,22 @@ class _PrioritySection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           for (final priority in TicketPriority.values)
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              value: config.enabledPriorities.contains(priority),
-              onChanged: (value) {
-                if (value == null) return;
-                cubit.togglePriority(priority, value);
-              },
-              title: Text(priority.label),
-              controlAffinity: ListTileControlAffinity.leading,
-              activeColor: AppColors.accent,
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: config.enabledPriorities.contains(priority),
+                    activeColor: AppColors.accent,
+                    onChanged: (value) {
+                      if (value == null) return;
+                      cubit.togglePriority(priority, value);
+                    },
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Text(priority.label, style: theme.textTheme.bodyMedium),
+                ],
+              ),
             ),
         ],
       ),
