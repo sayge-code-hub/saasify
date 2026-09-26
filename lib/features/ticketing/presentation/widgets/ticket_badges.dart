@@ -61,7 +61,7 @@ class _TagChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(color: foreground.withValues(alpha: 0.18)),
       ),
       child: Text(
