@@ -14,6 +14,9 @@ abstract final class AppColors {
   static const Color inkTertiary = Color(0xFF737373);
   static const Color border = Color(0xFFE8E8E8);
 
+  /// Softest column rules for dense tables.
+  static const Color borderFaint = Color(0xFFF0F0F0);
+
   /// Soft coral — easier on the eyes than a neon orange.
   static const Color accent = Color(0xFFE87A5C);
   static const Color accentHover = Color(0xFFD66A4E);

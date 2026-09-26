@@ -323,7 +323,7 @@ class _TicketListPageState extends State<TicketListPage> {
                         Text(
                           'All Tickets',
                           style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w400,
                             color: AppColors.ink,
                           ),
                         ),
@@ -450,7 +450,7 @@ class _ListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.labelSmall?.copyWith(
           color: AppColors.inkTertiary,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w400,
           letterSpacing: 0.4,
         );
 
@@ -481,20 +481,24 @@ class _ListHeader extends StatelessWidget {
             ),
           ),
           if (showColumnLabels) ...[
+            const TicketListColumnDivider(),
             SizedBox(
               width: TicketListColumns.id,
               child: Text('ID', style: style),
             ),
+            const TicketListColumnDivider(),
             Expanded(child: Text('TICKET', style: style)),
-            const SizedBox(width: AppSpacing.sm),
+            const TicketListColumnDivider(),
             SizedBox(
               width: TicketListColumns.priority,
               child: Text('PRIORITY', style: style),
             ),
+            const TicketListColumnDivider(),
             SizedBox(
               width: TicketListColumns.status,
               child: Text('STATUS', style: style),
             ),
+            const TicketListColumnDivider(),
             SizedBox(
               width: TicketListColumns.assignee,
               child: Text('ASSIGNEE', style: style),
@@ -540,7 +544,7 @@ class _ListToolbar extends StatelessWidget {
             '$selectedCount selected',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppColors.inkSecondary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
                 ),
           ),
           const SizedBox(width: AppSpacing.sm),

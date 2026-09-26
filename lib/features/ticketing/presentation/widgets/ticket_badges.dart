@@ -70,7 +70,7 @@ class TicketTagChip extends StatelessWidget {
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
             color: foreground,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
           ),
     );
 
