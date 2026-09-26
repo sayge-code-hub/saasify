@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
@@ -24,6 +25,7 @@ class ShellPage extends StatelessWidget {
       AuthAuthenticated(:final user) => user,
       _ => null,
     };
+    final onTicketDetail = location.startsWith('/ticketing/tickets/');
 
     return AppScaffold(
       backgroundColor: AppColors.canvas,
@@ -54,6 +56,11 @@ class ShellPage extends StatelessWidget {
                   children: [
                     DashboardHeader(
                       title: dashboardTitleFor(location),
+                      leading: onTicketDetail
+                          ? _TicketDetailHeaderBack(
+                              onPressed: () => context.go('/ticketing/all'),
+                            )
+                          : null,
                       userName: user?.name,
                       showMenu: compact,
                       onMenu: compact
@@ -72,11 +79,42 @@ class ShellPage extends StatelessWidget {
   }
 }
 
+class _TicketDetailHeaderBack extends StatelessWidget {
+  const _TicketDetailHeaderBack({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        key: const ValueKey('header-back-all-tickets'),
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.accent,
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+        ),
+        icon: const Icon(Icons.arrow_back, size: 20),
+        label: Text(
+          'All tickets',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: AppColors.accent,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 String dashboardTitleFor(String location) {
   if (location == '/ticketing' || location == '/') return 'Dashboard';
   if (location.startsWith('/ticketing/tickets/')) {
-    final id = location.split('/').last;
-    return 'Ticket: $id';
+    // Leading back control replaces the title on ticket detail.
+    return '';
   }
   if (location == '/ticketing/new') return 'Add Ticket';
   // List views keep the page title in content; header stays clean.

@@ -41,7 +41,7 @@ void main() {
     expect(find.text('Ticket by status'), findsOneWidget);
   });
 
-  testWidgets('ticketing list opens detail and advances workflow', (
+  testWidgets('ticketing list opens detail with comments and side panel', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1280, 900);
@@ -74,11 +74,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Cannot reset password'), findsOneWidget);
-    expect(find.text('Workflow'), findsOneWidget);
+    expect(find.text('Comments'), findsOneWidget);
+    expect(find.text('Attachments'), findsOneWidget);
+    expect(find.text('Timeline'), findsOneWidget);
+    expect(find.text('Workflow'), findsNothing);
+    expect(find.textContaining('Ticket:'), findsNothing);
+    expect(find.byKey(const ValueKey('header-back-all-tickets')), findsOneWidget);
 
-    await tester.tap(find.text('Mark in progress'));
+    tickets.updateStatus('TCK-1042', TicketStatus.inProgress);
     await tester.pumpAndSettle();
-
     expect(tickets.state.byId('TCK-1042')!.status.name, 'inProgress');
   });
 

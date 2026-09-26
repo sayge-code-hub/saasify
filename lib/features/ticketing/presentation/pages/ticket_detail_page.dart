@@ -10,7 +10,6 @@ import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_page.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:saasify/features/ticketing/data/mock_tickets.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/widgets/ticket_badges.dart';
@@ -47,7 +46,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               title: 'Ticket not found',
               message: 'This ticket may have been removed from the mock set.',
               actionLabel: 'Back to tickets',
-              onAction: () => context.go('/ticketing'),
+              onAction: () => context.go('/ticketing/all'),
             ),
           );
         }
@@ -57,31 +56,26 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           _ => 'Agent',
         };
 
-        final details = _TicketDetailsColumn(
+        final mainColumn = _TicketMainColumn(
           ticket: ticket,
           replyController: _replyController,
           agentName: agentName,
         );
-        final ledger = _ActivityLedger(events: ticket.events);
+        final sideColumn = _TicketSideColumn(
+          attachments: ticket.attachments,
+          events: ticket.events,
+        );
 
         return AppPage(
           maxWidth: 1280,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => context.go('/ticketing/all'),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('All tickets'),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
               Text(
                 ticket.id,
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: AppColors.accent,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxs),
@@ -103,19 +97,17 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              _WorkflowBar(ticket: ticket),
-              const SizedBox(height: AppSpacing.lg),
               if (compact) ...[
-                details,
+                mainColumn,
                 const SizedBox(height: AppSpacing.lg),
-                ledger,
+                sideColumn,
               ] else
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 7, child: details),
+                    Expanded(flex: 7, child: mainColumn),
                     const SizedBox(width: AppSpacing.lg),
-                    Expanded(flex: 3, child: ledger),
+                    Expanded(flex: 3, child: sideColumn),
                   ],
                 ),
             ],
@@ -126,87 +118,9 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
   }
 }
 
-class _WorkflowBar extends StatelessWidget {
-  const _WorkflowBar({required this.ticket});
-
-  final Ticket ticket;
-
-  @override
-  Widget build(BuildContext context) {
-    final cubit = context.read<TicketListCubit>();
-    final next = ticket.status.next;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              'Workflow',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            if (next != null)
-              AppButton(
-                label: 'Mark ${next.label.toLowerCase()}',
-                icon: Icons.play_arrow_rounded,
-                onPressed: () => cubit.updateStatus(ticket.id, next),
-              ),
-            AppButton(
-              label: 'Resolve',
-              variant: AppButtonVariant.outlined,
-              onPressed: ticket.status == TicketStatus.resolved ||
-                      ticket.status == TicketStatus.closed
-                  ? null
-                  : () => cubit.updateStatus(
-                        ticket.id,
-                        TicketStatus.resolved,
-                      ),
-            ),
-            AppButton(
-              label: 'Close',
-              variant: AppButtonVariant.text,
-              onPressed: ticket.status == TicketStatus.closed
-                  ? null
-                  : () => cubit.updateStatus(
-                        ticket.id,
-                        TicketStatus.closed,
-                      ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            DropdownButton<String?>(
-              value: ticket.assigneeName?.isEmpty == true
-                  ? null
-                  : ticket.assigneeName,
-              hint: const Text('Assign agent'),
-              underline: const SizedBox.shrink(),
-              items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Unassigned'),
-                ),
-                for (final name in MockTickets.assignees)
-                  DropdownMenuItem<String?>(value: name, child: Text(name)),
-              ],
-              onChanged: (value) => cubit.assign(ticket.id, value ?? ''),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Left column (~70%): ticket fields, conversation, attachments.
-class _TicketDetailsColumn extends StatelessWidget {
-  const _TicketDetailsColumn({
+/// Left ~70%: details + comments.
+class _TicketMainColumn extends StatelessWidget {
+  const _TicketMainColumn({
     required this.ticket,
     required this.replyController,
     required this.agentName,
@@ -223,13 +137,34 @@ class _TicketDetailsColumn extends StatelessWidget {
       children: [
         _DetailsSection(ticket: ticket),
         const SizedBox(height: AppSpacing.lg),
-        _ConversationPanel(
+        _CommentsPanel(
           ticket: ticket,
           replyController: replyController,
           agentName: agentName,
         ),
-        const SizedBox(height: AppSpacing.lg),
-        _AttachmentsSection(attachments: ticket.attachments),
+      ],
+    );
+  }
+}
+
+/// Right ~30%: attachments on top, activity ledger below.
+class _TicketSideColumn extends StatelessWidget {
+  const _TicketSideColumn({
+    required this.attachments,
+    required this.events,
+  });
+
+  final List<TicketAttachment> attachments;
+  final List<TicketEvent> events;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _AttachmentsSection(attachments: attachments),
+        const SizedBox(height: AppSpacing.md),
+        _ActivityLedger(events: events),
       ],
     );
   }
@@ -338,7 +273,13 @@ class _DetailsSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: AppSpacing.md),
-            Text('Description', style: theme.textTheme.labelLarge),
+            Text(
+              'Description',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: AppColors.inkSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(ticket.description, style: theme.textTheme.bodyMedium),
           ],
@@ -348,8 +289,8 @@ class _DetailsSection extends StatelessWidget {
   }
 }
 
-class _ConversationPanel extends StatelessWidget {
-  const _ConversationPanel({
+class _CommentsPanel extends StatelessWidget {
+  const _CommentsPanel({
     required this.ticket,
     required this.replyController,
     required this.agentName,
@@ -371,38 +312,44 @@ class _ConversationPanel extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.sm + 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Conversation', style: theme.textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.md),
+            Text('Comments', style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
             if (ticket.messages.isEmpty)
               Text(
-                'No messages yet.',
-                style: theme.textTheme.bodyMedium?.copyWith(
+                'No comments yet.',
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.inkTertiary,
                 ),
               )
             else
               for (final message in ticket.messages) ...[
-                _MessageBubble(message: message),
-                const SizedBox(height: AppSpacing.sm),
+                _CommentRow(message: message),
+                const SizedBox(height: AppSpacing.xs),
               ],
             const Divider(height: 1, color: AppColors.border),
-            const SizedBox(height: AppSpacing.sm),
-            Text('Reply as $agentName', style: theme.textTheme.labelLarge),
             const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Comment as $agentName',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: AppColors.inkSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxs),
             AppTextField(
               controller: replyController,
-              hint: 'Write an internal or customer-facing reply…',
-              maxLines: 4,
+              hint: 'Add a comment…',
+              maxLines: 2,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.xs),
             Align(
               alignment: Alignment.centerRight,
               child: AppButton(
-                label: 'Send reply',
+                label: 'Send',
                 icon: Icons.send_outlined,
                 onPressed: () {
                   cubit.addReply(
@@ -421,36 +368,40 @@ class _ConversationPanel extends StatelessWidget {
   }
 }
 
-class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message});
+class _CommentRow extends StatelessWidget {
+  const _CommentRow({required this.message});
 
   final TicketMessage message;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final align =
-        message.isAgent ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final bg = message.isAgent ? AppColors.accentMuted : AppColors.surfaceMuted;
 
-    return Column(
-      crossAxisAlignment: align,
-      children: [
-        Text(
-          '${message.authorName} · ${_formatTime(message.createdAt)}',
-          style: theme.textTheme.labelSmall,
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs + 2,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${message.authorName} · ${_formatTime(message.createdAt)}',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: AppColors.inkSecondary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          child: Text(message.body, style: theme.textTheme.bodyMedium),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(message.body, style: theme.textTheme.bodySmall),
+        ],
+      ),
     );
   }
 }
@@ -476,11 +427,11 @@ class _AttachmentsSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('Attachments', style: theme.textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
             if (attachments.isEmpty)
               Text(
-                'No attachments on this ticket.',
-                style: theme.textTheme.bodyMedium?.copyWith(
+                'No attachments',
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.inkTertiary,
                 ),
               )
@@ -514,7 +465,7 @@ class _AttachmentRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: AppSpacing.sm,
+        vertical: AppSpacing.xs + 2,
       ),
       decoration: BoxDecoration(
         color: AppColors.surfaceMuted,
@@ -523,13 +474,20 @@ class _AttachmentRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(_icon, size: 20, color: AppColors.inkSecondary),
-          const SizedBox(width: AppSpacing.sm),
+          Icon(_icon, size: 18, color: AppColors.inkSecondary),
+          const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(attachment.name, style: theme.textTheme.bodyMedium),
+                Text(
+                  attachment.name,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 Text(
                   attachment.sizeLabel,
                   style: theme.textTheme.labelSmall?.copyWith(
@@ -539,23 +497,13 @@ class _AttachmentRow extends StatelessWidget {
               ],
             ),
           ),
-          TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Download mocked for ${attachment.name}'),
-                ),
-              );
-            },
-            child: const Text('Download'),
-          ),
         ],
       ),
     );
   }
 }
 
-/// Right column (~30%): chronological activity ledger.
+/// Chronological activity ledger (row entries).
 class _ActivityLedger extends StatelessWidget {
   const _ActivityLedger({required this.events});
 
@@ -582,19 +530,7 @@ class _ActivityLedger extends StatelessWidget {
               AppSpacing.md,
               AppSpacing.sm,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Activity ledger', style: theme.textTheme.titleMedium),
-                const SizedBox(height: 2),
-                Text(
-                  'Chronological record of every action on this ticket.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.inkTertiary,
-                  ),
-                ),
-              ],
-            ),
+            child: Text('Timeline', style: theme.textTheme.titleMedium),
           ),
           const Divider(height: 1, color: AppColors.border),
           if (ordered.isEmpty)
@@ -602,7 +538,7 @@ class _ActivityLedger extends StatelessWidget {
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Text(
                 'No activity recorded.',
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.inkTertiary,
                 ),
               ),
@@ -702,11 +638,18 @@ class _MetaRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: AppColors.inkTertiary,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: AppColors.inkSecondary,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          Text(value, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.ink,
+            ),
+          ),
         ],
       ),
     );

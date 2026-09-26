@@ -19,9 +19,9 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
    - Bulk delete when selection is non-empty
    - Clean list: id, subject, customer, priority, status, assignee
 4. **Ticket detail** (`/ticketing/tickets/:id`)
-   - 70/30 layout: details + conversation + attachments | activity ledger
-   - Status workflow, assignee, conversation + reply
-   - Ledger lists create / assign / status / message actions chronologically
+   - Top bar: back + All tickets (not ticket id title)
+   - 70/30 layout: details + comments | attachments then timeline
+   - No workflow action bar on the page
 5. **Config** (`/ticketing/config`) — placeholder queue preferences
 
 ## Mock workflows

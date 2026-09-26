@@ -63,9 +63,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Activity ledger'), findsOneWidget);
+    expect(find.text('Timeline'), findsOneWidget);
     expect(find.text('Details'), findsOneWidget);
     expect(find.text('Attachments'), findsOneWidget);
+    expect(find.text('Comments'), findsOneWidget);
     expect(find.text('blank-invoice-aug.pdf'), findsOneWidget);
     expect(find.text('Ticket created'), findsWidgets);
     expect(find.text('Assigned'), findsWidgets);

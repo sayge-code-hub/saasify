@@ -10,6 +10,7 @@ import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 class DashboardHeader extends StatelessWidget {
   const DashboardHeader({
     required this.title,
+    this.leading,
     this.userName,
     this.showMenu = false,
     this.onMenu,
@@ -17,6 +18,9 @@ class DashboardHeader extends StatelessWidget {
   });
 
   final String title;
+
+  /// Optional leading content (e.g. back + “All tickets”) instead of [title].
+  final Widget? leading;
   final String? userName;
   final bool showMenu;
   final VoidCallback? onMenu;
@@ -41,17 +45,18 @@ class DashboardHeader extends StatelessWidget {
                   icon: const Icon(Icons.menu),
                 ),
               Expanded(
-                child: title.isEmpty
-                    ? const SizedBox.shrink()
-                    : Text(
-                        title,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                child: leading ??
+                    (title.isEmpty
+                        ? const SizedBox.shrink()
+                        : Text(
+                            title,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )),
               ),
               IconButton(
                 tooltip: 'Search',
