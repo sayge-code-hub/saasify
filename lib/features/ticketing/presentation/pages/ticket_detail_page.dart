@@ -638,8 +638,8 @@ class _MetaRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: AppColors.inkSecondary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.ink,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -647,7 +647,7 @@ class _MetaRow extends StatelessWidget {
           Text(
             value,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.ink,
+              color: AppColors.inkSecondary,
             ),
           ),
         ],
