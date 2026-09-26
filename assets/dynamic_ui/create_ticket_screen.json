@@ -11,7 +11,7 @@
       "fields": [
         {
           "key": "header",
-          "label": "Header",
+          "label": "Title",
           "type": "text",
           "required": true,
           "hint": "",

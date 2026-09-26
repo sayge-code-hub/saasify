@@ -107,7 +107,11 @@ abstract final class AppModules {
     ],
   );
 
-  static const List<NavModule> all = [ticketing, dynamicUi];
+  static const List<NavModule> all = [
+    ticketing,
+    // Frozen: BDUI experiment kept in code/routes, hidden from nav.
+    // dynamicUi,
+  ];
 
   static bool isLocationActive(String currentPath, String location) {
     if (currentPath == location) return true;
