@@ -42,39 +42,52 @@ class NavModule extends Equatable {
 
 /// Canonical admin navigation tree.
 abstract final class AppModules {
-  static const overview = NavModule(
-    id: 'overview',
-    label: 'Overview',
-    icon: Icons.dashboard_outlined,
-    selectedIcon: Icons.dashboard,
-    location: '/',
-  );
-
   static const ticketing = NavModule(
     id: 'ticketing',
     label: 'Ticketing',
     icon: Icons.confirmation_number_outlined,
     selectedIcon: Icons.confirmation_number,
+    location: '/ticketing',
     children: [
       NavSubmodule(
-        id: 'ticketing-all',
-        label: 'All tickets',
+        id: 'ticketing-dashboard',
+        label: 'Dashboard',
         location: '/ticketing',
       ),
       NavSubmodule(
+        id: 'ticketing-new',
+        label: 'Add Ticket',
+        location: '/ticketing/new',
+      ),
+      NavSubmodule(
+        id: 'ticketing-all',
+        label: 'All Tickets',
+        location: '/ticketing/all',
+      ),
+      NavSubmodule(
         id: 'ticketing-open',
-        label: 'Open',
+        label: 'Open Tickets',
         location: '/ticketing/open',
       ),
       NavSubmodule(
         id: 'ticketing-pending',
-        label: 'Pending',
+        label: 'Pending Tickets',
         location: '/ticketing/pending',
       ),
       NavSubmodule(
         id: 'ticketing-resolved',
-        label: 'Resolved',
+        label: 'Resolved Tickets',
         location: '/ticketing/resolved',
+      ),
+      NavSubmodule(
+        id: 'ticketing-priority',
+        label: 'Priority Tickets',
+        location: '/ticketing/priority',
+      ),
+      NavSubmodule(
+        id: 'ticketing-config',
+        label: 'Config',
+        location: '/ticketing/config',
       ),
     ],
   );
@@ -87,26 +100,35 @@ abstract final class AppModules {
     location: '/settings',
   );
 
-  static const List<NavModule> all = [overview, ticketing, settings];
+  static const List<NavModule> all = [ticketing, settings];
 
   static bool isLocationActive(String currentPath, String location) {
-    if (location == '/') return currentPath == '/';
     if (currentPath == location) return true;
-    // Ticket detail should keep Ticketing › All highlighted loosely.
-    if (location == '/ticketing' && currentPath.startsWith('/ticketing/tickets')) {
+
+    // Dashboard is only the ticketing root — not nested list routes.
+    if (location == '/ticketing') {
+      return currentPath == '/ticketing';
+    }
+
+    // Detail views keep All Tickets highlighted.
+    if (location == '/ticketing/all' &&
+        currentPath.startsWith('/ticketing/tickets/')) {
       return true;
     }
+
     return false;
   }
 
   static bool isModuleExpandedForPath(NavModule module, String currentPath) {
     if (!module.hasChildren) return false;
+    if (module.id == 'ticketing') {
+      return currentPath == '/ticketing' ||
+          currentPath.startsWith('/ticketing/');
+    }
     return module.children.any(
       (child) =>
           currentPath == child.location ||
-          currentPath.startsWith('${child.location}/') ||
-          (child.location == '/ticketing' &&
-              currentPath.startsWith('/ticketing')),
+          currentPath.startsWith('${child.location}/'),
     );
   }
 }

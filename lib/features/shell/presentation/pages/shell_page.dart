@@ -73,15 +73,18 @@ class ShellPage extends StatelessWidget {
 }
 
 String dashboardTitleFor(String location) {
-  if (location == '/') return 'Dashboard';
+  if (location == '/ticketing' || location == '/') return 'Dashboard';
   if (location.startsWith('/ticketing/tickets/')) {
     final id = location.split('/').last;
     return 'Ticket: $id';
   }
-  if (location == '/ticketing') return 'All tickets';
-  if (location == '/ticketing/open') return 'Open tickets';
-  if (location == '/ticketing/pending') return 'Pending tickets';
-  if (location == '/ticketing/resolved') return 'Resolved tickets';
+  if (location == '/ticketing/new') return 'Add Ticket';
+  if (location == '/ticketing/all') return 'All Tickets';
+  if (location == '/ticketing/open') return 'Open Tickets';
+  if (location == '/ticketing/pending') return 'Pending Tickets';
+  if (location == '/ticketing/resolved') return 'Resolved Tickets';
+  if (location == '/ticketing/priority') return 'Priority Tickets';
+  if (location == '/ticketing/config') return 'Config';
   if (location == '/settings') return 'Settings';
   return 'Workspace';
 }

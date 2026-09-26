@@ -10,43 +10,29 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
 
 ## Screens
 
-1. **Ticket list** (`/ticketing`, `/ticketing/open`, `/ticketing/pending`, `/ticketing/resolved`)
+1. **Dashboard** (`/ticketing`) — status / priority analytics (see overview spec)
+2. **Add Ticket** (`/ticketing/new`) — create case form (subject, description, customer, priority)
+3. **Ticket list** (`/ticketing/all`, `/open`, `/pending`, `/resolved`, `/priority`)
    - Search by subject / customer / id
    - Status segment filters (synced with route when applicable)
-   - Priority filter
-   - Sortable-feeling table/list: id, subject, customer, priority, status, assignee, updated
-2. **Ticket detail** (`/ticketing/tickets/:id`)
-   - Header with id + subject
-   - Status workflow actions (Open → In progress → Pending → Resolved → Closed)
-   - Priority + assignee chips (assignee change is UI mock dropdown)
-   - Conversation thread + reply composer (reply appends locally)
-   - Customer / meta aside
-
-## Desktop layout
-
-- Expanded: list is full-width; detail is a dedicated route (clean admin pattern)
-- Compact: same routes, stacked
+   - Priority filter (or priority queue for urgent + high)
+   - List: id, subject, customer, priority, status, assignee, updated
+4. **Ticket detail** (`/ticketing/tickets/:id`)
+   - Status workflow, assignee, conversation + reply
+5. **Config** (`/ticketing/config`) — placeholder queue preferences
 
 ## Mock workflows
 
-- Change status via action buttons (updates list + detail)
-- Post reply as agent (appends message, bumps updated time)
+- Create ticket via Add Ticket (prepends to catalog, opens detail)
+- Change status via action buttons
+- Post reply as agent
 - Search / filter without persistence
-
-## Out of scope
-
-- Real API, attachments upload, SLA clocks, email channel, CSAT
 
 ## Acceptance criteria
 
-- [ ] Mock catalog has ≥8 tickets across statuses/priorities
-- [ ] Filters and search update the visible list
-- [ ] Opening a row navigates to detail
-- [ ] Status transitions and replies update UI state
-- [ ] Empty search/filter state uses `AppEmptyState`
-- [ ] Cubits + key widgets tested
-
-## State
-
-- `TicketListCubit` — catalog, query, status/priority filters, derived visible list
-- Detail mutations go through the same cubit (single source of truth for mock data)
+- [x] Mock catalog has ≥8 tickets across statuses/priorities
+- [x] Filters and search update the visible list
+- [x] Opening a row navigates to detail
+- [x] Status transitions and replies update UI state
+- [x] Create case adds a ticket to the mock catalog
+- [x] Cubits + key widgets tested

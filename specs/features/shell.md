@@ -12,17 +12,18 @@ Authenticated admin chrome with a Maglo-inspired layout: left module sidebar (wo
 
 | Module | Submodules | Route prefix |
 |--------|------------|--------------|
-| Overview | — | `/` |
-| Ticketing | All tickets, Open, Pending, Resolved | `/ticketing…` |
+| Ticketing | Dashboard, Add Ticket, All Tickets, Open Tickets, Pending Tickets, Resolved Tickets, Priority Tickets, Config | `/ticketing…` |
 | Settings | — | `/settings` |
+
+Clicking **Ticketing** opens the Dashboard (`/ticketing`) and expands the submodule list. There is no standalone Overview module.
 
 ## Acceptance criteria
 
-- [ ] Expanded/medium: persistent left sidebar with expand/collapse modules
-- [ ] Compact: menu opens drawer with same nav
-- [ ] Active submodule highlighted from current route
-- [ ] Sign-out control available in shell header
-- [ ] No bottom-nav dual-destination pattern for admin
+- [x] Expanded/medium: persistent left sidebar with expand/collapse modules
+- [x] Compact: menu opens drawer with same nav
+- [x] Active submodule highlighted from current route
+- [x] Sign-out control available in shell header
+- [x] No bottom-nav dual-destination pattern for admin
 
 ## Out of scope
 

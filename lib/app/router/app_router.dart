@@ -8,6 +8,8 @@ import 'package:saasify/features/auth/presentation/pages/login_page.dart';
 import 'package:saasify/features/overview/presentation/pages/overview_page.dart';
 import 'package:saasify/features/settings/presentation/pages/settings_page.dart';
 import 'package:saasify/features/shell/presentation/pages/shell_page.dart';
+import 'package:saasify/features/ticketing/presentation/pages/create_ticket_page.dart';
+import 'package:saasify/features/ticketing/presentation/pages/ticket_config_page.dart';
 import 'package:saasify/features/ticketing/presentation/pages/ticket_detail_page.dart';
 import 'package:saasify/features/ticketing/presentation/pages/ticket_list_page.dart';
 
@@ -18,14 +20,16 @@ GoRouter createAppRouter({
 }) {
   return GoRouter(
     navigatorKey: navigatorKey,
-    initialLocation: '/',
+    initialLocation: '/ticketing',
     refreshListenable: refreshListenable,
     redirect: (context, state) {
       final authed = authCubit.state is AuthAuthenticated;
       final loggingIn = state.matchedLocation == '/login';
+      final atRoot = state.matchedLocation == '/';
 
       if (!authed && !loggingIn) return '/login';
-      if (authed && loggingIn) return '/';
+      if (authed && loggingIn) return '/ticketing';
+      if (authed && atRoot) return '/ticketing';
       return null;
     },
     routes: [
@@ -44,18 +48,29 @@ GoRouter createAppRouter({
         routes: [
           GoRoute(
             path: '/',
-            name: 'overview',
-            pageBuilder: (context, state) => const NoTransitionPage<void>(
-              child: OverviewPage(),
-            ),
+            redirect: (context, state) => '/ticketing',
           ),
           GoRoute(
             path: '/ticketing',
             name: 'ticketing',
             pageBuilder: (context, state) => const NoTransitionPage<void>(
-              child: TicketListPage(),
+              child: OverviewPage(),
             ),
             routes: [
+              GoRoute(
+                path: 'new',
+                name: 'ticketing-new',
+                pageBuilder: (context, state) => const NoTransitionPage<void>(
+                  child: CreateTicketPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'all',
+                name: 'ticketing-all',
+                pageBuilder: (context, state) => const NoTransitionPage<void>(
+                  child: TicketListPage(),
+                ),
+              ),
               GoRoute(
                 path: 'open',
                 name: 'ticketing-open',
@@ -75,6 +90,20 @@ GoRouter createAppRouter({
                 name: 'ticketing-resolved',
                 pageBuilder: (context, state) => const NoTransitionPage<void>(
                   child: TicketListPage(routeFilter: 'resolved'),
+                ),
+              ),
+              GoRoute(
+                path: 'priority',
+                name: 'ticketing-priority',
+                pageBuilder: (context, state) => const NoTransitionPage<void>(
+                  child: TicketListPage(routeFilter: 'priority'),
+                ),
+              ),
+              GoRoute(
+                path: 'config',
+                name: 'ticketing-config',
+                pageBuilder: (context, state) => const NoTransitionPage<void>(
+                  child: TicketConfigPage(),
                 ),
               ),
               GoRoute(

@@ -78,5 +78,33 @@ void main() {
         expect(cubit.state.visible.single.id, 'TCK-2');
       },
     );
+
+    blocTest<TicketListCubit, TicketListState>(
+      'priority route shows urgent and high',
+      build: () => TicketListCubit(seed: seed),
+      act: (cubit) => cubit.applyRouteFilter('priority'),
+      verify: (cubit) {
+        expect(cubit.state.priorityQueue, isTrue);
+        expect(cubit.state.visible, hasLength(2));
+      },
+    );
+
+    blocTest<TicketListCubit, TicketListState>(
+      'createTicket prepends an open case',
+      build: () => TicketListCubit(seed: seed),
+      act: (cubit) => cubit.createTicket(
+        subject: 'New case',
+        description: 'Details here',
+        customerName: 'Casey',
+        customerEmail: 'casey@example.com',
+        priority: TicketPriority.urgent,
+      ),
+      verify: (cubit) {
+        final created = cubit.state.tickets.first;
+        expect(created.subject, 'New case');
+        expect(created.status, TicketStatus.open);
+        expect(created.id, 'TCK-3');
+      },
+    );
   });
 }

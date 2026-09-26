@@ -16,7 +16,9 @@ void main() {
     expect(find.text('Sign in'), findsOneWidget);
   });
 
-  testWidgets('login enters overview with module sidebar', (tester) async {
+  testWidgets('login enters ticketing dashboard with sidebar modules', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1280, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -31,9 +33,11 @@ void main() {
     await tester.tap(find.text('Sign in'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Overview'), findsWidgets);
+    expect(find.text('Overview'), findsNothing);
     expect(find.text('Ticketing'), findsOneWidget);
-    expect(find.text('Open tickets'), findsNothing);
+    expect(find.text('Dashboard'), findsWidgets);
+    expect(find.text('Add Ticket'), findsOneWidget);
+    expect(find.text('Ticket by status'), findsOneWidget);
   });
 
   testWidgets('ticketing list opens detail and advances workflow', (
@@ -59,11 +63,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Expand already open; navigate via submodule label.
-    await tester.tap(find.text('All tickets'));
+    await tester.tap(find.text('All Tickets'));
     await tester.pumpAndSettle();
 
-    expect(find.text('All tickets'), findsWidgets);
+    expect(find.text('All Tickets'), findsWidgets);
     expect(find.textContaining('TCK-'), findsWidgets);
 
     await tester.tap(find.text('TCK-1042').first);
@@ -78,7 +81,7 @@ void main() {
     expect(tickets.state.byId('TCK-1042')!.status.name, 'inProgress');
   });
 
-  testWidgets('overview CTA and sidebar keys navigate to ticketing', (
+  testWidgets('sidebar keys navigate and add ticket creates a case', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1280, 900);
@@ -92,21 +95,35 @@ void main() {
         AuthUser(id: '1', name: 'Alex', email: 'alex@saasify.io'),
       ),
     );
+    final tickets = TicketListCubit();
     addTearDown(auth.close);
+    addTearDown(tickets.close);
 
-    await tester.pumpWidget(SaasifyApp(authCubit: auth));
+    await tester.pumpWidget(
+      SaasifyApp(authCubit: auth, ticketListCubit: tickets),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Ticket by status'), findsOneWidget);
-    expect(find.text('Ticket by priority'), findsOneWidget);
-    expect(find.text('Ticket by application'), findsNothing);
-
-    await tester.tap(find.text('All tickets'));
-    await tester.pumpAndSettle();
-    expect(find.text('Triage and resolve customer support requests.'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('nav-ticketing-open')));
     await tester.pumpAndSettle();
-    expect(find.text('Open tickets'), findsWidgets);
+    expect(find.text('Open Tickets'), findsWidgets);
+
+    await tester.tap(find.byKey(const ValueKey('nav-ticketing-new')));
+    await tester.pumpAndSettle();
+    expect(find.text('Add new ticket'), findsOneWidget);
+
+    final fields = find.byType(TextFormField);
+    expect(fields, findsNWidgets(4));
+    await tester.enterText(fields.at(0), 'Cannot login on tablet');
+    await tester.enterText(fields.at(1), 'Login spinner never finishes on iPad.');
+    await tester.enterText(fields.at(2), 'Taylor Reed');
+    await tester.enterText(fields.at(3), 'taylor@example.com');
+    await tester.tap(find.text('Create case'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Cannot login on tablet'), findsOneWidget);
+    expect(tickets.state.tickets.first.subject, 'Cannot login on tablet');
   });
 }

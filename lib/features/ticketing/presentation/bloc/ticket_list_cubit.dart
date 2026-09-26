@@ -10,6 +10,7 @@ class TicketListState extends Equatable {
     this.query = '',
     this.statusFilter,
     this.priorityFilter,
+    this.priorityQueue = false,
   });
 
   final List<Ticket> tickets;
@@ -17,13 +18,22 @@ class TicketListState extends Equatable {
   final TicketStatus? statusFilter;
   final TicketPriority? priorityFilter;
 
+  /// When true, show urgent + high tickets (Priority Tickets view).
+  final bool priorityQueue;
+
   List<Ticket> get visible {
     final q = query.trim().toLowerCase();
     return tickets.where((ticket) {
       if (statusFilter != null && ticket.status != statusFilter) {
         return false;
       }
-      if (priorityFilter != null && ticket.priority != priorityFilter) {
+      if (priorityQueue) {
+        if (ticket.priority != TicketPriority.urgent &&
+            ticket.priority != TicketPriority.high) {
+          return false;
+        }
+      } else if (priorityFilter != null &&
+          ticket.priority != priorityFilter) {
         return false;
       }
       if (q.isEmpty) return true;
@@ -49,6 +59,7 @@ class TicketListState extends Equatable {
     String? query,
     TicketStatus? statusFilter,
     TicketPriority? priorityFilter,
+    bool? priorityQueue,
     bool clearStatusFilter = false,
     bool clearPriorityFilter = false,
   }) {
@@ -59,12 +70,13 @@ class TicketListState extends Equatable {
           clearStatusFilter ? null : statusFilter ?? this.statusFilter,
       priorityFilter:
           clearPriorityFilter ? null : priorityFilter ?? this.priorityFilter,
+      priorityQueue: priorityQueue ?? this.priorityQueue,
     );
   }
 
   @override
   List<Object?> get props =>
-      [tickets, query, statusFilter, priorityFilter];
+      [tickets, query, statusFilter, priorityFilter, priorityQueue];
 }
 
 class TicketListCubit extends Cubit<TicketListState> {
@@ -79,32 +91,115 @@ class TicketListCubit extends Cubit<TicketListState> {
 
   void setStatusFilter(TicketStatus? status) {
     if (status == null) {
-      emit(state.copyWith(clearStatusFilter: true));
+      emit(state.copyWith(clearStatusFilter: true, priorityQueue: false));
       return;
     }
-    emit(state.copyWith(statusFilter: status));
+    emit(
+      state.copyWith(
+        statusFilter: status,
+        priorityQueue: false,
+      ),
+    );
   }
 
   void setPriorityFilter(TicketPriority? priority) {
     if (priority == null) {
-      emit(state.copyWith(clearPriorityFilter: true));
+      emit(state.copyWith(clearPriorityFilter: true, priorityQueue: false));
       return;
     }
-    emit(state.copyWith(priorityFilter: priority));
+    emit(
+      state.copyWith(
+        priorityFilter: priority,
+        priorityQueue: false,
+      ),
+    );
   }
 
   void applyRouteFilter(String segment) {
     switch (segment) {
       case 'open':
-        setStatusFilter(TicketStatus.open);
+        emit(
+          state.copyWith(
+            statusFilter: TicketStatus.open,
+            clearPriorityFilter: true,
+            priorityQueue: false,
+          ),
+        );
       case 'pending':
-        setStatusFilter(TicketStatus.pending);
+        emit(
+          state.copyWith(
+            statusFilter: TicketStatus.pending,
+            clearPriorityFilter: true,
+            priorityQueue: false,
+          ),
+        );
       case 'resolved':
-        setStatusFilter(TicketStatus.resolved);
+        emit(
+          state.copyWith(
+            statusFilter: TicketStatus.resolved,
+            clearPriorityFilter: true,
+            priorityQueue: false,
+          ),
+        );
+      case 'priority':
+        emit(
+          state.copyWith(
+            clearStatusFilter: true,
+            clearPriorityFilter: true,
+            priorityQueue: true,
+          ),
+        );
       case 'all':
       default:
-        setStatusFilter(null);
+        emit(
+          state.copyWith(
+            clearStatusFilter: true,
+            clearPriorityFilter: true,
+            priorityQueue: false,
+          ),
+        );
     }
+  }
+
+  /// Creates a new open ticket and returns its id.
+  String createTicket({
+    required String subject,
+    required String description,
+    required String customerName,
+    required String customerEmail,
+    TicketPriority priority = TicketPriority.medium,
+    List<String> tags = const [],
+  }) {
+    final now = DateTime.now();
+    var maxId = 0;
+    for (final ticket in state.tickets) {
+      final n = int.tryParse(ticket.id.replaceFirst('TCK-', '')) ?? 0;
+      if (n > maxId) maxId = n;
+    }
+    final id = 'TCK-${maxId + 1}';
+    final ticket = Ticket(
+      id: id,
+      subject: subject.trim(),
+      description: description.trim(),
+      status: TicketStatus.open,
+      priority: priority,
+      customerName: customerName.trim(),
+      customerEmail: customerEmail.trim(),
+      createdAt: now,
+      updatedAt: now,
+      tags: tags,
+      messages: [
+        TicketMessage(
+          id: 'm-${now.microsecondsSinceEpoch}',
+          authorName: customerName.trim(),
+          body: description.trim(),
+          createdAt: now,
+          isAgent: false,
+        ),
+      ],
+    );
+    emit(state.copyWith(tickets: [ticket, ...state.tickets]));
+    return id;
   }
 
   void updateStatus(String ticketId, TicketStatus status) {

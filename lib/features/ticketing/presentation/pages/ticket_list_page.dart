@@ -15,7 +15,7 @@ import 'package:saasify/features/ticketing/presentation/widgets/ticket_list_item
 class TicketListPage extends StatefulWidget {
   const TicketListPage({this.routeFilter = 'all', super.key});
 
-  /// `all` | `open` | `pending` | `resolved`
+  /// `all` | `open` | `pending` | `resolved` | `priority`
   final String routeFilter;
 
   @override
@@ -60,10 +60,11 @@ class _TicketListPageState extends State<TicketListPage> {
       builder: (context, state) {
         final tickets = state.visible;
         final title = switch (widget.routeFilter) {
-          'open' => 'Open tickets',
-          'pending' => 'Pending tickets',
-          'resolved' => 'Resolved tickets',
-          _ => 'All tickets',
+          'open' => 'Open Tickets',
+          'pending' => 'Pending Tickets',
+          'resolved' => 'Resolved Tickets',
+          'priority' => 'Priority Tickets',
+          _ => 'All Tickets',
         };
 
         return AppPage(
@@ -90,6 +91,7 @@ class _TicketListPageState extends State<TicketListPage> {
                 status: state.statusFilter,
                 priority: state.priorityFilter,
                 routeLocked: widget.routeFilter != 'all',
+                priorityQueue: state.priorityQueue,
               ),
               const SizedBox(height: AppSpacing.md),
               Expanded(
@@ -146,15 +148,27 @@ class _FilterBar extends StatelessWidget {
     required this.status,
     required this.priority,
     required this.routeLocked,
+    required this.priorityQueue,
   });
 
   final TicketStatus? status;
   final TicketPriority? priority;
   final bool routeLocked;
+  final bool priorityQueue;
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<TicketListCubit>();
+    final theme = Theme.of(context);
+
+    if (priorityQueue) {
+      return Text(
+        'Showing urgent and high priority tickets.',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: AppColors.inkSecondary,
+        ),
+      );
+    }
 
     return Wrap(
       spacing: AppSpacing.xs,
@@ -162,7 +176,7 @@ class _FilterBar extends StatelessWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         if (!routeLocked) ...[
-          Text('Status', style: Theme.of(context).textTheme.labelMedium),
+          Text('Status', style: theme.textTheme.labelMedium),
           ChoiceChip(
             label: const Text('Any'),
             selected: status == null,
@@ -176,7 +190,7 @@ class _FilterBar extends StatelessWidget {
             ),
           const SizedBox(width: AppSpacing.sm),
         ],
-        Text('Priority', style: Theme.of(context).textTheme.labelMedium),
+        Text('Priority', style: theme.textTheme.labelMedium),
         ChoiceChip(
           label: const Text('Any'),
           selected: priority == null,

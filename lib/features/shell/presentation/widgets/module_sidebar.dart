@@ -131,6 +131,7 @@ class _ModuleSection extends StatelessWidget {
     }
 
     final moduleActive = AppModules.isModuleExpandedForPath(module, location);
+    final parentLocation = module.location;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -140,12 +141,25 @@ class _ModuleSection extends StatelessWidget {
           label: module.label,
           icon: moduleActive ? module.selectedIcon : module.icon,
           active: false,
-          trailing: Icon(
-            expanded ? Icons.expand_less : Icons.expand_more,
-            size: 20,
-            color: AppColors.inkTertiary,
+          trailing: IconButton(
+            tooltip: expanded ? 'Collapse' : 'Expand',
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            icon: Icon(
+              expanded ? Icons.expand_less : Icons.expand_more,
+              size: 20,
+              color: AppColors.inkTertiary,
+            ),
+            onPressed: () =>
+                context.read<ShellCubit>().toggleModule(module.id),
           ),
-          onTap: () => context.read<ShellCubit>().toggleModule(module.id),
+          onTap: () {
+            context.read<ShellCubit>().ensureExpanded(module.id);
+            if (parentLocation != null) {
+              _go(context, parentLocation);
+            }
+          },
         ),
         if (expanded)
           Padding(

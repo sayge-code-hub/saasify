@@ -59,4 +59,13 @@ class ShellCubit extends Cubit<ShellState> {
     }
     emit(state.copyWith(expandedModuleIds: expanded));
   }
+
+  void ensureExpanded(String moduleId) {
+    if (state.expandedModuleIds.contains(moduleId)) return;
+    emit(
+      state.copyWith(
+        expandedModuleIds: {...state.expandedModuleIds, moduleId},
+      ),
+    );
+  }
 }
