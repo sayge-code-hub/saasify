@@ -10,7 +10,6 @@ class TicketListState extends Equatable {
     this.query = '',
     this.statusFilter,
     this.priorityFilter,
-    this.priorityQueue = false,
     this.selectedIds = const {},
   });
 
@@ -18,9 +17,6 @@ class TicketListState extends Equatable {
   final String query;
   final TicketStatus? statusFilter;
   final TicketPriority? priorityFilter;
-
-  /// When true, show urgent + high tickets (Priority Tickets view).
-  final bool priorityQueue;
   final Set<String> selectedIds;
 
   List<Ticket> get visible {
@@ -29,13 +25,7 @@ class TicketListState extends Equatable {
       if (statusFilter != null && ticket.status != statusFilter) {
         return false;
       }
-      if (priorityQueue) {
-        if (ticket.priority != TicketPriority.urgent &&
-            ticket.priority != TicketPriority.high) {
-          return false;
-        }
-      } else if (priorityFilter != null &&
-          ticket.priority != priorityFilter) {
+      if (priorityFilter != null && ticket.priority != priorityFilter) {
         return false;
       }
       if (q.isEmpty) return true;
@@ -71,7 +61,6 @@ class TicketListState extends Equatable {
     String? query,
     TicketStatus? statusFilter,
     TicketPriority? priorityFilter,
-    bool? priorityQueue,
     Set<String>? selectedIds,
     bool clearStatusFilter = false,
     bool clearPriorityFilter = false,
@@ -83,7 +72,6 @@ class TicketListState extends Equatable {
           clearStatusFilter ? null : statusFilter ?? this.statusFilter,
       priorityFilter:
           clearPriorityFilter ? null : priorityFilter ?? this.priorityFilter,
-      priorityQueue: priorityQueue ?? this.priorityQueue,
       selectedIds: selectedIds ?? this.selectedIds,
     );
   }
@@ -94,7 +82,6 @@ class TicketListState extends Equatable {
         query,
         statusFilter,
         priorityFilter,
-        priorityQueue,
         selectedIds,
       ];
 }
@@ -111,79 +98,28 @@ class TicketListCubit extends Cubit<TicketListState> {
 
   void setStatusFilter(TicketStatus? status) {
     if (status == null) {
-      emit(state.copyWith(clearStatusFilter: true, priorityQueue: false));
+      emit(state.copyWith(clearStatusFilter: true));
       return;
     }
-    emit(
-      state.copyWith(
-        statusFilter: status,
-        priorityQueue: false,
-      ),
-    );
+    emit(state.copyWith(statusFilter: status));
   }
 
   void setPriorityFilter(TicketPriority? priority) {
     if (priority == null) {
-      emit(state.copyWith(clearPriorityFilter: true, priorityQueue: false));
+      emit(state.copyWith(clearPriorityFilter: true));
       return;
     }
-    emit(
-      state.copyWith(
-        priorityFilter: priority,
-        priorityQueue: false,
-      ),
-    );
+    emit(state.copyWith(priorityFilter: priority));
   }
 
-  void applyRouteFilter(String segment) {
-    switch (segment) {
-      case 'open':
-        emit(
-          state.copyWith(
-            statusFilter: TicketStatus.open,
-            clearPriorityFilter: true,
-            priorityQueue: false,
-            selectedIds: const {},
-          ),
-        );
-      case 'pending':
-        emit(
-          state.copyWith(
-            statusFilter: TicketStatus.pending,
-            clearPriorityFilter: true,
-            priorityQueue: false,
-            selectedIds: const {},
-          ),
-        );
-      case 'resolved':
-        emit(
-          state.copyWith(
-            statusFilter: TicketStatus.resolved,
-            clearPriorityFilter: true,
-            priorityQueue: false,
-            selectedIds: const {},
-          ),
-        );
-      case 'priority':
-        emit(
-          state.copyWith(
-            clearStatusFilter: true,
-            clearPriorityFilter: true,
-            priorityQueue: true,
-            selectedIds: const {},
-          ),
-        );
-      case 'all':
-      default:
-        emit(
-          state.copyWith(
-            clearStatusFilter: true,
-            clearPriorityFilter: true,
-            priorityQueue: false,
-            selectedIds: const {},
-          ),
-        );
-    }
+  void clearFilters() {
+    emit(
+      state.copyWith(
+        clearStatusFilter: true,
+        clearPriorityFilter: true,
+        selectedIds: const {},
+      ),
+    );
   }
 
   void toggleSelected(String id) {

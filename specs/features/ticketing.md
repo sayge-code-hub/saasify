@@ -13,7 +13,7 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
 1. **Dashboard** (`/ticketing`) — status / priority analytics (see overview spec)
 2. **Add Ticket** (`/ticketing/new`) — create form: Header, Application, Priority, Bug, Responsibility, Affected Equipment, Description, Distribution List
    - Application, Priority, Bug, and Distribution List options come from **Config**
-3. **Ticket list** (`/ticketing/all`, `/open`, `/pending`, `/resolved`, `/priority`)
+3. **Ticket list** (`/ticketing/all`)
    - Search by subject / customer / id
    - Export Excel / PDF / Email (mocked)
    - Select all / deselect all / per-row selection
@@ -22,6 +22,7 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
 4. **Ticket detail** (`/ticketing/tickets/:id`)
    - 70/30 layout: details + comments | attachments then timeline
    - Change **Assignee** via dropdown (options from Config)
+   - Categorized equal-size chips: Status, Priority, SLA, Tags
    - **SLA** panel: first response + resolution clocks
 5. **Config** (`/ticketing/config`) — editable dropdown lists, enabled priorities, SLA hours per priority
 

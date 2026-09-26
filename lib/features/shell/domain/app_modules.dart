@@ -65,26 +65,6 @@ abstract final class AppModules {
         location: '/ticketing/all',
       ),
       NavSubmodule(
-        id: 'ticketing-open',
-        label: 'Open Tickets',
-        location: '/ticketing/open',
-      ),
-      NavSubmodule(
-        id: 'ticketing-pending',
-        label: 'Pending Tickets',
-        location: '/ticketing/pending',
-      ),
-      NavSubmodule(
-        id: 'ticketing-resolved',
-        label: 'Resolved Tickets',
-        location: '/ticketing/resolved',
-      ),
-      NavSubmodule(
-        id: 'ticketing-priority',
-        label: 'Priority Tickets',
-        location: '/ticketing/priority',
-      ),
-      NavSubmodule(
         id: 'ticketing-config',
         label: 'Config',
         location: '/ticketing/config',

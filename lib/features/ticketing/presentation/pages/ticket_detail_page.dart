@@ -86,26 +86,21 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(ticket.subject, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.xs,
-                    children: [
-                      TicketStatusBadge(status: ticket.status),
-                      TicketPriorityBadge(priority: ticket.priority),
-                      _SlaChip(snapshot: sla),
-                      for (final tag in ticket.tags)
-                        Chip(
-                          label: Text(tag),
-                          visualDensity: VisualDensity.compact,
-                          side: const BorderSide(color: AppColors.border),
-                          backgroundColor: AppColors.surfaceMuted,
-                        ),
-                    ],
+                  Text(
+                    ticket.subject,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
+                  _TicketChipCategories(
+                    status: ticket.status,
+                    priority: ticket.priority,
+                    sla: sla,
+                    tags: ticket.tags,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                   if (compact) ...[
                     mainColumn,
                     const SizedBox(height: AppSpacing.lg),
@@ -125,6 +120,90 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           },
         );
       },
+    );
+  }
+}
+
+/// Grouped, equal-width chips under the ticket title.
+class _TicketChipCategories extends StatelessWidget {
+  const _TicketChipCategories({
+    required this.status,
+    required this.priority,
+    required this.sla,
+    required this.tags,
+  });
+
+  final TicketStatus status;
+  final TicketPriority priority;
+  final TicketSlaSnapshot sla;
+  final List<String> tags;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.xl,
+      runSpacing: AppSpacing.md,
+      crossAxisAlignment: WrapCrossAlignment.start,
+      children: [
+        _ChipCategory(
+          label: 'Status',
+          child: TicketStatusBadge(status: status),
+        ),
+        _ChipCategory(
+          label: 'Priority',
+          child: TicketPriorityBadge(priority: priority),
+        ),
+        _ChipCategory(
+          label: 'SLA',
+          child: _SlaChip(snapshot: sla),
+        ),
+        if (tags.isNotEmpty)
+          _ChipCategory(
+            label: 'Tags',
+            child: Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                for (final tag in tags)
+                  TicketTagChip(
+                    label: tag,
+                    background: AppColors.surfaceMuted,
+                    foreground: AppColors.inkSecondary,
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ChipCategory extends StatelessWidget {
+  const _ChipCategory({
+    required this.label,
+    required this.child,
+  });
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: AppColors.inkTertiary,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.6,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        child,
+      ],
     );
   }
 }
@@ -542,22 +621,11 @@ class _SlaStatusBadge extends StatelessWidget {
       SlaClockStatus.met => (AppColors.accentMuted, AppColors.accentDeep),
     };
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 10,
-        vertical: compact ? 4 : 6,
-      ),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      ),
-      child: Text(
-        compact ? 'SLA · ${status.label}' : status.label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w700,
-            ),
-      ),
+    return TicketTagChip(
+      label: status.label,
+      background: bg,
+      foreground: fg,
+      fixedSize: compact,
     );
   }
 }

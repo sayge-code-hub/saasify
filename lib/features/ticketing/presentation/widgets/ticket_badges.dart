@@ -4,6 +4,12 @@ import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 
+/// Shared footprint so status / priority / SLA chips align visually.
+abstract final class TicketChipSize {
+  static const double width = 108;
+  static const double height = 28;
+}
+
 class TicketStatusBadge extends StatelessWidget {
   const TicketStatusBadge({required this.status, super.key});
 
@@ -19,7 +25,7 @@ class TicketStatusBadge extends StatelessWidget {
       TicketStatus.closed => (AppColors.surfaceMuted, AppColors.inkSecondary),
     };
 
-    return _TagChip(label: status.label, background: bg, foreground: fg);
+    return TicketTagChip(label: status.label, background: bg, foreground: fg);
   }
 }
 
@@ -37,42 +43,50 @@ class TicketPriorityBadge extends StatelessWidget {
       TicketPriority.urgent => (AppColors.dangerMuted, AppColors.danger),
     };
 
-    return _TagChip(label: priority.label, background: bg, foreground: fg);
+    return TicketTagChip(label: priority.label, background: bg, foreground: fg);
   }
 }
 
-class _TagChip extends StatelessWidget {
-  const _TagChip({
+class TicketTagChip extends StatelessWidget {
+  const TicketTagChip({
     required this.label,
     required this.background,
     required this.foreground,
+    this.fixedSize = true,
+    super.key,
   });
 
   final String label;
   final Color background;
   final Color foreground;
+  final bool fixedSize;
 
   @override
   Widget build(BuildContext context) {
+    final text = Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: foreground,
+            fontWeight: FontWeight.w600,
+          ),
+    );
+
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 5,
-      ),
+      width: fixedSize ? TicketChipSize.width : null,
+      height: TicketChipSize.height,
+      alignment: Alignment.center,
+      padding: fixedSize
+          ? const EdgeInsets.symmetric(horizontal: AppSpacing.xs)
+          : const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: foreground.withValues(alpha: 0.18)),
       ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w600,
-            ),
-      ),
+      child: text,
     );
   }
 }

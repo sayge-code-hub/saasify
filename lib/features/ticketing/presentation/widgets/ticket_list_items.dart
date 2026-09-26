@@ -67,7 +67,7 @@ class TicketListRow extends StatelessWidget {
                 child: Text(
                   ticket.subject,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.ink,
                   ),
                   maxLines: 2,
@@ -159,7 +159,7 @@ class TicketListCard extends StatelessWidget {
                         Text(
                           ticket.subject,
                           style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],

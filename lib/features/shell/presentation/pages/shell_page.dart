@@ -116,10 +116,6 @@ String dashboardTitleFor(String location) {
   if (location == '/ticketing/new') return 'Add Ticket';
   // List views and Config keep the page title in content; header stays clean.
   if (location == '/ticketing/all' ||
-      location == '/ticketing/open' ||
-      location == '/ticketing/pending' ||
-      location == '/ticketing/resolved' ||
-      location == '/ticketing/priority' ||
       location == '/ticketing/config' ||
       location.startsWith('/ticketing/config/')) {
     return '';

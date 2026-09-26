@@ -8,9 +8,9 @@ void main() {
     blocTest<ShellCubit, ShellState>(
       'setLocation expands ticketing for ticket paths',
       build: ShellCubit.new,
-      act: (cubit) => cubit.setLocation('/ticketing/open'),
+      act: (cubit) => cubit.setLocation('/ticketing/all'),
       verify: (cubit) {
-        expect(cubit.state.location, '/ticketing/open');
+        expect(cubit.state.location, '/ticketing/all');
         expect(cubit.state.expandedModuleIds, contains('ticketing'));
       },
     );

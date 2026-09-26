@@ -116,31 +116,31 @@ List<_Slice> _statusSlices(List<Ticket> tickets) {
       label: 'Open',
       count: count(TicketStatus.open),
       color: AppColors.accent,
-      route: '/ticketing/open',
+      route: '/ticketing/all',
     ),
     _Slice(
       label: 'In progress',
       count: count(TicketStatus.inProgress),
       color: AppColors.ink,
-      route: '/ticketing',
+      route: '/ticketing/all',
     ),
     _Slice(
       label: 'Pending',
       count: count(TicketStatus.pending),
       color: AppColors.accentLight,
-      route: '/ticketing/pending',
+      route: '/ticketing/all',
     ),
     _Slice(
       label: 'Resolved',
       count: count(TicketStatus.resolved),
       color: AppColors.inkTertiary,
-      route: '/ticketing/resolved',
+      route: '/ticketing/all',
     ),
     _Slice(
       label: 'Closed',
       count: count(TicketStatus.closed),
       color: AppColors.border,
-      route: '/ticketing',
+      route: '/ticketing/all',
     ),
   ].where((s) => s.count > 0).toList();
 }

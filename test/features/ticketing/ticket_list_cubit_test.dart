@@ -86,21 +86,15 @@ void main() {
     );
 
     blocTest<TicketListCubit, TicketListState>(
-      'applyRouteFilter maps segments',
+      'clearFilters resets status and priority filters',
       build: () => TicketListCubit(seed: seed),
-      act: (cubit) => cubit.applyRouteFilter('pending'),
-      verify: (cubit) {
-        expect(cubit.state.statusFilter, TicketStatus.pending);
-        expect(cubit.state.visible.single.id, 'TCK-2');
+      act: (cubit) {
+        cubit.setStatusFilter(TicketStatus.pending);
+        cubit.clearFilters();
       },
-    );
-
-    blocTest<TicketListCubit, TicketListState>(
-      'priority route shows urgent and high',
-      build: () => TicketListCubit(seed: seed),
-      act: (cubit) => cubit.applyRouteFilter('priority'),
       verify: (cubit) {
-        expect(cubit.state.priorityQueue, isTrue);
+        expect(cubit.state.statusFilter, isNull);
+        expect(cubit.state.priorityFilter, isNull);
         expect(cubit.state.visible, hasLength(2));
       },
     );

@@ -83,34 +83,6 @@ GoRouter createAppRouter({
                 ),
               ),
               GoRoute(
-                path: 'open',
-                name: 'ticketing-open',
-                pageBuilder: (context, state) => const NoTransitionPage<void>(
-                  child: TicketListPage(routeFilter: 'open'),
-                ),
-              ),
-              GoRoute(
-                path: 'pending',
-                name: 'ticketing-pending',
-                pageBuilder: (context, state) => const NoTransitionPage<void>(
-                  child: TicketListPage(routeFilter: 'pending'),
-                ),
-              ),
-              GoRoute(
-                path: 'resolved',
-                name: 'ticketing-resolved',
-                pageBuilder: (context, state) => const NoTransitionPage<void>(
-                  child: TicketListPage(routeFilter: 'resolved'),
-                ),
-              ),
-              GoRoute(
-                path: 'priority',
-                name: 'ticketing-priority',
-                pageBuilder: (context, state) => const NoTransitionPage<void>(
-                  child: TicketListPage(routeFilter: 'priority'),
-                ),
-              ),
-              GoRoute(
                 path: 'config',
                 name: 'ticketing-config',
                 pageBuilder: (context, state) => const NoTransitionPage<void>(

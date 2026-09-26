@@ -33,9 +33,31 @@ class AppRelease {
 
 /// Mock deployment history for the Release History screen.
 abstract final class ReleaseNotes {
-  static const currentVersion = '1.1.1';
+  static const currentVersion = '1.1.2';
 
   static final List<AppRelease> all = [
+    AppRelease(
+      version: '1.1.2',
+      releasedAt: DateTime(2026, 9, 26),
+      title: 'List and detail chrome cleanup',
+      changes: const [
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary:
+              'Ticket titles and Export / Email / Filter / Sort actions use regular weight; list and detail tops are more spacious.',
+        ),
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary:
+              'Detail chips share one size and are grouped by Status, Priority, SLA, and Tags.',
+        ),
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary:
+              'Sidebar Ticketing nav keeps Dashboard, Add Ticket, All Tickets, and Config only.',
+        ),
+      ],
+    ),
     AppRelease(
       version: '1.1.1',
       releasedAt: DateTime(2026, 9, 26),

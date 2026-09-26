@@ -28,9 +28,11 @@ class AppPage extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: horizontal,
-            vertical: AppSpacing.lg,
+          padding: EdgeInsets.fromLTRB(
+            horizontal,
+            AppSpacing.xxl,
+            horizontal,
+            AppSpacing.lg,
           ),
           child: child,
         ),

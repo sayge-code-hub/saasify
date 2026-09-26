@@ -69,7 +69,10 @@ void main() {
 
     expect(find.text('Timeline'), findsOneWidget);
     expect(find.text('Details'), findsOneWidget);
+    expect(find.text('STATUS'), findsOneWidget);
+    expect(find.text('PRIORITY'), findsOneWidget);
     expect(find.text('SLA'), findsWidgets);
+    expect(find.text('TAGS'), findsOneWidget);
     expect(find.text('First response'), findsOneWidget);
     expect(find.text('Resolution'), findsOneWidget);
     expect(find.text('Attachments'), findsOneWidget);

@@ -111,9 +111,9 @@ void main() {
 
     expect(find.text('Ticket by status'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('nav-ticketing-open')));
+    await tester.tap(find.byKey(const ValueKey('nav-ticketing-all')));
     await tester.pumpAndSettle();
-    expect(find.text('Open Tickets'), findsWidgets);
+    expect(find.text('All Tickets'), findsWidgets);
 
     await tester.tap(find.byKey(const ValueKey('nav-ticketing-new')));
     await tester.pumpAndSettle();

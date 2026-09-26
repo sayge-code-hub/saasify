@@ -12,10 +12,7 @@ import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.d
 import 'package:saasify/features/ticketing/presentation/widgets/ticket_list_items.dart';
 
 class TicketListPage extends StatefulWidget {
-  const TicketListPage({this.routeFilter = 'all', super.key});
-
-  /// `all` | `open` | `pending` | `resolved` | `priority`
-  final String routeFilter;
+  const TicketListPage({super.key});
 
   @override
   State<TicketListPage> createState() => _TicketListPageState();
@@ -31,18 +28,6 @@ class _TicketListPageState extends State<TicketListPage> {
     _searchController = TextEditingController(
       text: context.read<TicketListCubit>().state.query,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<TicketListCubit>().applyRouteFilter(widget.routeFilter);
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant TicketListPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.routeFilter != widget.routeFilter) {
-      context.read<TicketListCubit>().applyRouteFilter(widget.routeFilter);
-    }
   }
 
   @override
@@ -312,13 +297,6 @@ class _TicketListPageState extends State<TicketListPage> {
       builder: (context, state) {
         final cubit = context.read<TicketListCubit>();
         final tickets = _sorted(state.visible);
-        final title = switch (widget.routeFilter) {
-          'open' => 'Open Tickets',
-          'pending' => 'Pending Tickets',
-          'resolved' => 'Resolved Tickets',
-          'priority' => 'Priority Tickets',
-          _ => 'All Tickets',
-        };
         final selectedCount = state.selectedIds.length;
 
         return ColoredBox(
@@ -329,36 +307,27 @@ class _TicketListPageState extends State<TicketListPage> {
               Padding(
                 padding: EdgeInsets.fromLTRB(
                   horizontal,
-                  AppSpacing.lg,
+                  AppSpacing.xxl,
                   horizontal,
-                  AppSpacing.sm,
+                  AppSpacing.md,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      title,
+                      'All Tickets',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.lg),
                     AppTextField(
                       controller: _searchController,
                       hint: 'Search by id, subject, or customer',
                       prefixIcon: const Icon(Icons.search),
                       onChanged: cubit.setQuery,
                     ),
-                    if (widget.routeFilter == 'priority') ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        'Showing urgent and high priority tickets.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.inkTertiary,
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: AppSpacing.md),
                     _ListToolbar(
                       hasTickets: tickets.isNotEmpty,
@@ -618,10 +587,17 @@ class _ToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label),
+      icon: Icon(icon, size: 18, color: AppColors.ink),
+      label: Text(
+        label,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: AppColors.ink,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.ink,
         side: const BorderSide(color: AppColors.border),
