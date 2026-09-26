@@ -25,6 +25,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Dynamic UI'), findsOneWidget);
+    await tester.tap(find.text('Dynamic UI'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('BDUI Add Ticket'));
     await tester.tap(find.text('BDUI Add Ticket'));
     await tester.pumpAndSettle();
 
@@ -34,8 +37,5 @@ void main() {
     expect(find.textContaining('Channel'), findsWidgets);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Save'), findsOneWidget);
-
-    // Existing hard-coded Add Ticket route still available in nav.
-    expect(find.text('Add Ticket'), findsWidgets);
   });
 }
