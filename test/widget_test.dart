@@ -97,6 +97,9 @@ void main() {
     await tester.pumpWidget(SaasifyApp(authCubit: auth));
     await tester.pumpAndSettle();
 
+    expect(find.text('Ticket by status'), findsOneWidget);
+    expect(find.text('Ticket by application'), findsOneWidget);
+
     await tester.tap(find.text('Open ticketing'));
     await tester.pumpAndSettle();
     expect(find.text('Triage and resolve customer support requests.'), findsOneWidget);

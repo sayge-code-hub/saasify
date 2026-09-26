@@ -6,20 +6,21 @@
 
 ## Summary
 
-Post-login landing page using a Maglo-inspired dashboard layout: black workspace banner, pulse metrics, active ticket table, and a right-hand attention panel with quick actions. White · black · orange palette. Counts and lists come from mock tickets.
+Post-login analytics landing page inspired by ticket-system dashboards: status and priority breakdown cards, plus a ranked “Ticket by application” load board. White · black · orange palette. Counts derived from mock tickets / tags.
 
 ## Layout
 
 | Region | Content |
 |--------|---------|
-| Main | Workspace banner, pulse / resolved meta, active ticket rows, orange “View all tickets” link, summary totals |
-| Right panel | Spotlight customer/ticket, light-orange “Browse queue”, queue fields, orange “Open ticketing”, Preview / Open |
+| Toolbar | “Ticket system” title + timestamp + refresh |
+| Top row | Ticket by status (donut + legend with %) · Ticket by priority (horizontal bars) |
+| Bottom | Ticket by application — insight strip + ranked product-area rows (active volume bar, open/pending/done chips) |
 
-Compact widths stack the right panel below the main column.
+Compact widths stack the top cards vertically.
 
 ## Acceptance criteria
 
-- [x] Shows open / pending / in-progress counts from mock tickets
-- [x] Lists active tickets with links to detail
+- [x] Shows status and priority distribution from mock tickets
+- [x] Application load ranked from ticket tags (not an empty half-table)
 - [x] CTA into Ticketing module (`Open ticketing`)
-- [x] Three-region shell chrome (sidebar + header + main/right) uses brand palette
+- [x] Orange / black / white palette (no multi-hue pie charts)
