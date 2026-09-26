@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
@@ -23,6 +24,7 @@ class DashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onSettings = GoRouterState.of(context).uri.path == '/settings';
 
     return Material(
       color: AppColors.surface,
@@ -62,6 +64,15 @@ class DashboardHeader extends StatelessWidget {
                   color: AppColors.ink,
                 ),
               ),
+              IconButton(
+                key: const ValueKey('header-settings'),
+                tooltip: 'Settings',
+                onPressed: () => context.go('/settings'),
+                icon: Icon(
+                  onSettings ? Icons.settings : Icons.settings_outlined,
+                  color: onSettings ? AppColors.accent : AppColors.ink,
+                ),
+              ),
               const SizedBox(width: AppSpacing.xs),
               PopupMenuButton<_HeaderAction>(
                 tooltip: 'Account',
@@ -81,13 +92,13 @@ class DashboardHeader extends StatelessWidget {
                     CircleAvatar(
                       radius: 16,
                       backgroundColor: AppColors.accentMuted,
-                      foregroundColor: AppColors.accent,
+                      foregroundColor: AppColors.accentHover,
                       child: Text(
                         (userName != null && userName!.isNotEmpty)
                             ? userName![0].toUpperCase()
                             : 'A',
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: AppColors.accent,
+                          color: AppColors.accentHover,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

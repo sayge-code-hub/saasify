@@ -206,45 +206,52 @@ class _NavTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Maglo-style: solid orange pill, black label when active.
-    final foreground = active ? AppColors.ink : AppColors.inkSecondary;
-    final background = active ? AppColors.accent : Colors.transparent;
+    final foreground = active ? Colors.white : AppColors.inkSecondary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Material(
-        color: background,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        child: InkWell(
-          onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: active ? AppColors.accentGradient : null,
+          color: active ? null : Colors.transparent,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          mouseCursor: SystemMouseCursors.click,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: dense ? AppSpacing.xs : AppSpacing.sm,
-              ),
-              child: Row(
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 20, color: foreground),
-                    const SizedBox(width: AppSpacing.sm),
-                  ] else
-                    const SizedBox(width: AppSpacing.lg + AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: foreground,
-                        fontWeight:
-                            active ? FontWeight.w700 : FontWeight.w500,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            mouseCursor: SystemMouseCursors.click,
+            splashColor: Colors.white24,
+            highlightColor: Colors.white10,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: dense ? AppSpacing.xs : AppSpacing.sm,
+                ),
+                child: Row(
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, size: 20, color: foreground),
+                      const SizedBox(width: AppSpacing.sm),
+                    ] else
+                      const SizedBox(width: AppSpacing.lg + AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: foreground,
+                          fontWeight:
+                              active ? FontWeight.w700 : FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                  ?trailing,
-                ],
+                    ?trailing,
+                  ],
+                ),
               ),
             ),
           ),

@@ -92,15 +92,7 @@ abstract final class AppModules {
     ],
   );
 
-  static const settings = NavModule(
-    id: 'settings',
-    label: 'Settings',
-    icon: Icons.settings_outlined,
-    selectedIcon: Icons.settings,
-    location: '/settings',
-  );
-
-  static const List<NavModule> all = [ticketing, settings];
+  static const List<NavModule> all = [ticketing];
 
   static bool isLocationActive(String currentPath, String location) {
     if (currentPath == location) return true;

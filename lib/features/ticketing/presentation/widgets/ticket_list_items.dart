@@ -24,7 +24,7 @@ class TicketListRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Material(
-      color: selected ? AppColors.accentMuted : AppColors.surface,
+      color: selected ? AppColors.accentSoft : AppColors.surface,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -50,7 +50,7 @@ class TicketListRow extends StatelessWidget {
                 child: Text(
                   ticket.id,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: AppColors.accent,
+                    color: AppColors.accentHover,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -124,7 +124,7 @@ class TicketListCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Material(
-      color: selected ? AppColors.accentMuted : AppColors.surface,
+      color: selected ? AppColors.accentSoft : AppColors.surface,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -142,7 +142,7 @@ class TicketListCard extends StatelessWidget {
                   Text(
                     ticket.id,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: AppColors.accent,
+                      color: AppColors.accentHover,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

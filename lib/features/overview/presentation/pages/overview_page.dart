@@ -127,7 +127,7 @@ List<_Slice> _statusSlices(List<Ticket> tickets) {
     _Slice(
       label: 'Pending',
       count: count(TicketStatus.pending),
-      color: const Color(0xFFFFB08A),
+      color: AppColors.accentLight,
       route: '/ticketing/pending',
     ),
     _Slice(
@@ -161,7 +161,7 @@ List<_Slice> _prioritySlices(List<Ticket> tickets) {
     _Slice(
       label: 'Medium',
       count: count(TicketPriority.medium),
-      color: const Color(0xFFFFB08A),
+      color: AppColors.accentLight,
     ),
     _Slice(
       label: 'Low',
