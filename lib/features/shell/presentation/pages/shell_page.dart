@@ -79,11 +79,14 @@ String dashboardTitleFor(String location) {
     return 'Ticket: $id';
   }
   if (location == '/ticketing/new') return 'Add Ticket';
-  if (location == '/ticketing/all') return 'All Tickets';
-  if (location == '/ticketing/open') return 'Open Tickets';
-  if (location == '/ticketing/pending') return 'Pending Tickets';
-  if (location == '/ticketing/resolved') return 'Resolved Tickets';
-  if (location == '/ticketing/priority') return 'Priority Tickets';
+  // List views keep the page title in content; header stays clean.
+  if (location == '/ticketing/all' ||
+      location == '/ticketing/open' ||
+      location == '/ticketing/pending' ||
+      location == '/ticketing/resolved' ||
+      location == '/ticketing/priority') {
+    return '';
+  }
   if (location == '/ticketing/config') return 'Config';
   if (location == '/settings') return 'Settings';
   return 'Workspace';

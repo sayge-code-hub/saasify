@@ -41,15 +41,17 @@ class DashboardHeader extends StatelessWidget {
                   icon: const Icon(Icons.menu),
                 ),
               Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: title.isEmpty
+                    ? const SizedBox.shrink()
+                    : Text(
+                        title,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
               ),
               IconButton(
                 tooltip: 'Search',

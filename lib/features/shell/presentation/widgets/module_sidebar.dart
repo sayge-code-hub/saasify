@@ -206,7 +206,7 @@ class _NavTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final foreground = active ? AppColors.ink : AppColors.inkSecondary;
+    final foreground = active ? AppColors.accent : AppColors.inkSecondary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),

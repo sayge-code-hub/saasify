@@ -23,6 +23,7 @@ class TicketListPage extends StatefulWidget {
 
 class _TicketListPageState extends State<TicketListPage> {
   late final TextEditingController _searchController;
+  String _sortId = 'updated';
 
   @override
   void initState() {
@@ -144,12 +145,35 @@ class _TicketListPageState extends State<TicketListPage> {
     }
   }
 
-  void _export(String format, List<Ticket> tickets) {
-    final label = switch (format) {
-      'excel' => 'Excel',
-      'pdf' => 'PDF',
-      _ => format,
-    };
+  Future<void> _pickExport(List<Ticket> tickets) async {
+    final format = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.table_view_outlined),
+                title: const Text('Excel'),
+                subtitle: const Text('Spreadsheet (.xlsx)'),
+                onTap: () => Navigator.of(context).pop('excel'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_outlined),
+                title: const Text('PDF'),
+                subtitle: const Text('Document (.pdf)'),
+                onTap: () => Navigator.of(context).pop('pdf'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
+        );
+      },
+    );
+    if (format == null || !mounted) return;
+    final label = format == 'excel' ? 'Excel' : 'PDF';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -160,6 +184,97 @@ class _TicketListPageState extends State<TicketListPage> {
     );
   }
 
+  Future<void> _pickFilter(TicketListCubit cubit) async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('All priorities'),
+                onTap: () => Navigator.of(context).pop('all'),
+              ),
+              ListTile(
+                title: const Text('Urgent only'),
+                onTap: () => Navigator.of(context).pop('urgent'),
+              ),
+              ListTile(
+                title: const Text('High only'),
+                onTap: () => Navigator.of(context).pop('high'),
+              ),
+              ListTile(
+                title: const Text('Unassigned only'),
+                onTap: () => Navigator.of(context).pop('unassigned'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
+        );
+      },
+    );
+    if (choice == null || !mounted) return;
+    switch (choice) {
+      case 'urgent':
+        cubit.setPriorityFilter(TicketPriority.urgent);
+      case 'high':
+        cubit.setPriorityFilter(TicketPriority.high);
+      case 'all':
+        cubit.setPriorityFilter(null);
+      case 'unassigned':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unassigned filter coming soon (mock).'),
+          ),
+        );
+    }
+  }
+
+  Future<void> _pickSort() async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Recently updated'),
+                trailing: _sortId == 'updated'
+                    ? const Icon(Icons.check, color: AppColors.accent)
+                    : null,
+                onTap: () => Navigator.of(context).pop('updated'),
+              ),
+              ListTile(
+                title: const Text('Priority'),
+                trailing: _sortId == 'priority'
+                    ? const Icon(Icons.check, color: AppColors.accent)
+                    : null,
+                onTap: () => Navigator.of(context).pop('priority'),
+              ),
+              ListTile(
+                title: const Text('Ticket ID'),
+                trailing: _sortId == 'id'
+                    ? const Icon(Icons.check, color: AppColors.accent)
+                    : null,
+                onTap: () => Navigator.of(context).pop('id'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
+        );
+      },
+    );
+    if (choice == null || !mounted) return;
+    setState(() => _sortId = choice);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Sorted by $choice (mock).')),
+    );
+  }
+
   List<Ticket> _exportTargets(TicketListState state) {
     if (state.hasSelection) {
       return state.visible
@@ -167,6 +282,22 @@ class _TicketListPageState extends State<TicketListPage> {
           .toList();
     }
     return state.visible;
+  }
+
+  List<Ticket> _sorted(List<Ticket> tickets) {
+    final list = [...tickets];
+    switch (_sortId) {
+      case 'priority':
+        list.sort(
+          (a, b) => b.priority.index.compareTo(a.priority.index),
+        );
+      case 'id':
+        list.sort((a, b) => b.id.compareTo(a.id));
+      case 'updated':
+      default:
+        list.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    }
+    return list;
   }
 
   @override
@@ -180,7 +311,7 @@ class _TicketListPageState extends State<TicketListPage> {
     return BlocBuilder<TicketListCubit, TicketListState>(
       builder: (context, state) {
         final cubit = context.read<TicketListCubit>();
-        final tickets = state.visible;
+        final tickets = _sorted(state.visible);
         final title = switch (widget.routeFilter) {
           'open' => 'Open Tickets',
           'pending' => 'Pending Tickets',
@@ -230,20 +361,13 @@ class _TicketListPageState extends State<TicketListPage> {
                     ],
                     const SizedBox(height: AppSpacing.md),
                     _ListToolbar(
-                      compact: compact,
-                      allSelected: state.allVisibleSelected,
                       hasTickets: tickets.isNotEmpty,
                       selectedCount: selectedCount,
-                      onSelectAll: cubit.selectAllVisible,
-                      onDeselectAll: cubit.clearSelection,
-                      onExportExcel: () =>
-                          _export('excel', _exportTargets(state)),
-                      onExportPdf: () =>
-                          _export('pdf', _exportTargets(state)),
+                      onExport: () => _pickExport(_exportTargets(state)),
                       onEmail: () => _emailTickets(_exportTargets(state)),
-                      onDelete: selectedCount == 0
-                          ? null
-                          : () => _confirmDelete(cubit, selectedCount),
+                      onFilter: () => _pickFilter(cubit),
+                      onSort: _pickSort,
+                      onDelete: () => _confirmDelete(cubit, selectedCount),
                     ),
                   ],
                 ),
@@ -271,7 +395,19 @@ class _TicketListPageState extends State<TicketListPage> {
                           )
                         : Column(
                             children: [
-                              if (!compact) const _ListHeader(),
+                              _ListHeader(
+                                allSelected: state.allVisibleSelected,
+                                partiallySelected: selectedCount > 0 &&
+                                    !state.allVisibleSelected,
+                                onSelectAllChanged: (value) {
+                                  if (value == true) {
+                                    cubit.selectAllVisible();
+                                  } else {
+                                    cubit.clearSelection();
+                                  }
+                                },
+                                showColumnLabels: !compact,
+                              ),
                               const Divider(height: 1),
                               Expanded(
                                 child: ListView.separated(
@@ -321,7 +457,17 @@ class _TicketListPageState extends State<TicketListPage> {
 }
 
 class _ListHeader extends StatelessWidget {
-  const _ListHeader();
+  const _ListHeader({
+    required this.allSelected,
+    required this.partiallySelected,
+    required this.onSelectAllChanged,
+    required this.showColumnLabels,
+  });
+
+  final bool allSelected;
+  final bool partiallySelected;
+  final ValueChanged<bool?> onSelectAllChanged;
+  final bool showColumnLabels;
 
   @override
   Widget build(BuildContext context) {
@@ -330,6 +476,12 @@ class _ListHeader extends StatelessWidget {
           fontWeight: FontWeight.w700,
           letterSpacing: 0.4,
         );
+
+    final selectValue = allSelected
+        ? true
+        : partiallySelected
+            ? null
+            : false;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -341,25 +493,45 @@ class _ListHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: TicketListColumns.checkbox),
           SizedBox(
-            width: TicketListColumns.id,
-            child: Text('ID', style: style),
+            width: TicketListColumns.checkbox,
+            child: Checkbox(
+              tristate: true,
+              value: selectValue,
+              onChanged: onSelectAllChanged,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
           ),
-          Expanded(child: Text('TICKET', style: style)),
-          const SizedBox(width: AppSpacing.sm),
-          SizedBox(
-            width: TicketListColumns.priority,
-            child: Text('PRIORITY', style: style),
-          ),
-          SizedBox(
-            width: TicketListColumns.status,
-            child: Text('STATUS', style: style),
-          ),
-          SizedBox(
-            width: TicketListColumns.assignee,
-            child: Text('ASSIGNEE', style: style),
-          ),
+          if (showColumnLabels) ...[
+            SizedBox(
+              width: TicketListColumns.id,
+              child: Text('ID', style: style),
+            ),
+            Expanded(child: Text('TICKET', style: style)),
+            const SizedBox(width: AppSpacing.sm),
+            SizedBox(
+              width: TicketListColumns.priority,
+              child: Text('PRIORITY', style: style),
+            ),
+            SizedBox(
+              width: TicketListColumns.status,
+              child: Text('STATUS', style: style),
+            ),
+            SizedBox(
+              width: TicketListColumns.assignee,
+              child: Text('ASSIGNEE', style: style),
+            ),
+          ] else
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  allSelected ? 'Deselect all' : 'Select all',
+                  style: style,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -368,48 +540,52 @@ class _ListHeader extends StatelessWidget {
 
 class _ListToolbar extends StatelessWidget {
   const _ListToolbar({
-    required this.compact,
-    required this.allSelected,
     required this.hasTickets,
     required this.selectedCount,
-    required this.onSelectAll,
-    required this.onDeselectAll,
-    required this.onExportExcel,
-    required this.onExportPdf,
+    required this.onExport,
     required this.onEmail,
+    required this.onFilter,
+    required this.onSort,
     required this.onDelete,
   });
 
-  final bool compact;
-  final bool allSelected;
   final bool hasTickets;
   final int selectedCount;
-  final VoidCallback onSelectAll;
-  final VoidCallback onDeselectAll;
-  final VoidCallback onExportExcel;
-  final VoidCallback onExportPdf;
+  final VoidCallback onExport;
   final VoidCallback onEmail;
-  final VoidCallback? onDelete;
+  final VoidCallback onFilter;
+  final VoidCallback onSort;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Wrap(
-      spacing: AppSpacing.xs,
-      runSpacing: AppSpacing.xs,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    return Row(
       children: [
+        if (selectedCount > 0) ...[
+          Text(
+            '$selectedCount selected',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: AppColors.inkSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          TextButton.icon(
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline, size: 18),
+            label: const Text('Delete'),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.danger,
+            ),
+          ),
+        ],
+        const Spacer(),
         _ToolbarButton(
-          icon: Icons.table_view_outlined,
-          label: compact ? 'Excel' : 'Export Excel',
-          onPressed: hasTickets ? onExportExcel : null,
+          icon: Icons.ios_share_outlined,
+          label: 'Export',
+          onPressed: hasTickets ? onExport : null,
         ),
-        _ToolbarButton(
-          icon: Icons.picture_as_pdf_outlined,
-          label: compact ? 'PDF' : 'Export PDF',
-          onPressed: hasTickets ? onExportPdf : null,
-        ),
+        const SizedBox(width: AppSpacing.xs),
         _ToolbarButton(
           icon: Icons.mail_outline,
           label: 'Email',
@@ -417,47 +593,16 @@ class _ListToolbar extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.xs),
         _ToolbarButton(
-          icon: Icons.select_all,
-          label: 'Select all',
-          onPressed: hasTickets ? onSelectAll : null,
+          icon: Icons.filter_list,
+          label: 'Filter',
+          onPressed: onFilter,
         ),
+        const SizedBox(width: AppSpacing.xs),
         _ToolbarButton(
-          icon: Icons.deselect,
-          label: 'Deselect all',
-          onPressed: selectedCount > 0 ? onDeselectAll : null,
+          icon: Icons.sort,
+          label: 'Sort',
+          onPressed: onSort,
         ),
-        if (selectedCount > 0) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.accentMuted,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            ),
-            child: Text(
-              '$selectedCount selected',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: AppColors.accentHover,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          _ToolbarButton(
-            icon: Icons.delete_outline,
-            label: 'Delete',
-            danger: true,
-            onPressed: onDelete,
-          ),
-        ],
-        if (allSelected && hasTickets)
-          Text(
-            'All visible selected',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkTertiary,
-            ),
-          ),
       ],
     );
   }
@@ -468,26 +613,21 @@ class _ToolbarButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
-    this.danger = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onPressed;
-  final bool danger;
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? AppColors.danger : AppColors.ink;
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 18, color: onPressed == null ? null : color),
+      icon: Icon(icon, size: 18),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(
-          color: danger ? AppColors.danger.withValues(alpha: 0.4) : AppColors.border,
-        ),
+        foregroundColor: AppColors.ink,
+        side: const BorderSide(color: AppColors.border),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,
