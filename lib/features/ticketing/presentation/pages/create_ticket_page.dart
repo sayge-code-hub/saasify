@@ -83,7 +83,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final cardWidth = constraints.maxWidth * 0.85;
+                  final cardWidth = constraints.maxWidth * 0.95;
                   return SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
                       vertical: AppSpacing.lg,
@@ -312,14 +312,6 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                                     },
                                   ),
                                 ),
-                                const SizedBox(height: AppSpacing.xl),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: AppButton(
-                                    label: 'Save',
-                                    isLoading: _submitting,
-                                    onPressed: _submitting ? null : _submit,
-                                  ),
                                 ),
                               ],
                             ),
@@ -329,6 +321,48 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                     ),
                   );
                 },
+              ),
+            ),
+            Material(
+              color: AppColors.surface,
+              elevation: 0,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: AppColors.border),
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
+                        alignment: WrapAlignment.end,
+                        children: [
+                          AppButton(
+                            label: 'Cancel',
+                            variant: AppButtonVariant.outlined,
+                            onPressed: _submitting
+                                ? null
+                                : () => context.go('/ticketing'),
+                          ),
+                          AppButton(
+                            label: 'Save',
+                            isLoading: _submitting,
+                            onPressed: _submitting ? null : _submit,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
