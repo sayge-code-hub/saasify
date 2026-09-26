@@ -11,6 +11,7 @@ class TicketListState extends Equatable {
     this.statusFilter,
     this.priorityFilter,
     this.priorityQueue = false,
+    this.selectedIds = const {},
   });
 
   final List<Ticket> tickets;
@@ -20,6 +21,7 @@ class TicketListState extends Equatable {
 
   /// When true, show urgent + high tickets (Priority Tickets view).
   final bool priorityQueue;
+  final Set<String> selectedIds;
 
   List<Ticket> get visible {
     final q = query.trim().toLowerCase();
@@ -45,6 +47,16 @@ class TicketListState extends Equatable {
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
+  bool get hasSelection => selectedIds.isNotEmpty;
+
+  bool isSelected(String id) => selectedIds.contains(id);
+
+  bool get allVisibleSelected {
+    final ids = visible.map((t) => t.id).toList();
+    if (ids.isEmpty) return false;
+    return ids.every(selectedIds.contains);
+  }
+
   int countWhere(bool Function(Ticket) test) => tickets.where(test).length;
 
   Ticket? byId(String id) {
@@ -60,6 +72,7 @@ class TicketListState extends Equatable {
     TicketStatus? statusFilter,
     TicketPriority? priorityFilter,
     bool? priorityQueue,
+    Set<String>? selectedIds,
     bool clearStatusFilter = false,
     bool clearPriorityFilter = false,
   }) {
@@ -71,12 +84,19 @@ class TicketListState extends Equatable {
       priorityFilter:
           clearPriorityFilter ? null : priorityFilter ?? this.priorityFilter,
       priorityQueue: priorityQueue ?? this.priorityQueue,
+      selectedIds: selectedIds ?? this.selectedIds,
     );
   }
 
   @override
-  List<Object?> get props =>
-      [tickets, query, statusFilter, priorityFilter, priorityQueue];
+  List<Object?> get props => [
+        tickets,
+        query,
+        statusFilter,
+        priorityFilter,
+        priorityQueue,
+        selectedIds,
+      ];
 }
 
 class TicketListCubit extends Cubit<TicketListState> {
@@ -123,6 +143,7 @@ class TicketListCubit extends Cubit<TicketListState> {
             statusFilter: TicketStatus.open,
             clearPriorityFilter: true,
             priorityQueue: false,
+            selectedIds: const {},
           ),
         );
       case 'pending':
@@ -131,6 +152,7 @@ class TicketListCubit extends Cubit<TicketListState> {
             statusFilter: TicketStatus.pending,
             clearPriorityFilter: true,
             priorityQueue: false,
+            selectedIds: const {},
           ),
         );
       case 'resolved':
@@ -139,6 +161,7 @@ class TicketListCubit extends Cubit<TicketListState> {
             statusFilter: TicketStatus.resolved,
             clearPriorityFilter: true,
             priorityQueue: false,
+            selectedIds: const {},
           ),
         );
       case 'priority':
@@ -147,6 +170,7 @@ class TicketListCubit extends Cubit<TicketListState> {
             clearStatusFilter: true,
             clearPriorityFilter: true,
             priorityQueue: true,
+            selectedIds: const {},
           ),
         );
       case 'all':
@@ -156,9 +180,51 @@ class TicketListCubit extends Cubit<TicketListState> {
             clearStatusFilter: true,
             clearPriorityFilter: true,
             priorityQueue: false,
+            selectedIds: const {},
           ),
         );
     }
+  }
+
+  void toggleSelected(String id) {
+    final next = {...state.selectedIds};
+    if (next.contains(id)) {
+      next.remove(id);
+    } else {
+      next.add(id);
+    }
+    emit(state.copyWith(selectedIds: next));
+  }
+
+  void selectAllVisible() {
+    emit(
+      state.copyWith(
+        selectedIds: state.visible.map((t) => t.id).toSet(),
+      ),
+    );
+  }
+
+  void clearSelection() {
+    if (state.selectedIds.isEmpty) return;
+    emit(state.copyWith(selectedIds: const {}));
+  }
+
+  void deleteSelected() {
+    if (state.selectedIds.isEmpty) return;
+    final remaining = state.tickets
+        .where((t) => !state.selectedIds.contains(t.id))
+        .toList();
+    emit(state.copyWith(tickets: remaining, selectedIds: const {}));
+  }
+
+  void deleteTickets(Iterable<String> ids) {
+    final idSet = ids.toSet();
+    if (idSet.isEmpty) return;
+    final remaining =
+        state.tickets.where((t) => !idSet.contains(t.id)).toList();
+    final selected =
+        state.selectedIds.where((id) => !idSet.contains(id)).toSet();
+    emit(state.copyWith(tickets: remaining, selectedIds: selected));
   }
 
   /// Creates a new open ticket and returns its id.

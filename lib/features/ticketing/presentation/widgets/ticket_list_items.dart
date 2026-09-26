@@ -9,34 +9,49 @@ class TicketListRow extends StatelessWidget {
   const TicketListRow({
     required this.ticket,
     required this.onTap,
+    required this.selected,
+    required this.onSelectedChanged,
     super.key,
   });
 
   final Ticket ticket;
   final VoidCallback onTap;
+  final bool selected;
+  final ValueChanged<bool?> onSelectedChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Material(
-      color: AppColors.surface,
+      color: selected ? AppColors.accentMuted : AppColors.surface,
       child: InkWell(
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            vertical: AppSpacing.sm + 2,
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(
+                width: 40,
+                child: Checkbox(
+                  value: selected,
+                  onChanged: onSelectedChanged,
+                  side: const BorderSide(color: AppColors.border, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
               SizedBox(
                 width: 88,
                 child: Text(
                   ticket.id,
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: AppColors.accent,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -47,14 +62,19 @@ class TicketListRow extends StatelessWidget {
                   children: [
                     Text(
                       ticket.subject,
-                      style: theme.textTheme.titleSmall,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.ink,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       '${ticket.customerName} · ${ticket.customerEmail}',
-                      style: theme.textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkTertiary,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -70,7 +90,9 @@ class TicketListRow extends StatelessWidget {
                 width: 110,
                 child: Text(
                   ticket.assigneeName ?? 'Unassigned',
-                  style: theme.textTheme.bodySmall,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.inkSecondary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -87,18 +109,22 @@ class TicketListCard extends StatelessWidget {
   const TicketListCard({
     required this.ticket,
     required this.onTap,
+    required this.selected,
+    required this.onSelectedChanged,
     super.key,
   });
 
   final Ticket ticket;
   final VoidCallback onTap;
+  final bool selected;
+  final ValueChanged<bool?> onSelectedChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Material(
-      color: AppColors.surface,
+      color: selected ? AppColors.accentMuted : AppColors.surface,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -108,10 +134,16 @@ class TicketListCard extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  Checkbox(
+                    value: selected,
+                    onChanged: onSelectedChanged,
+                    visualDensity: VisualDensity.compact,
+                  ),
                   Text(
                     ticket.id,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: AppColors.accent,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const Spacer(),
@@ -119,11 +151,18 @@ class TicketListCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
-              Text(ticket.subject, style: theme.textTheme.titleSmall),
+              Text(
+                ticket.subject,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 ticket.customerName,
-                style: theme.textTheme.bodySmall,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.inkTertiary,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               Row(

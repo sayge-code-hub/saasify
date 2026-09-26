@@ -106,5 +106,19 @@ void main() {
         expect(created.id, 'TCK-3');
       },
     );
+
+    blocTest<TicketListCubit, TicketListState>(
+      'select all and delete selected',
+      build: () => TicketListCubit(seed: seed),
+      act: (cubit) {
+        cubit.selectAllVisible();
+        cubit.toggleSelected('TCK-2');
+        cubit.deleteSelected();
+      },
+      verify: (cubit) {
+        expect(cubit.state.tickets.map((t) => t.id), ['TCK-2']);
+        expect(cubit.state.selectedIds, isEmpty);
+      },
+    );
   });
 }
