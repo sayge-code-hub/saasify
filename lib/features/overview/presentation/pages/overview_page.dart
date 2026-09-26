@@ -10,7 +10,7 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 
-/// Analytics-style overview: status / priority breakdowns + application load.
+/// Analytics-style overview: status and priority breakdowns.
 class OverviewPage extends StatelessWidget {
   const OverviewPage({super.key});
 
@@ -21,7 +21,6 @@ class OverviewPage extends StatelessWidget {
         final tickets = state.tickets;
         final statusSlices = _statusSlices(tickets);
         final prioritySlices = _prioritySlices(tickets);
-        final apps = _applicationLoads(tickets);
         final compact = context.isCompact;
 
         return ColoredBox(
@@ -59,9 +58,7 @@ class OverviewPage extends StatelessWidget {
                       slices: prioritySlices,
                       visualization: _BreakdownViz.bars,
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    _ApplicationLoadCard(apps: apps),
-                  ] else ...[
+                  ] else
                     IntrinsicHeight(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -86,9 +83,6 @@ class OverviewPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    _ApplicationLoadCard(apps: apps),
-                  ],
                 ],
               ),
             ),
@@ -113,28 +107,6 @@ class _Slice {
   final int count;
   final Color color;
   final String? route;
-}
-
-class _AppLoad {
-  const _AppLoad({
-    required this.id,
-    required this.label,
-    required this.total,
-    required this.open,
-    required this.pending,
-    required this.resolved,
-    required this.inProgress,
-  });
-
-  final String id;
-  final String label;
-  final int total;
-  final int open;
-  final int pending;
-  final int resolved;
-  final int inProgress;
-
-  int get active => open + pending + inProgress;
 }
 
 List<_Slice> _statusSlices(List<Ticket> tickets) {
@@ -197,59 +169,6 @@ List<_Slice> _prioritySlices(List<Ticket> tickets) {
       color: AppColors.inkTertiary,
     ),
   ].where((s) => s.count > 0).toList();
-}
-
-const _appLabels = <String, String>{
-  'auth': 'Authentication',
-  'mobile': 'Mobile',
-  'billing': 'Billing',
-  'sso': 'SSO',
-  'enterprise': 'Enterprise',
-  'api': 'Platform API',
-  'email': 'Email',
-  'export': 'Exports',
-  'a11y': 'Accessibility',
-  'ui': 'UI',
-  'audit': 'Audit',
-  'platform': 'Platform',
-};
-
-List<_AppLoad> _applicationLoads(List<Ticket> tickets) {
-  final map = <String, _AppLoad>{};
-  for (final ticket in tickets) {
-    final keys = ticket.tags.isEmpty ? const ['general'] : ticket.tags;
-    for (final tag in keys) {
-      final existing = map[tag];
-      final open = ticket.status == TicketStatus.open ? 1 : 0;
-      final pending = ticket.status == TicketStatus.pending ? 1 : 0;
-      final resolved = (ticket.status == TicketStatus.resolved ||
-              ticket.status == TicketStatus.closed)
-          ? 1
-          : 0;
-      final inProgress = ticket.status == TicketStatus.inProgress ? 1 : 0;
-      map[tag] = _AppLoad(
-        id: tag,
-        label: _appLabels[tag] ?? _titleCase(tag),
-        total: (existing?.total ?? 0) + 1,
-        open: (existing?.open ?? 0) + open,
-        pending: (existing?.pending ?? 0) + pending,
-        resolved: (existing?.resolved ?? 0) + resolved,
-        inProgress: (existing?.inProgress ?? 0) + inProgress,
-      );
-    }
-  }
-  final list = map.values.toList()
-    ..sort((a, b) {
-      final byActive = b.active.compareTo(a.active);
-      if (byActive != 0) return byActive;
-      return b.total.compareTo(a.total);
-    });
-  return list;
-}
-
-String _titleCase(String value) {
-  if (value.isEmpty) return value;
-  return value[0].toUpperCase() + value.substring(1);
 }
 
 class _PageToolbar extends StatelessWidget {
@@ -653,299 +572,5 @@ class _DonutPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _DonutPainter oldDelegate) {
     return oldDelegate.total != total || oldDelegate.slices != slices;
-  }
-}
-
-/// Radical replacement for the empty table: ranked product-area load board.
-class _ApplicationLoadCard extends StatelessWidget {
-  const _ApplicationLoadCard({required this.apps});
-
-  final List<_AppLoad> apps;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final maxActive = apps.isEmpty
-        ? 1
-        : apps.map((a) => a.active).fold<int>(1, math.max);
-    final top = apps.isEmpty ? null : apps.first;
-    final totalActive = apps.fold<int>(0, (s, a) => s + a.active);
-    final insight = top == null || totalActive == 0
-        ? 'No active tickets across product areas.'
-        : '${top.label} drives '
-            '${((top.active / totalActive) * 100).round()}% of active volume.';
-
-    return _DashboardCard(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Ticket by application',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Where the queue is concentrating right now',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.inkTertiary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.go('/ticketing'),
-                  child: const Text('Open ticketing'),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.ink,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.insights_outlined,
-                      color: AppColors.accent,
-                      size: 22,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        insight,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            if (apps.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                child: Text(
-                  'No application tags on tickets yet.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.inkSecondary,
-                  ),
-                ),
-              )
-            else
-              for (var i = 0; i < apps.length; i++) ...[
-                if (i > 0) const SizedBox(height: AppSpacing.md),
-                _AppLoadRow(
-                  rank: i + 1,
-                  app: apps[i],
-                  maxActive: maxActive,
-                  emphasize: i == 0,
-                ),
-              ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AppLoadRow extends StatelessWidget {
-  const _AppLoadRow({
-    required this.rank,
-    required this.app,
-    required this.maxActive,
-    required this.emphasize,
-  });
-
-  final int rank;
-  final _AppLoad app;
-  final int maxActive;
-  final bool emphasize;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final frac = maxActive == 0 ? 0.0 : app.active / maxActive;
-
-    return Material(
-      color: emphasize ? AppColors.accentMuted : AppColors.surfaceMuted,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        onTap: () => context.go('/ticketing'),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: emphasize ? AppColors.accent : AppColors.ink,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '$rank',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: emphasize ? AppColors.ink : Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      app.label,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${app.active} active',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: AppColors.inkSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    '${app.total} total',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: AppColors.ink,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: SizedBox(
-                  height: 12,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      const ColoredBox(color: Colors.white),
-                      FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: frac.clamp(0.05, 1.0),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: emphasize
-                                  ? const [
-                                      AppColors.accent,
-                                      Color(0xFFFF8A6A),
-                                    ]
-                                  : const [
-                                      AppColors.ink,
-                                      Color(0xFF404040),
-                                    ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.xs,
-                runSpacing: AppSpacing.xs,
-                children: [
-                  _MiniStat(label: 'Open', value: app.open, tone: AppColors.accent),
-                  _MiniStat(
-                    label: 'In progress',
-                    value: app.inProgress,
-                    tone: AppColors.ink,
-                  ),
-                  _MiniStat(
-                    label: 'Pending',
-                    value: app.pending,
-                    tone: const Color(0xFFE07A4F),
-                  ),
-                  _MiniStat(
-                    label: 'Done',
-                    value: app.resolved,
-                    tone: AppColors.inkTertiary,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MiniStat extends StatelessWidget {
-  const _MiniStat({
-    required this.label,
-    required this.value,
-    required this.tone,
-  });
-
-  final String label;
-  final int value;
-  final Color tone;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: tone, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '$label $value',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: AppColors.inkSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

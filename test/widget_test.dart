@@ -98,9 +98,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Ticket by status'), findsOneWidget);
-    expect(find.text('Ticket by application'), findsOneWidget);
+    expect(find.text('Ticket by priority'), findsOneWidget);
+    expect(find.text('Ticket by application'), findsNothing);
 
-    await tester.tap(find.text('Open ticketing'));
+    await tester.tap(find.text('All tickets'));
     await tester.pumpAndSettle();
     expect(find.text('Triage and resolve customer support requests.'), findsOneWidget);
 
