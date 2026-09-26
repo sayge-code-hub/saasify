@@ -75,7 +75,6 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
             );
 
             return AppPage(
-              maxWidth: 1280,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

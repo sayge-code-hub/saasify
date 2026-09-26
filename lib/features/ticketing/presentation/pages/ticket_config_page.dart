@@ -122,10 +122,11 @@ class _TicketConfigPageState extends State<TicketConfigPage> {
                   ),
                 )
               else
-                for (var i = 0; i < visible.length; i++) ...[
-                  if (i > 0) const SizedBox(height: AppSpacing.md),
-                  visible[i].buildCard(context),
-                ],
+                _SectionGrid(
+                  children: [
+                    for (final section in visible) section.buildCard(context),
+                  ],
+                ),
             ],
           );
         },
@@ -224,6 +225,57 @@ class _ConfigSectionData {
   }
 }
 
+class _SectionGrid extends StatelessWidget {
+  const _SectionGrid({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoCol = constraints.maxWidth >= AppSpacing.sectionGridMinWidth;
+        if (!twoCol) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) const SizedBox(height: AppSpacing.md),
+                children[i],
+              ],
+            ],
+          );
+        }
+
+        final rows = <Widget>[];
+        for (var i = 0; i < children.length; i += 2) {
+          final left = children[i];
+          final right = i + 1 < children.length ? children[i + 1] : null;
+          rows.add(
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: i + 2 < children.length ? AppSpacing.md : 0,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: left),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: right ?? const SizedBox.shrink()),
+                ],
+              ),
+            ),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: rows,
+        );
+      },
+    );
+  }
+}
+
 class _OptionListSectionCard extends StatelessWidget {
   const _OptionListSectionCard({
     required this.kind,
@@ -233,10 +285,12 @@ class _OptionListSectionCard extends StatelessWidget {
   final TicketConfigListKind kind;
   final List<String> values;
 
+  static const _previewLimit = 8;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final preview = values.take(6).toList();
+    final preview = values.take(_previewLimit).toList();
     final remaining = values.length - preview.length;
 
     return _ConfigCard(
@@ -293,17 +347,12 @@ class _OptionListSectionCard extends StatelessWidget {
               ),
             )
           else
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                for (final value in preview) _PreviewItemCard(label: value),
-                if (remaining > 0)
-                  _PreviewItemCard(
-                    label: '+$remaining more',
-                    muted: true,
-                  ),
+            _OptionList(
+              items: [
+                for (final value in preview) value,
+                if (remaining > 0) '+$remaining more',
               ],
+              mutedLast: remaining > 0,
             ),
         ],
       ),
@@ -311,38 +360,52 @@ class _OptionListSectionCard extends StatelessWidget {
   }
 }
 
-class _PreviewItemCard extends StatelessWidget {
-  const _PreviewItemCard({required this.label, this.muted = false});
+class _OptionList extends StatelessWidget {
+  const _OptionList({
+    required this.items,
+    this.mutedLast = false,
+  });
 
-  final String label;
-  final bool muted;
+  final List<String> items;
+  final bool mutedLast;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 120, maxWidth: 200),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: muted ? AppColors.canvas : AppColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.sm,
-          ),
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: muted ? AppColors.inkTertiary : AppColors.ink,
-              fontWeight: FontWeight.w600,
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0)
+              const Divider(height: 1, thickness: 1, color: AppColors.border),
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                child: Text(
+                  items[i],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: mutedLast && i == items.length - 1
+                        ? AppColors.inkTertiary
+                        : AppColors.ink,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
+          ],
+        ],
       ),
     );
   }
@@ -376,17 +439,33 @@ class _PrioritySection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
-              for (final priority in TicketPriority.values)
-                _PriorityToggleCard(
-                  label: priority.label,
-                  enabled: config.enabledPriorities.contains(priority),
-                  onChanged: (value) => cubit.togglePriority(priority, value),
-                ),
-            ],
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                for (var i = 0; i < TicketPriority.values.length; i++) ...[
+                  if (i > 0)
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.border,
+                    ),
+                  _PriorityListRow(
+                    label: TicketPriority.values[i].label,
+                    enabled: config.enabledPriorities
+                        .contains(TicketPriority.values[i]),
+                    onChanged: (value) => cubit.togglePriority(
+                      TicketPriority.values[i],
+                      value,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
@@ -394,8 +473,8 @@ class _PrioritySection extends StatelessWidget {
   }
 }
 
-class _PriorityToggleCard extends StatelessWidget {
-  const _PriorityToggleCard({
+class _PriorityListRow extends StatelessWidget {
+  const _PriorityListRow({
     required this.label,
     required this.enabled,
     required this.onChanged,
@@ -408,42 +487,35 @@ class _PriorityToggleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: InkWell(
-        onTap: () => onChanged(!enabled),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Checkbox(
-                value: enabled,
-                activeColor: AppColors.accent,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
-                onChanged: (value) {
-                  if (value == null) return;
-                  onChanged(value);
-                },
-              ),
-              Text(
+    return InkWell(
+      onTap: () => onChanged(!enabled),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        child: Row(
+          children: [
+            Checkbox(
+              value: enabled,
+              activeColor: AppColors.accent,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+              onChanged: (value) {
+                if (value == null) return;
+                onChanged(value);
+              },
+            ),
+            Expanded(
+              child: Text(
                 label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.ink,
                 ),
               ),
-              const SizedBox(width: AppSpacing.xs),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

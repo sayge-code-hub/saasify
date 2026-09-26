@@ -36,10 +36,17 @@ void main() {
     expect(find.text('Distribution lists'), findsOneWidget);
     expect(find.text('Assignees'), findsOneWidget);
     expect(find.text('Bug options'), findsOneWidget);
+    expect(find.text('Priorities'), findsOneWidget);
     expect(find.text('SLA targets'), findsOneWidget);
-    expect(find.text('Edit'), findsWidgets);
+    expect(find.text('Edit'), findsNWidgets(4));
+    expect(find.byKey(const ValueKey('config-edit-applications')), findsOneWidget);
+    expect(find.byKey(const ValueKey('config-edit-assignees')), findsOneWidget);
     expect(find.text('Add option…'), findsNothing);
     expect(find.text('Search config sections…'), findsOneWidget);
+
+    // Options render as list rows (not chip/card wrap previews).
+    expect(find.text(config.state.applications.first), findsOneWidget);
+    expect(find.textContaining('option'), findsWidgets);
 
     await tester.enterText(find.byType(TextFormField).first, 'assignee');
     await tester.pumpAndSettle();

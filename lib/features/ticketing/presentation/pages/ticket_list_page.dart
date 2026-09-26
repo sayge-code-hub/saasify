@@ -301,123 +301,131 @@ class _TicketListPageState extends State<TicketListPage> {
 
         return ColoredBox(
           color: AppColors.canvas,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontal,
-                  AppSpacing.xxl,
-                  horizontal,
-                  AppSpacing.md,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'All Tickets',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSpacing.contentMaxWidth,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontal,
+                      AppSpacing.xxl,
+                      horizontal,
+                      AppSpacing.md,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'All Tickets',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        AppTextField(
+                          controller: _searchController,
+                          hint: 'Search by id, subject, or customer',
+                          prefixIcon: const Icon(Icons.search),
+                          onChanged: cubit.setQuery,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _ListToolbar(
+                          hasTickets: tickets.isNotEmpty,
+                          selectedCount: selectedCount,
+                          onExport: () => _pickExport(_exportTargets(state)),
+                          onEmail: () => _emailTickets(_exportTargets(state)),
+                          onFilter: () => _pickFilter(cubit),
+                          onSort: _pickSort,
+                          onDelete: () => _confirmDelete(cubit, selectedCount),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontal,
+                        0,
+                        horizontal,
+                        AppSpacing.lg,
+                      ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusLg),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: tickets.isEmpty
+                            ? const AppEmptyState(
+                                title: 'No tickets match',
+                                message: 'Try clearing search or filters.',
+                                icon: Icons.confirmation_number_outlined,
+                              )
+                            : Column(
+                                children: [
+                                  _ListHeader(
+                                    allSelected: state.allVisibleSelected,
+                                    partiallySelected: selectedCount > 0 &&
+                                        !state.allVisibleSelected,
+                                    onSelectAllChanged: (value) {
+                                      if (value == true) {
+                                        cubit.selectAllVisible();
+                                      } else {
+                                        cubit.clearSelection();
+                                      }
+                                    },
+                                    showColumnLabels: !compact,
+                                  ),
+                                  const Divider(height: 1),
+                                  Expanded(
+                                    child: ListView.separated(
+                                      itemCount: tickets.length,
+                                      separatorBuilder: (_, _) =>
+                                          const Divider(height: 1),
+                                      itemBuilder: (context, index) {
+                                        final ticket = tickets[index];
+                                        final selected =
+                                            state.isSelected(ticket.id);
+                                        void open() => context.go(
+                                              '/ticketing/tickets/${ticket.id}',
+                                            );
+                                        void toggle(bool? value) {
+                                          if (value == null) return;
+                                          cubit.toggleSelected(ticket.id);
+                                        }
+
+                                        if (compact) {
+                                          return TicketListCard(
+                                            ticket: ticket,
+                                            selected: selected,
+                                            onSelectedChanged: toggle,
+                                            onTap: open,
+                                          );
+                                        }
+                                        return TicketListRow(
+                                          ticket: ticket,
+                                          selected: selected,
+                                          onSelectedChanged: toggle,
+                                          onTap: open,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    AppTextField(
-                      controller: _searchController,
-                      hint: 'Search by id, subject, or customer',
-                      prefixIcon: const Icon(Icons.search),
-                      onChanged: cubit.setQuery,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _ListToolbar(
-                      hasTickets: tickets.isNotEmpty,
-                      selectedCount: selectedCount,
-                      onExport: () => _pickExport(_exportTargets(state)),
-                      onEmail: () => _emailTickets(_exportTargets(state)),
-                      onFilter: () => _pickFilter(cubit),
-                      onSort: _pickSort,
-                      onDelete: () => _confirmDelete(cubit, selectedCount),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontal,
-                    0,
-                    horizontal,
-                    AppSpacing.lg,
                   ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusLg),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: tickets.isEmpty
-                        ? const AppEmptyState(
-                            title: 'No tickets match',
-                            message: 'Try clearing search or filters.',
-                            icon: Icons.confirmation_number_outlined,
-                          )
-                        : Column(
-                            children: [
-                              _ListHeader(
-                                allSelected: state.allVisibleSelected,
-                                partiallySelected: selectedCount > 0 &&
-                                    !state.allVisibleSelected,
-                                onSelectAllChanged: (value) {
-                                  if (value == true) {
-                                    cubit.selectAllVisible();
-                                  } else {
-                                    cubit.clearSelection();
-                                  }
-                                },
-                                showColumnLabels: !compact,
-                              ),
-                              const Divider(height: 1),
-                              Expanded(
-                                child: ListView.separated(
-                                  itemCount: tickets.length,
-                                  separatorBuilder: (_, _) =>
-                                      const Divider(height: 1),
-                                  itemBuilder: (context, index) {
-                                    final ticket = tickets[index];
-                                    final selected =
-                                        state.isSelected(ticket.id);
-                                    void open() => context.go(
-                                          '/ticketing/tickets/${ticket.id}',
-                                        );
-                                    void toggle(bool? value) {
-                                      if (value == null) return;
-                                      cubit.toggleSelected(ticket.id);
-                                    }
-
-                                    if (compact) {
-                                      return TicketListCard(
-                                        ticket: ticket,
-                                        selected: selected,
-                                        onSelectedChanged: toggle,
-                                        onTap: open,
-                                      );
-                                    }
-                                    return TicketListRow(
-                                      ticket: ticket,
-                                      selected: selected,
-                                      onSelectedChanged: toggle,
-                                      onTap: open,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },

@@ -13,7 +13,13 @@ abstract final class AppSpacing {
   static const double radiusMd = 12;
   static const double radiusLg = 16;
 
-  static const double contentMaxWidth = 1120;
+  /// Standard content measure for admin pages via [AppPage].
+  /// Keep screens on this width — do not invent narrower per-page max widths
+  /// unless a focused form truly needs a tighter column.
+  static const double contentMaxWidth = 1280;
   static const double pagePaddingCompact = md;
   static const double pagePaddingExpanded = xl;
+
+  /// Breakpoint for two-up section grids (Config, etc.).
+  static const double sectionGridMinWidth = 720;
 }
