@@ -111,15 +111,22 @@ void main() {
       act: (cubit) => cubit.createTicket(
         subject: 'New case',
         description: 'Details here',
-        customerName: 'Casey',
-        customerEmail: 'casey@example.com',
         priority: TicketPriority.urgent,
+        application: 'Web App',
+        distributionList: 'Engineering',
+        isBug: true,
+        responsibility: 'Casey',
+        affectedEquipment: 'Laptop-12',
       ),
       verify: (cubit) {
         final created = cubit.state.tickets.first;
         expect(created.subject, 'New case');
         expect(created.status, TicketStatus.open);
         expect(created.id, 'TCK-3');
+        expect(created.application, 'Web App');
+        expect(created.isBug, isTrue);
+        expect(created.distributionList, 'Engineering');
+        expect(created.affectedEquipment, 'Laptop-12');
         expect(created.events.first.action, 'Ticket created');
         expect(created.events.any((e) => e.action == 'Customer message'), isTrue);
       },

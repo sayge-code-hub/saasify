@@ -270,6 +270,34 @@ class _DetailsSection extends StatelessWidget {
                         : 'Unassigned',
                   ),
                   _MetaRow(
+                    label: 'Application',
+                    value: ticket.application?.isNotEmpty == true
+                        ? ticket.application!
+                        : '—',
+                  ),
+                  _MetaRow(
+                    label: 'Bug',
+                    value: ticket.isBug ? 'Yes' : 'No',
+                  ),
+                  _MetaRow(
+                    label: 'Responsibility',
+                    value: ticket.responsibility?.isNotEmpty == true
+                        ? ticket.responsibility!
+                        : '—',
+                  ),
+                  _MetaRow(
+                    label: 'Affected Equipment',
+                    value: ticket.affectedEquipment?.isNotEmpty == true
+                        ? ticket.affectedEquipment!
+                        : '—',
+                  ),
+                  _MetaRow(
+                    label: 'Distribution List',
+                    value: ticket.distributionList?.isNotEmpty == true
+                        ? ticket.distributionList!
+                        : '—',
+                  ),
+                  _MetaRow(
                     label: 'Created',
                     value: _formatDate(ticket.createdAt),
                   ),
@@ -299,7 +327,10 @@ class _DetailsSection extends StatelessWidget {
                   runSpacing: AppSpacing.sm,
                   children: [
                     for (final row in rows)
-                      SizedBox(width: (constraints.maxWidth - AppSpacing.xl) / 2, child: row),
+                      SizedBox(
+                        width: (constraints.maxWidth - AppSpacing.xl) / 2,
+                        child: row,
+                      ),
                   ],
                 );
               },

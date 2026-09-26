@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:saasify/features/auth/data/auth_session_store.dart';
 import 'package:saasify/features/auth/domain/auth_user.dart';
 
 sealed class AuthState extends Equatable {
@@ -36,14 +37,31 @@ final class AuthFailure extends AuthState {
   List<Object?> get props => [message];
 }
 
-/// In-memory mock auth. Any non-empty email/password succeeds.
+/// Mock auth. Any non-empty email/password succeeds.
+/// On web, the session is restored from sessionStorage across reloads.
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     AuthState? initialState,
     this.delay = const Duration(milliseconds: 450),
-  }) : super(initialState ?? const AuthUnauthenticated());
+    this.persistSession = true,
+  }) : super(initialState ?? _restore(persistSession));
 
   final Duration delay;
+  final bool persistSession;
+
+  static AuthState _restore(bool persistSession) {
+    if (!persistSession) return const AuthUnauthenticated();
+    final saved = AuthSessionStore.read();
+    if (saved == null) return const AuthUnauthenticated();
+    return AuthAuthenticated(
+      AuthUser(
+        id: saved['id']!,
+        name: saved['name']!,
+        email: saved['email']!,
+        role: saved['role'] ?? 'Admin',
+      ),
+    );
+  }
 
   Future<void> login({
     required String email,
@@ -62,18 +80,26 @@ class AuthCubit extends Cubit<AuthState> {
         ? trimmedEmail.split('@').first
         : trimmedEmail;
 
-    emit(
-      AuthAuthenticated(
-        AuthUser(
-          id: 'admin-1',
-          name: _titleCase(name),
-          email: trimmedEmail,
-        ),
-      ),
+    final user = AuthUser(
+      id: 'admin-1',
+      name: _titleCase(name),
+      email: trimmedEmail,
     );
+    if (persistSession) {
+      AuthSessionStore.write(
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      );
+    }
+    emit(AuthAuthenticated(user));
   }
 
-  void logout() => emit(const AuthUnauthenticated());
+  void logout() {
+    if (persistSession) AuthSessionStore.clear();
+    emit(const AuthUnauthenticated());
+  }
 
   void clearFailure() {
     if (state is AuthFailure) {

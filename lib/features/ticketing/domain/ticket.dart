@@ -106,9 +106,16 @@ class Ticket extends Equatable {
     this.tags = const [],
     this.events = const [],
     this.attachments = const [],
+    this.application,
+    this.isBug = false,
+    this.responsibility,
+    this.affectedEquipment,
+    this.distributionList,
   });
 
   final String id;
+
+  /// Displayed as "Header" on the create form.
   final String subject;
   final String description;
   final TicketStatus status;
@@ -122,6 +129,11 @@ class Ticket extends Equatable {
   final List<String> tags;
   final List<TicketEvent> events;
   final List<TicketAttachment> attachments;
+  final String? application;
+  final bool isBug;
+  final String? responsibility;
+  final String? affectedEquipment;
+  final String? distributionList;
 
   Ticket copyWith({
     TicketStatus? status,
@@ -131,6 +143,11 @@ class Ticket extends Equatable {
     List<TicketMessage>? messages,
     List<TicketEvent>? events,
     List<TicketAttachment>? attachments,
+    String? application,
+    bool? isBug,
+    String? responsibility,
+    String? affectedEquipment,
+    String? distributionList,
   }) {
     return Ticket(
       id: id,
@@ -147,6 +164,11 @@ class Ticket extends Equatable {
       tags: tags,
       events: events ?? this.events,
       attachments: attachments ?? this.attachments,
+      application: application ?? this.application,
+      isBug: isBug ?? this.isBug,
+      responsibility: responsibility ?? this.responsibility,
+      affectedEquipment: affectedEquipment ?? this.affectedEquipment,
+      distributionList: distributionList ?? this.distributionList,
     );
   }
 
@@ -166,5 +188,10 @@ class Ticket extends Equatable {
         tags,
         events,
         attachments,
+        application,
+        isBug,
+        responsibility,
+        affectedEquipment,
+        distributionList,
       ];
 }

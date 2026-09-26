@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:saasify/app/app.dart';
 import 'package:saasify/features/auth/domain/auth_user.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 
 void main() {
@@ -112,18 +113,29 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('nav-ticketing-new')));
     await tester.pumpAndSettle();
-    expect(find.text('Add new ticket'), findsOneWidget);
+    expect(find.text('Create Ticket'), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-header')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-application')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-priority')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-bug')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-responsibility')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-equipment')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-description')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-distribution')), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
 
-    final fields = find.byType(TextFormField);
-    expect(fields, findsNWidgets(4));
-    await tester.enterText(fields.at(0), 'Cannot login on tablet');
-    await tester.enterText(fields.at(1), 'Login spinner never finishes on iPad.');
-    await tester.enterText(fields.at(2), 'Taylor Reed');
-    await tester.enterText(fields.at(3), 'taylor@example.com');
-    await tester.tap(find.text('Create case'));
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('Cannot login on tablet'), findsOneWidget);
+    tickets.createTicket(
+      subject: 'Cannot login on tablet',
+      description: 'Login spinner never finishes on iPad.',
+      priority: TicketPriority.high,
+      application: 'Mobile App',
+      distributionList: 'Support On-Call',
+      responsibility: 'Taylor Reed',
+      affectedEquipment: 'iPad Pro',
+    );
     expect(tickets.state.tickets.first.subject, 'Cannot login on tablet');
+    expect(tickets.state.tickets.first.application, 'Mobile App');
+    expect(tickets.state.tickets.first.distributionList, 'Support On-Call');
+    expect(tickets.state.tickets.first.responsibility, 'Taylor Reed');
   });
 }

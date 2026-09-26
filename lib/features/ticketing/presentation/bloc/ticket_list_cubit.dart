@@ -231,9 +231,12 @@ class TicketListCubit extends Cubit<TicketListState> {
   String createTicket({
     required String subject,
     required String description,
-    required String customerName,
-    required String customerEmail,
-    TicketPriority priority = TicketPriority.medium,
+    required TicketPriority priority,
+    required String application,
+    required String distributionList,
+    bool isBug = false,
+    String responsibility = '',
+    String affectedEquipment = '',
     List<String> tags = const [],
   }) {
     final now = DateTime.now();
@@ -243,38 +246,62 @@ class TicketListCubit extends Cubit<TicketListState> {
       if (n > maxId) maxId = n;
     }
     final id = 'TCK-${maxId + 1}';
+    final owner = responsibility.trim();
+    final reporter = owner.isNotEmpty ? owner : 'Internal';
     final message = TicketMessage(
       id: 'm-${now.microsecondsSinceEpoch}',
-      authorName: customerName.trim(),
+      authorName: reporter,
       body: description.trim(),
       createdAt: now,
       isAgent: false,
     );
+    final tagList = <String>[
+      ...tags,
+      if (isBug) 'bug',
+      application.trim().toLowerCase().replaceAll(' ', '-'),
+    ];
     final ticket = Ticket(
       id: id,
       subject: subject.trim(),
       description: description.trim(),
       status: TicketStatus.open,
       priority: priority,
-      customerName: customerName.trim(),
-      customerEmail: customerEmail.trim(),
+      customerName: reporter,
+      customerEmail: 'tickets@saasify.io',
+      assigneeName: owner.isEmpty ? null : owner,
       createdAt: now,
       updatedAt: now,
-      tags: tags,
+      tags: tagList,
       messages: [message],
+      application: application.trim(),
+      isBug: isBug,
+      responsibility: owner.isEmpty ? null : owner,
+      affectedEquipment: affectedEquipment.trim().isEmpty
+          ? null
+          : affectedEquipment.trim(),
+      distributionList: distributionList.trim(),
       events: [
         TicketEvent(
           id: '$id-created',
           action: 'Ticket created',
-          detail: 'Case opened · ${priority.label} priority',
-          actorName: customerName.trim(),
+          detail:
+              'Case opened · ${priority.label} priority · $application',
+          actorName: reporter,
           at: now,
         ),
+        if (owner.isNotEmpty)
+          TicketEvent(
+            id: '$id-assign',
+            action: 'Assigned',
+            detail: 'Assigned to $owner',
+            actorName: 'System',
+            at: now,
+          ),
         TicketEvent(
           id: 'evt-${message.id}',
           action: 'Customer message',
           detail: message.body,
-          actorName: customerName.trim(),
+          actorName: reporter,
           at: now,
         ),
       ],

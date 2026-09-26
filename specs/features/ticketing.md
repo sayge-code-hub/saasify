@@ -11,7 +11,7 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
 ## Screens
 
 1. **Dashboard** (`/ticketing`) — status / priority analytics (see overview spec)
-2. **Add Ticket** (`/ticketing/new`) — create case form (subject, description, customer, priority)
+2. **Add Ticket** (`/ticketing/new`) — create form: Header, Application, Priority, Bug, Responsibility, Affected Equipment, Description, Distribution List
 3. **Ticket list** (`/ticketing/all`, `/open`, `/pending`, `/resolved`, `/priority`)
    - Search by subject / customer / id
    - Export Excel / PDF / Email (mocked)

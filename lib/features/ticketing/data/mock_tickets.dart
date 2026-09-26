@@ -18,6 +18,9 @@ abstract final class MockTickets {
         createdAt: _now.subtract(const Duration(hours: 5)),
         updatedAt: _now.subtract(const Duration(minutes: 40)),
         tags: const ['auth', 'mobile'],
+        application: 'Mobile App',
+        isBug: true,
+        distributionList: 'Support On-Call',
         messages: [
           TicketMessage(
             id: 'm1',
@@ -41,6 +44,11 @@ abstract final class MockTickets {
         createdAt: _now.subtract(const Duration(days: 1, hours: 3)),
         updatedAt: _now.subtract(const Duration(minutes: 15)),
         tags: const ['billing'],
+        application: 'Billing',
+        isBug: true,
+        responsibility: 'Alex Rivera',
+        affectedEquipment: 'PDF render service',
+        distributionList: 'Billing Ops',
         messages: [
           TicketMessage(
             id: 'm2',
@@ -371,6 +379,11 @@ abstract final class MockTickets {
     List<String> tags = const [],
     List<TicketEvent> extraEvents = const [],
     List<TicketAttachment> attachments = const [],
+    String? application,
+    bool isBug = false,
+    String? responsibility,
+    String? affectedEquipment,
+    String? distributionList,
   }) {
     final events = <TicketEvent>[
       TicketEvent(
@@ -406,6 +419,11 @@ abstract final class MockTickets {
       messages: messages,
       events: events,
       attachments: attachments,
+      application: application,
+      isBug: isBug,
+      responsibility: responsibility ?? assigneeName,
+      affectedEquipment: affectedEquipment,
+      distributionList: distributionList,
     );
   }
 
@@ -414,5 +432,24 @@ abstract final class MockTickets {
     'Sam Ortiz',
     'Jamie Fox',
     'Riley Nguyen',
+  ];
+
+  static const applications = <String>[
+    'Billing',
+    'Mobile App',
+    'Web App',
+    'SSO / Identity',
+    'API Platform',
+    'Email / Notifications',
+    'Admin Console',
+  ];
+
+  static const distributionLists = <String>[
+    'Support On-Call',
+    'Engineering',
+    'Billing Ops',
+    'Security',
+    'Customer Success',
+    'All Staff',
   ];
 }
