@@ -312,7 +312,6 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                                     },
                                   ),
                                 ),
-                                ),
                               ],
                             ),
                           ),
