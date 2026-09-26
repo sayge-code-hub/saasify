@@ -7,6 +7,7 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_logo.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
+import 'package:saasify/core/widgets/powered_by_footer.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 
 class LoginPage extends StatefulWidget {
@@ -71,9 +72,11 @@ class _LoginPageState extends State<LoginPage>
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: wide ? AppSpacing.xxl : AppSpacing.lg,
-                  vertical: AppSpacing.xl,
+                padding: EdgeInsets.fromLTRB(
+                  wide ? AppSpacing.xxl : AppSpacing.lg,
+                  AppSpacing.xl,
+                  wide ? AppSpacing.xxl : AppSpacing.lg,
+                  AppSpacing.xxxl,
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 400),
@@ -187,6 +190,18 @@ class _LoginPageState extends State<LoginPage>
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.md),
+                child: PoweredByFooter(),
               ),
             ),
           ),

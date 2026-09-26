@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_logo.dart';
+import 'package:saasify/core/widgets/powered_by_footer.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/domain/app_modules.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
@@ -63,7 +64,7 @@ class ModuleSidebar extends StatelessWidget {
                   AppSpacing.sm,
                   AppSpacing.sm,
                   AppSpacing.sm,
-                  AppSpacing.lg,
+                  AppSpacing.md,
                 ),
                 child: Column(
                   children: [
@@ -87,6 +88,11 @@ class ModuleSidebar extends StatelessWidget {
                         onNavigate?.call();
                       },
                     ),
+                    const SizedBox(height: AppSpacing.sm),
+                    const Divider(height: 1, color: AppColors.border),
+                    const SizedBox(height: AppSpacing.sm),
+                    const PoweredByFooter(),
+                    const SizedBox(height: AppSpacing.xs),
                   ],
                 ),
               ),

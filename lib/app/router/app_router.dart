@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/auth/presentation/pages/login_page.dart';
 import 'package:saasify/features/overview/presentation/pages/overview_page.dart';
+import 'package:saasify/features/releases/presentation/pages/release_history_page.dart';
 import 'package:saasify/features/settings/presentation/pages/settings_page.dart';
 import 'package:saasify/features/shell/presentation/pages/shell_page.dart';
 import 'package:saasify/features/ticketing/presentation/pages/create_ticket_page.dart';
@@ -26,8 +27,9 @@ GoRouter createAppRouter({
       final authed = authCubit.state is AuthAuthenticated;
       final loggingIn = state.matchedLocation == '/login';
       final atRoot = state.matchedLocation == '/';
+      final onReleases = state.matchedLocation == '/releases';
 
-      if (!authed && !loggingIn) return '/login';
+      if (!authed && !loggingIn && !onReleases) return '/login';
       if (authed && loggingIn) return '/ticketing';
       if (authed && atRoot) return '/ticketing';
       return null;
@@ -37,6 +39,11 @@ GoRouter createAppRouter({
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/releases',
+        name: 'releases',
+        builder: (context, state) => const ReleaseHistoryPage(),
       ),
       ShellRoute(
         builder: (context, state, child) {
