@@ -42,10 +42,7 @@ class ShellPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (!compact) ...[
-            const SizedBox(
-              width: sidebarWidth,
-              child: ModuleSidebar(),
-            ),
+            const SizedBox(width: sidebarWidth, child: ModuleSidebar()),
             const VerticalDivider(width: 1),
           ],
           Expanded(
@@ -67,7 +64,7 @@ class ShellPage extends StatelessWidget {
                           ? () => Scaffold.of(scaffoldContext).openDrawer()
                           : null,
                     ),
-                    Expanded(child: child),
+                    Expanded(child: SelectionArea(child: child)),
                   ],
                 );
               },
@@ -117,15 +114,16 @@ String dashboardTitleFor(String location) {
     return '';
   }
   if (location == '/ticketing/new') return 'Add Ticket';
-  // List views keep the page title in content; header stays clean.
+  // List views and Config keep the page title in content; header stays clean.
   if (location == '/ticketing/all' ||
       location == '/ticketing/open' ||
       location == '/ticketing/pending' ||
       location == '/ticketing/resolved' ||
-      location == '/ticketing/priority') {
+      location == '/ticketing/priority' ||
+      location == '/ticketing/config' ||
+      location.startsWith('/ticketing/config/')) {
     return '';
   }
-  if (location == '/ticketing/config') return 'Config';
   if (location == '/dynamic/create-ticket') return 'Add Ticket (BDUI)';
   if (location == '/settings') return 'Settings';
   return 'Workspace';

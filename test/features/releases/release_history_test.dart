@@ -24,7 +24,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Release history'), findsOneWidget);
-    expect(find.textContaining('v1.1.0'), findsWidgets);
+    expect(find.textContaining('v1.1.1'), findsWidgets);
     expect(find.text('Feature'), findsWidgets);
   });
 

@@ -16,53 +16,52 @@ class ReleaseHistoryPage extends StatelessWidget {
     final theme = Theme.of(context);
     final releases = ReleaseNotes.all;
 
-    return AppPage(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => context.go('/ticketing'),
-              icon: const Icon(Icons.arrow_back, size: 18),
-              label: const Text('Back'),
+    return SelectionArea(
+      child: AppPage(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => context.go('/ticketing'),
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: const Text('Back'),
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Release history',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.ink,
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Release history',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Versions deployed for ${AppConstants.appName}, including features, '
-            'improvements, and bug fixes. Current: ${AppConstants.appVersionLabel}.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkSecondary,
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Versions deployed for ${AppConstants.appName}, including features, '
+              'improvements, and bug fixes. Current: ${AppConstants.appVersionLabel}.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.inkSecondary,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          for (var i = 0; i < releases.length; i++) ...[
-            if (i > 0) const SizedBox(height: AppSpacing.md),
-            _ReleaseCard(
-              release: releases[i],
-              isCurrent: releases[i].version == ReleaseNotes.currentVersion,
-            ),
+            const SizedBox(height: AppSpacing.xl),
+            for (var i = 0; i < releases.length; i++) ...[
+              if (i > 0) const SizedBox(height: AppSpacing.md),
+              _ReleaseCard(
+                release: releases[i],
+                isCurrent: releases[i].version == ReleaseNotes.currentVersion,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 }
 
 class _ReleaseCard extends StatelessWidget {
-  const _ReleaseCard({
-    required this.release,
-    required this.isCurrent,
-  });
+  const _ReleaseCard({required this.release, required this.isCurrent});
 
   final AppRelease release;
   final bool isCurrent;
@@ -173,11 +172,14 @@ class _ChangeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (bg, fg) = switch (type) {
-      ReleaseChangeType.feature => (AppColors.accentMuted, AppColors.accentHover),
+      ReleaseChangeType.feature => (
+        AppColors.accentMuted,
+        AppColors.accentHover,
+      ),
       ReleaseChangeType.improvement => (
-          AppColors.successMuted,
-          AppColors.success,
-        ),
+        AppColors.successMuted,
+        AppColors.success,
+      ),
       ReleaseChangeType.bugfix => (AppColors.warningMuted, AppColors.warning),
     };
 
@@ -195,11 +197,8 @@ class _ChangeBadge extends StatelessWidget {
           ReleaseChangeType.bugfix => 'Bug fix',
         },
         textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w700,
-              fontSize: 10,
-            ),
+        style: Theme.of(context).textTheme.labelSmall
+            ?.copyWith(color: fg, fontWeight: FontWeight.w700, fontSize: 10),
       ),
     );
   }

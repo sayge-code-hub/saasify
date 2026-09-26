@@ -11,7 +11,9 @@ import 'package:saasify/features/overview/presentation/pages/overview_page.dart'
 import 'package:saasify/features/releases/presentation/pages/release_history_page.dart';
 import 'package:saasify/features/settings/presentation/pages/settings_page.dart';
 import 'package:saasify/features/shell/presentation/pages/shell_page.dart';
+import 'package:saasify/features/ticketing/domain/ticket_config_lists.dart';
 import 'package:saasify/features/ticketing/presentation/pages/create_ticket_page.dart';
+import 'package:saasify/features/ticketing/presentation/pages/ticket_config_list_page.dart';
 import 'package:saasify/features/ticketing/presentation/pages/ticket_config_page.dart';
 import 'package:saasify/features/ticketing/presentation/pages/ticket_detail_page.dart';
 import 'package:saasify/features/ticketing/presentation/pages/ticket_list_page.dart';
@@ -114,6 +116,25 @@ GoRouter createAppRouter({
                 pageBuilder: (context, state) => const NoTransitionPage<void>(
                   child: TicketConfigPage(),
                 ),
+                routes: [
+                  GoRoute(
+                    path: ':kind',
+                    name: 'ticketing-config-list',
+                    pageBuilder: (context, state) {
+                      final kind = TicketConfigListKindX.tryParse(
+                        state.pathParameters['kind'] ?? '',
+                      );
+                      if (kind == null) {
+                        return const NoTransitionPage<void>(
+                          child: TicketConfigPage(),
+                        );
+                      }
+                      return NoTransitionPage<void>(
+                        child: TicketConfigListPage(kind: kind),
+                      );
+                    },
+                  ),
+                ],
               ),
               GoRoute(
                 path: 'tickets/:id',

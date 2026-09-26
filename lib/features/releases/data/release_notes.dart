@@ -33,9 +33,30 @@ class AppRelease {
 
 /// Mock deployment history for the Release History screen.
 abstract final class ReleaseNotes {
-  static const currentVersion = '1.1.0';
+  static const currentVersion = '1.1.1';
 
   static final List<AppRelease> all = [
+    AppRelease(
+      version: '1.1.1',
+      releasedAt: DateTime(2026, 9, 26),
+      title: 'Config editor polish',
+      changes: const [
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary:
+              'Config hub uses searchable section cards with Edit screens instead of inline chip adders.',
+        ),
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary:
+              'Option list editors confirm adds, warn on discard, and keep the top bar free of a Config title.',
+        ),
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary: 'App text is selectable so labels and values can be copied.',
+        ),
+      ],
+    ),
     AppRelease(
       version: '1.1.0',
       releasedAt: DateTime(2026, 9, 26),

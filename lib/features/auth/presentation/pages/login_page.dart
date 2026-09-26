@@ -58,154 +58,159 @@ class _LoginPageState extends State<LoginPage>
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      body: Stack(
-        children: [
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: ColoredBox(
-              color: AppColors.accent,
-              child: SizedBox(height: 4),
+      body: SelectionArea(
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ColoredBox(
+                color: AppColors.accent,
+                child: SizedBox(height: 4),
+              ),
             ),
-          ),
-          SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  wide ? AppSpacing.xxl : AppSpacing.lg,
-                  AppSpacing.xl,
-                  wide ? AppSpacing.xxl : AppSpacing.lg,
-                  AppSpacing.xxxl,
-                ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: FadeTransition(
-                    opacity: _fade,
-                    child: SlideTransition(
-                      position: _slide,
-                      child: BlocBuilder<AuthCubit, AuthState>(
-                        builder: (context, state) {
-                          final loading = state is AuthAuthenticating;
-                          final error =
-                              state is AuthFailure ? state.message : null;
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    wide ? AppSpacing.xxl : AppSpacing.lg,
+                    AppSpacing.xl,
+                    wide ? AppSpacing.xxl : AppSpacing.lg,
+                    AppSpacing.xxxl,
+                  ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: FadeTransition(
+                      opacity: _fade,
+                      child: SlideTransition(
+                        position: _slide,
+                        child: BlocBuilder<AuthCubit, AuthState>(
+                          builder: (context, state) {
+                            final loading = state is AuthAuthenticating;
+                            final error = state is AuthFailure
+                                ? state.message
+                                : null;
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // group.svg wordmark as primary logo
-                              const Align(
-                                alignment: Alignment.centerLeft,
-                                child: AppLogoWordmark(height: 48),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Text(
-                                'Sign in to the admin workspace',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: AppColors.inkSecondary,
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // group.svg wordmark as primary logo
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: AppLogoWordmark(height: 48),
                                 ),
-                              ),
-                              const SizedBox(height: AppSpacing.xxl),
-                              Form(
-                                key: _formKey,
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    AppTextField(
-                                      controller: _emailController,
-                                      label: 'Work email',
-                                      hint: 'you@company.com',
-                                      keyboardType:
-                                          TextInputType.emailAddress,
-                                      textInputAction: TextInputAction.next,
-                                      prefixIcon:
-                                          const Icon(Icons.mail_outline),
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return 'Email is required';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    const SizedBox(height: AppSpacing.md),
-                                    AppTextField(
-                                      controller: _passwordController,
-                                      label: 'Password',
-                                      obscureText: _obscure,
-                                      textInputAction: TextInputAction.done,
-                                      prefixIcon:
-                                          const Icon(Icons.lock_outline),
-                                      suffixIcon: IconButton(
-                                        onPressed: () => setState(
-                                          () => _obscure = !_obscure,
+                                const SizedBox(height: AppSpacing.md),
+                                Text(
+                                  'Sign in to the admin workspace',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: AppColors.inkSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.xxl),
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      AppTextField(
+                                        controller: _emailController,
+                                        label: 'Work email',
+                                        hint: 'you@company.com',
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        textInputAction: TextInputAction.next,
+                                        prefixIcon: const Icon(
+                                          Icons.mail_outline,
                                         ),
-                                        icon: Icon(
-                                          _obscure
-                                              ? Icons.visibility_outlined
-                                              : Icons.visibility_off_outlined,
-                                        ),
+                                        validator: (value) {
+                                          if (value == null ||
+                                              value.trim().isEmpty) {
+                                            return 'Email is required';
+                                          }
+                                          return null;
+                                        },
                                       ),
-                                      onSubmitted: (_) => _submit(),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Password is required';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    if (error != null) ...[
+                                      const SizedBox(height: AppSpacing.md),
+                                      AppTextField(
+                                        controller: _passwordController,
+                                        label: 'Password',
+                                        obscureText: _obscure,
+                                        textInputAction: TextInputAction.done,
+                                        prefixIcon: const Icon(
+                                          Icons.lock_outline,
+                                        ),
+                                        suffixIcon: IconButton(
+                                          onPressed: () => setState(
+                                            () => _obscure = !_obscure,
+                                          ),
+                                          icon: Icon(
+                                            _obscure
+                                                ? Icons.visibility_outlined
+                                                : Icons.visibility_off_outlined,
+                                          ),
+                                        ),
+                                        onSubmitted: (_) => _submit(),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Password is required';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      if (error != null) ...[
+                                        const SizedBox(height: AppSpacing.md),
+                                        Text(
+                                          error,
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color: theme.colorScheme.error,
+                                              ),
+                                        ),
+                                      ],
+                                      const SizedBox(height: AppSpacing.xl),
+                                      AppButton(
+                                        label: 'Sign in',
+                                        expand: true,
+                                        isLoading: loading,
+                                        onPressed: loading ? null : _submit,
+                                      ),
                                       const SizedBox(height: AppSpacing.md),
                                       Text(
-                                        error,
-                                        style: theme.textTheme.bodyMedium
+                                        'Mock auth — any non-empty credentials work.',
+                                        style: theme.textTheme.bodySmall
                                             ?.copyWith(
-                                          color: theme.colorScheme.error,
-                                        ),
+                                              color: AppColors.inkTertiary,
+                                            ),
                                       ),
                                     ],
-                                    const SizedBox(height: AppSpacing.xl),
-                                    AppButton(
-                                      label: 'Sign in',
-                                      expand: true,
-                                      isLoading: loading,
-                                      onPressed: loading ? null : _submit,
-                                    ),
-                                    const SizedBox(height: AppSpacing.md),
-                                    Text(
-                                      'Mock auth — any non-empty credentials work.',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                        color: AppColors.inkTertiary,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        },
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: AppSpacing.md),
-                child: PoweredByFooter(),
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.md),
+                  child: PoweredByFooter(),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -215,8 +220,8 @@ class _LoginPageState extends State<LoginPage>
     context.read<AuthCubit>().clearFailure();
     if (!(_formKey.currentState?.validate() ?? false)) return;
     context.read<AuthCubit>().login(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
   }
 }

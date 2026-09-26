@@ -1,18 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
+import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/domain/ticket_config.dart';
+import 'package:saasify/features/ticketing/domain/ticket_config_lists.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_config_cubit.dart';
 
-/// Editable queue options (create-form dropdowns) and SLA targets.
-class TicketConfigPage extends StatelessWidget {
+/// Config hub: searchable sections for dropdown lists + SLA targets.
+class TicketConfigPage extends StatefulWidget {
   const TicketConfigPage({super.key});
+
+  @override
+  State<TicketConfigPage> createState() => _TicketConfigPageState();
+}
+
+class _TicketConfigPageState extends State<TicketConfigPage> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  bool _matches(String title, String subtitle, Iterable<String> haystack) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    if (title.toLowerCase().contains(q)) return true;
+    if (subtitle.toLowerCase().contains(q)) return true;
+    return haystack.any((item) => item.toLowerCase().contains(q));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +48,32 @@ class TicketConfigPage extends StatelessWidget {
       child: BlocBuilder<TicketConfigCubit, TicketConfig>(
         builder: (context, config) {
           final cubit = context.read<TicketConfigCubit>();
+          final sections = <_ConfigSectionData>[
+            for (final kind in TicketConfigListKind.values)
+              _ConfigSectionData.list(
+                kind: kind,
+                values: switch (kind) {
+                  TicketConfigListKind.applications => config.applications,
+                  TicketConfigListKind.distributionLists =>
+                    config.distributionLists,
+                  TicketConfigListKind.assignees => config.assignees,
+                  TicketConfigListKind.bugOptions => config.bugOptions,
+                },
+              ),
+            _ConfigSectionData.priorities(config),
+            _ConfigSectionData.sla(config),
+          ];
+          final visible = sections
+              .where(
+                (s) => _matches(s.title, s.subtitle, s.previewItems),
+              )
+              .toList();
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
@@ -40,8 +88,8 @@ class TicketConfigPage extends StatelessWidget {
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          'Dropdown options for Add Ticket and SLA clocks that '
-                          'measure first response and resolution by priority.',
+                          'Manage dropdown options for Add Ticket and SLA '
+                          'targets by priority.',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: AppColors.inkSecondary,
                           ),
@@ -52,149 +100,249 @@ class TicketConfigPage extends StatelessWidget {
                   AppButton(
                     label: 'Reset defaults',
                     variant: AppButtonVariant.outlined,
-                    onPressed: cubit.resetDefaults,
+                    onPressed: () => _confirmReset(context, cubit),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.xl),
-              _EditableOptionList(
-                title: 'Applications',
-                subtitle: 'Shown in the Application dropdown on Add Ticket.',
-                values: config.applications,
-                kind: TicketConfigListKind.applications,
+              const SizedBox(height: AppSpacing.lg),
+              AppTextField(
+                controller: _searchController,
+                hint: 'Search config sections…',
+                prefixIcon: const Icon(Icons.search),
+                onChanged: (value) => setState(() => _query = value),
               ),
               const SizedBox(height: AppSpacing.lg),
-              _EditableOptionList(
-                title: 'Distribution lists',
-                subtitle: 'Shown in the Distribution List dropdown.',
-                values: config.distributionLists,
-                kind: TicketConfigListKind.distributionLists,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _EditableOptionList(
-                title: 'Assignees',
-                subtitle:
-                    'Agents available when assigning a ticket on the detail page.',
-                values: config.assignees,
-                kind: TicketConfigListKind.assignees,
-                allowEmpty: true,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _EditableOptionList(
-                title: 'Bug options',
-                subtitle: 'Shown in the Bug dropdown (typically No / Yes).',
-                values: config.bugOptions,
-                kind: TicketConfigListKind.bugOptions,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _PrioritySection(config: config),
-              const SizedBox(height: AppSpacing.lg),
-              _SlaSection(config: config),
+              if (visible.isEmpty)
+                const SizedBox(
+                  height: 280,
+                  child: AppEmptyState(
+                    title: 'No matching sections',
+                    message: 'Try a different search term.',
+                    icon: Icons.search_off_outlined,
+                  ),
+                )
+              else
+                for (var i = 0; i < visible.length; i++) ...[
+                  if (i > 0) const SizedBox(height: AppSpacing.md),
+                  visible[i].buildCard(context),
+                ],
             ],
           );
         },
       ),
     );
   }
+
+  Future<void> _confirmReset(
+    BuildContext context,
+    TicketConfigCubit cubit,
+  ) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset defaults?'),
+        content: const Text(
+          'This restores all dropdown lists and SLA targets to the '
+          'built-in defaults. Your custom options will be removed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) cubit.resetDefaults();
+  }
 }
 
-class _EditableOptionList extends StatefulWidget {
-  const _EditableOptionList({
+class _ConfigSectionData {
+  const _ConfigSectionData._({
     required this.title,
     required this.subtitle,
-    required this.values,
+    required this.previewItems,
     required this.kind,
-    this.allowEmpty = false,
+    required this.buildCard,
   });
 
   final String title;
   final String subtitle;
-  final List<String> values;
-  final TicketConfigListKind kind;
-  final bool allowEmpty;
+  final List<String> previewItems;
+  final TicketConfigListKind? kind;
+  final Widget Function(BuildContext context) buildCard;
 
-  @override
-  State<_EditableOptionList> createState() => _EditableOptionListState();
+  factory _ConfigSectionData.list({
+    required TicketConfigListKind kind,
+    required List<String> values,
+  }) {
+    return _ConfigSectionData._(
+      title: kind.title,
+      subtitle: kind.subtitle,
+      previewItems: values,
+      kind: kind,
+      buildCard: (context) => _OptionListSectionCard(
+        kind: kind,
+        values: values,
+      ),
+    );
+  }
+
+  factory _ConfigSectionData.priorities(TicketConfig config) {
+    final labels = [
+      for (final p in TicketPriority.values)
+        '${p.label}${config.enabledPriorities.contains(p) ? '' : ' (off)'}',
+    ];
+    return _ConfigSectionData._(
+      title: 'Priorities',
+      subtitle: 'Which priorities appear in the Priority dropdown on Add Ticket.',
+      previewItems: labels,
+      kind: null,
+      buildCard: (context) => _PrioritySection(config: config),
+    );
+  }
+
+  factory _ConfigSectionData.sla(TicketConfig config) {
+    final labels = [
+      for (final p in TicketPriority.values)
+        '${p.label} ${config.slaFor(p).firstResponse.inHours}h / '
+            '${config.slaFor(p).resolution.inHours}h',
+    ];
+    return _ConfigSectionData._(
+      title: 'SLA targets',
+      subtitle:
+          'First response and resolution clocks by priority. At risk when '
+          '≤20% of the target remains.',
+      previewItems: labels,
+      kind: null,
+      buildCard: (context) => _SlaSection(config: config),
+    );
+  }
 }
 
-class _EditableOptionListState extends State<_EditableOptionList> {
-  final _controller = TextEditingController();
+class _OptionListSectionCard extends StatelessWidget {
+  const _OptionListSectionCard({
+    required this.kind,
+    required this.values,
+  });
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _add() {
-    context.read<TicketConfigCubit>().addListItem(
-          widget.kind,
-          _controller.text,
-        );
-    _controller.clear();
-  }
+  final TicketConfigListKind kind;
+  final List<String> values;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cubit = context.read<TicketConfigCubit>();
+    final preview = values.take(6).toList();
+    final remaining = values.length - preview.length;
 
     return _ConfigCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            widget.title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            widget.subtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.xs,
-            runSpacing: AppSpacing.xs,
-            children: [
-              for (final value in widget.values)
-                InputChip(
-                  label: Text(value),
-                  onDeleted: (!widget.allowEmpty && widget.values.length <= 1)
-                      ? null
-                      : () => cubit.removeListItem(widget.kind, value),
-                  deleteIconColor: AppColors.inkTertiary,
-                  side: const BorderSide(color: AppColors.border),
-                  backgroundColor: AppColors.surfaceMuted,
-                ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Add option…',
-                    isDense: true,
-                  ),
-                  onSubmitted: (_) => _add(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      kind.title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      kind.subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               AppButton(
-                label: 'Add',
+                key: ValueKey('config-edit-${kind.pathSegment}'),
+                label: 'Edit',
                 variant: AppButtonVariant.outlined,
-                onPressed: _add,
+                onPressed: () =>
+                    context.go('/ticketing/config/${kind.pathSegment}'),
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '${values.length} option${values.length == 1 ? '' : 's'}',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: AppColors.inkTertiary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (values.isEmpty)
+            Text(
+              'No options yet. Open Edit to add some.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.inkTertiary,
+              ),
+            )
+          else
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                for (final value in preview) _PreviewItemCard(label: value),
+                if (remaining > 0)
+                  _PreviewItemCard(
+                    label: '+$remaining more',
+                    muted: true,
+                  ),
+              ],
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _PreviewItemCard extends StatelessWidget {
+  const _PreviewItemCard({required this.label, this.muted = false});
+
+  final String label;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 120, maxWidth: 200),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: muted ? AppColors.canvas : AppColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.sm,
+          ),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: muted ? AppColors.inkTertiary : AppColors.ink,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -228,25 +376,75 @@ class _PrioritySection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          for (final priority in TicketPriority.values)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: config.enabledPriorities.contains(priority),
-                    activeColor: AppColors.accent,
-                    onChanged: (value) {
-                      if (value == null) return;
-                      cubit.togglePriority(priority, value);
-                    },
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(priority.label, style: theme.textTheme.bodyMedium),
-                ],
-              ),
-            ),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final priority in TicketPriority.values)
+                _PriorityToggleCard(
+                  label: priority.label,
+                  enabled: config.enabledPriorities.contains(priority),
+                  onChanged: (value) => cubit.togglePriority(priority, value),
+                ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _PriorityToggleCard extends StatelessWidget {
+  const _PriorityToggleCard({
+    required this.label,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: InkWell(
+        onTap: () => onChanged(!enabled),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Checkbox(
+                value: enabled,
+                activeColor: AppColors.accent,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+                onChanged: (value) {
+                  if (value == null) return;
+                  onChanged(value);
+                },
+              ),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -273,10 +471,9 @@ class _SlaSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxs),
           Text(
-            'A Service Level Agreement (SLA) is the promised time to act on a '
-            'ticket. First response starts at creation and ends at the first '
-            'agent comment. Resolution ends when the ticket is resolved or '
-            'closed. Status becomes At risk when ≤20% of the target remains.',
+            'A Service Level Agreement is the promised time to first agent '
+            'reply and to resolve the case. Status becomes At risk when ≤20% '
+            'of the target remains.',
             style: theme.textTheme.bodySmall?.copyWith(
               color: AppColors.inkSecondary,
             ),
@@ -284,8 +481,8 @@ class _SlaSection extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           for (final priority in TicketPriority.values) ...[
             if (priority != TicketPriority.values.first)
-              const SizedBox(height: AppSpacing.md),
-            _SlaPriorityRow(
+              const SizedBox(height: AppSpacing.sm),
+            _SlaPriorityCard(
               priority: priority,
               target: config.slaFor(priority),
             ),
@@ -296,8 +493,8 @@ class _SlaSection extends StatelessWidget {
   }
 }
 
-class _SlaPriorityRow extends StatelessWidget {
-  const _SlaPriorityRow({
+class _SlaPriorityCard extends StatelessWidget {
+  const _SlaPriorityCard({
     required this.priority,
     required this.target,
   });
