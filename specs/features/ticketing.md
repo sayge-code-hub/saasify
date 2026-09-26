@@ -2,7 +2,7 @@
 
 ## Status
 
-`done` (UI mocked)
+`in_progress` (UI mocked; config + SLA + assignee added)
 
 ## Summary
 
@@ -12,6 +12,7 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
 
 1. **Dashboard** (`/ticketing`) — status / priority analytics (see overview spec)
 2. **Add Ticket** (`/ticketing/new`) — create form: Header, Application, Priority, Bug, Responsibility, Affected Equipment, Description, Distribution List
+   - Application, Priority, Bug, and Distribution List options come from **Config**
 3. **Ticket list** (`/ticketing/all`, `/open`, `/pending`, `/resolved`, `/priority`)
    - Search by subject / customer / id
    - Export Excel / PDF / Email (mocked)
@@ -19,16 +20,35 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
    - Bulk delete when selection is non-empty
    - Clean list: id, subject, customer, priority, status, assignee
 4. **Ticket detail** (`/ticketing/tickets/:id`)
-   - Top bar: back + All tickets (not ticket id title)
    - 70/30 layout: details + comments | attachments then timeline
-   - No workflow action bar on the page
-5. **Config** (`/ticketing/config`) — placeholder queue preferences
+   - Change **Assignee** via dropdown (options from Config)
+   - **SLA** panel: first response + resolution clocks
+5. **Config** (`/ticketing/config`) — editable dropdown lists, enabled priorities, SLA hours per priority
+
+## SLA model
+
+A Service Level Agreement is the promised time to act on a ticket, by priority:
+
+| Clock | Starts | Ends |
+|-------|--------|------|
+| First response | Ticket created | First agent comment |
+| Resolution | Ticket created | Status becomes Resolved or Closed |
+
+Status:
+
+- **On track** — open and comfortably within target
+- **At risk** — open with ≤20% of target time remaining
+- **Breached** — deadline passed while still open
+- **Met** / **Met late** — completed before / after the deadline
+
+Default targets (hours): Urgent 1/4, High 4/24, Medium 8/72, Low 24/120 (response / resolution).
 
 ## Mock workflows
 
 - Create ticket via Add Ticket (prepends to catalog, opens detail)
-- Change status via action buttons
-- Post reply as agent
+- Change assignee on detail
+- Post reply as agent (starts first-response SLA completion)
+- Edit dropdown options and SLA targets in Config
 - Search / filter without persistence
 
 ## Acceptance criteria
@@ -36,6 +56,9 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
 - [x] Mock catalog has ≥8 tickets across statuses/priorities
 - [x] Filters and search update the visible list
 - [x] Opening a row navigates to detail
-- [x] Status transitions and replies update UI state
+- [x] Replies update UI state
 - [x] Create case adds a ticket to the mock catalog
+- [x] Assignee can be changed on detail
+- [x] Create-form dropdowns are driven by Config
+- [x] SLA evaluate + display on detail
 - [x] Cubits + key widgets tested

@@ -111,6 +111,8 @@ class Ticket extends Equatable {
     this.responsibility,
     this.affectedEquipment,
     this.distributionList,
+    this.firstRespondedAt,
+    this.resolvedAt,
   });
 
   final String id;
@@ -135,10 +137,17 @@ class Ticket extends Equatable {
   final String? affectedEquipment;
   final String? distributionList;
 
+  /// When the first agent reply landed (SLA first-response clock).
+  final DateTime? firstRespondedAt;
+
+  /// When the ticket reached resolved/closed (SLA resolution clock).
+  final DateTime? resolvedAt;
+
   Ticket copyWith({
     TicketStatus? status,
     TicketPriority? priority,
     String? assigneeName,
+    bool clearAssignee = false,
     DateTime? updatedAt,
     List<TicketMessage>? messages,
     List<TicketEvent>? events,
@@ -148,6 +157,10 @@ class Ticket extends Equatable {
     String? responsibility,
     String? affectedEquipment,
     String? distributionList,
+    DateTime? firstRespondedAt,
+    bool clearFirstRespondedAt = false,
+    DateTime? resolvedAt,
+    bool clearResolvedAt = false,
   }) {
     return Ticket(
       id: id,
@@ -157,7 +170,8 @@ class Ticket extends Equatable {
       priority: priority ?? this.priority,
       customerName: customerName,
       customerEmail: customerEmail,
-      assigneeName: assigneeName ?? this.assigneeName,
+      assigneeName:
+          clearAssignee ? null : (assigneeName ?? this.assigneeName),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       messages: messages ?? this.messages,
@@ -169,6 +183,11 @@ class Ticket extends Equatable {
       responsibility: responsibility ?? this.responsibility,
       affectedEquipment: affectedEquipment ?? this.affectedEquipment,
       distributionList: distributionList ?? this.distributionList,
+      firstRespondedAt: clearFirstRespondedAt
+          ? null
+          : (firstRespondedAt ?? this.firstRespondedAt),
+      resolvedAt:
+          clearResolvedAt ? null : (resolvedAt ?? this.resolvedAt),
     );
   }
 
@@ -193,5 +212,7 @@ class Ticket extends Equatable {
         responsibility,
         affectedEquipment,
         distributionList,
+        firstRespondedAt,
+        resolvedAt,
       ];
 }

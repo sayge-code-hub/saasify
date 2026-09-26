@@ -404,6 +404,17 @@ abstract final class MockTickets {
       ...extraEvents,
     ]..sort((a, b) => a.at.compareTo(b.at));
 
+    DateTime? firstRespondedAt;
+    for (final message in messages) {
+      if (message.isAgent) {
+        firstRespondedAt = message.createdAt;
+        break;
+      }
+    }
+
+    final isResolved = status == TicketStatus.resolved ||
+        status == TicketStatus.closed;
+
     return Ticket(
       id: id,
       subject: subject,
@@ -424,6 +435,8 @@ abstract final class MockTickets {
       responsibility: responsibility ?? assigneeName,
       affectedEquipment: affectedEquipment,
       distributionList: distributionList,
+      firstRespondedAt: firstRespondedAt,
+      resolvedAt: isResolved ? updatedAt : null,
     );
   }
 

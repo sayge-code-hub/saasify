@@ -33,9 +33,31 @@ class AppRelease {
 
 /// Mock deployment history for the Release History screen.
 abstract final class ReleaseNotes {
-  static const currentVersion = '1.0.0';
+  static const currentVersion = '1.1.0';
 
   static final List<AppRelease> all = [
+    AppRelease(
+      version: '1.1.0',
+      releasedAt: DateTime(2026, 9, 26),
+      title: 'Assignee, config dropdowns, and SLA',
+      changes: const [
+        ReleaseChange(
+          type: ReleaseChangeType.feature,
+          summary:
+              'Change assignee on ticket detail from the configured agent list.',
+        ),
+        ReleaseChange(
+          type: ReleaseChangeType.feature,
+          summary:
+              'Config page edits Application, Priority, Bug, Distribution List, and Assignee dropdown options used by Add Ticket.',
+        ),
+        ReleaseChange(
+          type: ReleaseChangeType.feature,
+          summary:
+              'SLA clocks for first response and resolution by priority, with On track / At risk / Breached / Met status on detail.',
+        ),
+      ],
+    ),
     AppRelease(
       version: '1.0.0',
       releasedAt: DateTime(2026, 9, 26),

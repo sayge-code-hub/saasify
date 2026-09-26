@@ -320,10 +320,14 @@ class TicketListCubit extends Cubit<TicketListState> {
         actorName: 'Admin',
         at: now,
       );
+      final resolved = status == TicketStatus.resolved ||
+          status == TicketStatus.closed;
       return ticket.copyWith(
         status: status,
         updatedAt: now,
         events: [...ticket.events, event],
+        resolvedAt: resolved ? (ticket.resolvedAt ?? now) : null,
+        clearResolvedAt: !resolved,
       );
     });
   }
@@ -331,18 +335,18 @@ class TicketListCubit extends Cubit<TicketListState> {
   void assign(String ticketId, String? assigneeName) {
     _replace(ticketId, (ticket) {
       final now = DateTime.now();
-      final name = (assigneeName == null || assigneeName.isEmpty)
-          ? 'Unassigned'
-          : assigneeName;
+      final clear = assigneeName == null || assigneeName.trim().isEmpty;
+      final name = clear ? 'Unassigned' : assigneeName.trim();
       final event = TicketEvent(
         id: 'evt-${now.microsecondsSinceEpoch}',
         action: 'Assigned',
-        detail: name == 'Unassigned' ? 'Cleared assignee' : 'Assigned to $name',
+        detail: clear ? 'Cleared assignee' : 'Assigned to $name',
         actorName: 'Admin',
         at: now,
       );
       return ticket.copyWith(
-        assigneeName: assigneeName ?? '',
+        clearAssignee: clear,
+        assigneeName: clear ? null : name,
         updatedAt: now,
         events: [...ticket.events, event],
       );
@@ -389,11 +393,13 @@ class TicketListCubit extends Cubit<TicketListState> {
           ),
         );
       }
+      final firstResponse = ticket.firstRespondedAt ?? now;
       return ticket.copyWith(
         messages: [...ticket.messages, message],
         updatedAt: now,
         status: status,
         events: events,
+        firstRespondedAt: firstResponse,
       );
     });
   }

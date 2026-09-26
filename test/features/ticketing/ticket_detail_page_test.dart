@@ -7,11 +7,12 @@ import 'package:saasify/core/theme/app_theme.dart';
 import 'package:saasify/features/auth/domain/auth_user.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/ticketing/data/mock_tickets.dart';
+import 'package:saasify/features/ticketing/presentation/bloc/ticket_config_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/pages/ticket_detail_page.dart';
 
 void main() {
-  testWidgets('ticket detail shows 70/30 details and activity ledger', (
+  testWidgets('ticket detail shows 70/30 details, SLA, and assignee control', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1440, 1100);
@@ -27,8 +28,10 @@ void main() {
       ),
     );
     final tickets = TicketListCubit(seed: MockTickets.createCatalog());
+    final config = TicketConfigCubit();
     addTearDown(auth.close);
     addTearDown(tickets.close);
+    addTearDown(config.close);
 
     final router = GoRouter(
       initialLocation: '/ticketing/tickets/TCK-1038',
@@ -54,6 +57,7 @@ void main() {
         providers: [
           BlocProvider.value(value: auth),
           BlocProvider.value(value: tickets),
+          BlocProvider.value(value: config),
         ],
         child: MaterialApp.router(
           theme: AppTheme.light(),
@@ -65,6 +69,9 @@ void main() {
 
     expect(find.text('Timeline'), findsOneWidget);
     expect(find.text('Details'), findsOneWidget);
+    expect(find.text('SLA'), findsWidgets);
+    expect(find.text('First response'), findsOneWidget);
+    expect(find.text('Resolution'), findsOneWidget);
     expect(find.text('Attachments'), findsOneWidget);
     expect(find.text('Comments'), findsOneWidget);
     expect(find.text('blank-invoice-aug.pdf'), findsOneWidget);
@@ -72,5 +79,18 @@ void main() {
     expect(find.text('Assigned'), findsWidgets);
     expect(find.text('Status changed'), findsWidgets);
     expect(find.text('Invoice PDF downloads corrupted'), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-assignee')), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const ValueKey('ticket-assignee')));
+    await tester.tap(find.byKey(const ValueKey('ticket-assignee')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Riley Nguyen').last);
+    await tester.pumpAndSettle();
+
+    expect(tickets.state.byId('TCK-1038')!.assigneeName, 'Riley Nguyen');
+    expect(
+      tickets.state.byId('TCK-1038')!.events.last.detail,
+      'Assigned to Riley Nguyen',
+    );
   });
 }

@@ -11,6 +11,9 @@ import 'package:saasify/core/widgets/app_page.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
+import 'package:saasify/features/ticketing/domain/ticket_config.dart';
+import 'package:saasify/features/ticketing/domain/ticket_sla.dart';
+import 'package:saasify/features/ticketing/presentation/bloc/ticket_config_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/widgets/ticket_badges.dart';
 
@@ -56,62 +59,70 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           _ => 'Agent',
         };
 
-        final mainColumn = _TicketMainColumn(
-          ticket: ticket,
-          replyController: _replyController,
-          agentName: agentName,
-        );
-        final sideColumn = _TicketSideColumn(
-          attachments: ticket.attachments,
-          events: ticket.events,
-        );
+        return BlocBuilder<TicketConfigCubit, TicketConfig>(
+          builder: (context, config) {
+            final sla = TicketSla.evaluate(ticket: ticket, config: config);
+            final mainColumn = _TicketMainColumn(
+              ticket: ticket,
+              replyController: _replyController,
+              agentName: agentName,
+              assignees: config.assignees,
+              sla: sla,
+            );
+            final sideColumn = _TicketSideColumn(
+              attachments: ticket.attachments,
+              events: ticket.events,
+            );
 
-        return AppPage(
-          maxWidth: 1280,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                ticket.id,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: AppColors.accent,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxs),
-              Text(ticket.subject, style: theme.textTheme.headlineSmall),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: AppSpacing.xs,
-                runSpacing: AppSpacing.xs,
+            return AppPage(
+              maxWidth: 1280,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TicketStatusBadge(status: ticket.status),
-                  TicketPriorityBadge(priority: ticket.priority),
-                  for (final tag in ticket.tags)
-                    Chip(
-                      label: Text(tag),
-                      visualDensity: VisualDensity.compact,
-                      side: const BorderSide(color: AppColors.border),
-                      backgroundColor: AppColors.surfaceMuted,
+                  Text(
+                    ticket.id,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(ticket.subject, style: theme.textTheme.headlineSmall),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: [
+                      TicketStatusBadge(status: ticket.status),
+                      TicketPriorityBadge(priority: ticket.priority),
+                      _SlaChip(snapshot: sla),
+                      for (final tag in ticket.tags)
+                        Chip(
+                          label: Text(tag),
+                          visualDensity: VisualDensity.compact,
+                          side: const BorderSide(color: AppColors.border),
+                          backgroundColor: AppColors.surfaceMuted,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (compact) ...[
+                    mainColumn,
+                    const SizedBox(height: AppSpacing.lg),
+                    sideColumn,
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 7, child: mainColumn),
+                        const SizedBox(width: AppSpacing.lg),
+                        Expanded(flex: 3, child: sideColumn),
+                      ],
                     ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.lg),
-              if (compact) ...[
-                mainColumn,
-                const SizedBox(height: AppSpacing.lg),
-                sideColumn,
-              ] else
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(flex: 7, child: mainColumn),
-                    const SizedBox(width: AppSpacing.lg),
-                    Expanded(flex: 3, child: sideColumn),
-                  ],
-                ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -124,18 +135,24 @@ class _TicketMainColumn extends StatelessWidget {
     required this.ticket,
     required this.replyController,
     required this.agentName,
+    required this.assignees,
+    required this.sla,
   });
 
   final Ticket ticket;
   final TextEditingController replyController;
   final String agentName;
+  final List<String> assignees;
+  final TicketSlaSnapshot sla;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _DetailsSection(ticket: ticket),
+        _DetailsSection(ticket: ticket, assignees: assignees),
+        const SizedBox(height: AppSpacing.lg),
+        _SlaPanel(snapshot: sla),
         const SizedBox(height: AppSpacing.lg),
         _CommentsPanel(
           ticket: ticket,
@@ -171,13 +188,26 @@ class _TicketSideColumn extends StatelessWidget {
 }
 
 class _DetailsSection extends StatelessWidget {
-  const _DetailsSection({required this.ticket});
+  const _DetailsSection({
+    required this.ticket,
+    required this.assignees,
+  });
 
   final Ticket ticket;
+  final List<String> assignees;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cubit = context.read<TicketListCubit>();
+    final currentAssignee = ticket.assigneeName?.isNotEmpty == true
+        ? ticket.assigneeName
+        : null;
+    final assigneeOptions = <String>{
+      ?currentAssignee,
+      ...assignees,
+    }.toList()
+      ..sort();
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -195,14 +225,13 @@ class _DetailsSection extends StatelessWidget {
             LayoutBuilder(
               builder: (context, constraints) {
                 final twoCol = constraints.maxWidth >= 520;
-                final rows = [
+                final rows = <Widget>[
                   _MetaRow(label: 'Customer', value: ticket.customerName),
                   _MetaRow(label: 'Email', value: ticket.customerEmail),
-                  _MetaRow(
-                    label: 'Assignee',
-                    value: ticket.assigneeName?.isNotEmpty == true
-                        ? ticket.assigneeName!
-                        : 'Unassigned',
+                  _AssigneeRow(
+                    value: currentAssignee,
+                    options: assigneeOptions,
+                    onChanged: (value) => cubit.assign(ticket.id, value),
                   ),
                   _MetaRow(
                     label: 'Application',
@@ -284,6 +313,250 @@ class _DetailsSection extends StatelessWidget {
             Text(ticket.description, style: theme.textTheme.bodyMedium),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AssigneeRow extends StatelessWidget {
+  const _AssigneeRow({
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+
+  final String? value;
+  final List<String> options;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              'Assignee',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: AppColors.inkSecondary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Expanded(
+            child: DropdownButtonFormField<String?>(
+              key: const ValueKey('ticket-assignee'),
+              // ignore: deprecated_member_use
+              value: value,
+              isExpanded: true,
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+              ),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Unassigned'),
+                ),
+                for (final name in options)
+                  DropdownMenuItem<String?>(
+                    value: name,
+                    child: Text(name, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SlaPanel extends StatelessWidget {
+  const _SlaPanel({required this.snapshot});
+
+  final TicketSlaSnapshot snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text('SLA', style: theme.textTheme.titleMedium),
+                ),
+                _SlaChip(snapshot: snapshot),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              'Service Level Agreement — promised time to first agent reply '
+              'and to resolve the case.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppColors.inkSecondary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _SlaClockRow(clock: snapshot.firstResponse),
+            const SizedBox(height: AppSpacing.sm),
+            _SlaClockRow(clock: snapshot.resolution),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SlaClockRow extends StatelessWidget {
+  const _SlaClockRow({required this.clock});
+
+  final SlaClock clock;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+    final String timing;
+    if (clock.completedAt != null) {
+      final delta = clock.completedAt!.difference(clock.dueAt);
+      timing = delta.isNegative || delta == Duration.zero
+          ? 'Completed ${TicketSla.formatDuration(clock.dueAt.difference(clock.completedAt!))} early'
+          : 'Completed ${TicketSla.formatDuration(delta)} late';
+    } else if (now.isAfter(clock.dueAt)) {
+      timing =
+          'Overdue by ${TicketSla.formatDuration(now.difference(clock.dueAt))}';
+    } else {
+      timing =
+          '${TicketSla.formatDuration(clock.dueAt.difference(now))} remaining';
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    clock.label,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Target ${TicketSla.formatDuration(clock.target)} · '
+                    'Due ${_formatDate(clock.dueAt)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.inkSecondary,
+                    ),
+                  ),
+                  Text(
+                    timing,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.inkTertiary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _SlaStatusBadge(status: clock.status),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SlaChip extends StatelessWidget {
+  const _SlaChip({required this.snapshot});
+
+  final TicketSlaSnapshot snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = snapshot.anyBreached
+        ? SlaClockStatus.breached
+        : snapshot.anyAtRisk
+            ? SlaClockStatus.atRisk
+            : snapshot.firstResponse.status == SlaClockStatus.met &&
+                    snapshot.resolution.status == SlaClockStatus.met
+                ? SlaClockStatus.met
+                : SlaClockStatus.onTrack;
+
+    return _SlaStatusBadge(status: status, compact: true);
+  }
+}
+
+class _SlaStatusBadge extends StatelessWidget {
+  const _SlaStatusBadge({required this.status, this.compact = false});
+
+  final SlaClockStatus status;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final (bg, fg) = switch (status) {
+      SlaClockStatus.onTrack => (AppColors.successMuted, AppColors.success),
+      SlaClockStatus.atRisk => (AppColors.warningMuted, AppColors.warning),
+      SlaClockStatus.breached ||
+      SlaClockStatus.metLate =>
+        (AppColors.dangerMuted, AppColors.danger),
+      SlaClockStatus.met => (AppColors.accentMuted, AppColors.accentDeep),
+    };
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 8 : 10,
+        vertical: compact ? 4 : 6,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      ),
+      child: Text(
+        compact ? 'SLA · ${status.label}' : status.label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w700,
+            ),
       ),
     );
   }

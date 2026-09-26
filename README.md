@@ -22,7 +22,7 @@ If you see “Loading workspace…” forever, hard-refresh to clear a stale Flu
 - **Login** — gated routes, in-memory session
 - **Shell** — left module bar with expandable **Ticketing** submodules (drawer on compact)
 - **Overview** — ticket pulse stats + urgent queue
-- **Ticketing admin** — list/search/filters, detail, status workflow, assignee, reply thread (all mocked)
+- **Ticketing admin** — list/search/filters, detail with assignee + SLA, reply thread, configurable dropdowns (all mocked)
 
 ## Spec-driven workflow
 

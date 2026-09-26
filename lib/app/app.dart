@@ -7,6 +7,7 @@ import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/theme/app_theme.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
+import 'package:saasify/features/ticketing/presentation/bloc/ticket_config_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 
 class SaasifyApp extends StatefulWidget {
@@ -14,11 +15,13 @@ class SaasifyApp extends StatefulWidget {
     super.key,
     this.authCubit,
     this.ticketListCubit,
+    this.ticketConfigCubit,
     this.shellCubit,
   });
 
   final AuthCubit? authCubit;
   final TicketListCubit? ticketListCubit;
+  final TicketConfigCubit? ticketConfigCubit;
   final ShellCubit? shellCubit;
 
   @override
@@ -28,11 +31,13 @@ class SaasifyApp extends StatefulWidget {
 class _SaasifyAppState extends State<SaasifyApp> {
   late final AuthCubit _authCubit;
   late final TicketListCubit _ticketListCubit;
+  late final TicketConfigCubit _ticketConfigCubit;
   late final ShellCubit _shellCubit;
   late final AuthRouterRefresh _authRefresh;
   late final GoRouter _router;
   late final bool _ownsAuth;
   late final bool _ownsTickets;
+  late final bool _ownsConfig;
   late final bool _ownsShell;
 
   @override
@@ -40,9 +45,11 @@ class _SaasifyAppState extends State<SaasifyApp> {
     super.initState();
     _ownsAuth = widget.authCubit == null;
     _ownsTickets = widget.ticketListCubit == null;
+    _ownsConfig = widget.ticketConfigCubit == null;
     _ownsShell = widget.shellCubit == null;
     _authCubit = widget.authCubit ?? AuthCubit();
     _ticketListCubit = widget.ticketListCubit ?? TicketListCubit();
+    _ticketConfigCubit = widget.ticketConfigCubit ?? TicketConfigCubit();
     _shellCubit = widget.shellCubit ?? ShellCubit();
     _authRefresh = AuthRouterRefresh(_authCubit);
     _router = createAppRouter(
@@ -56,6 +63,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
     _authRefresh.dispose();
     if (_ownsAuth) _authCubit.close();
     if (_ownsTickets) _ticketListCubit.close();
+    if (_ownsConfig) _ticketConfigCubit.close();
     if (_ownsShell) _shellCubit.close();
     _router.dispose();
     super.dispose();
@@ -67,6 +75,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
       providers: [
         BlocProvider.value(value: _authCubit),
         BlocProvider.value(value: _ticketListCubit),
+        BlocProvider.value(value: _ticketConfigCubit),
         BlocProvider.value(value: _shellCubit),
       ],
       child: MaterialApp.router(
