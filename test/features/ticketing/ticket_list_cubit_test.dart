@@ -66,6 +66,22 @@ void main() {
         expect(ticket.status, TicketStatus.inProgress);
         expect(ticket.messages, hasLength(1));
         expect(ticket.messages.single.body, 'Looking into this');
+        expect(
+          ticket.events.map((e) => e.action),
+          containsAll(['Status changed', 'Agent reply']),
+        );
+      },
+    );
+
+    blocTest<TicketListCubit, TicketListState>(
+      'assign appends ledger event',
+      build: () => TicketListCubit(seed: seed),
+      act: (cubit) => cubit.assign('TCK-1', 'Alex Rivera'),
+      verify: (cubit) {
+        final ticket = cubit.state.byId('TCK-1')!;
+        expect(ticket.assigneeName, 'Alex Rivera');
+        expect(ticket.events.last.action, 'Assigned');
+        expect(ticket.events.last.detail, 'Assigned to Alex Rivera');
       },
     );
 
@@ -104,6 +120,8 @@ void main() {
         expect(created.subject, 'New case');
         expect(created.status, TicketStatus.open);
         expect(created.id, 'TCK-3');
+        expect(created.events.first.action, 'Ticket created');
+        expect(created.events.any((e) => e.action == 'Customer message'), isTrue);
       },
     );
 

@@ -243,6 +243,13 @@ class TicketListCubit extends Cubit<TicketListState> {
       if (n > maxId) maxId = n;
     }
     final id = 'TCK-${maxId + 1}';
+    final message = TicketMessage(
+      id: 'm-${now.microsecondsSinceEpoch}',
+      authorName: customerName.trim(),
+      body: description.trim(),
+      createdAt: now,
+      isAgent: false,
+    );
     final ticket = Ticket(
       id: id,
       subject: subject.trim(),
@@ -254,13 +261,21 @@ class TicketListCubit extends Cubit<TicketListState> {
       createdAt: now,
       updatedAt: now,
       tags: tags,
-      messages: [
-        TicketMessage(
-          id: 'm-${now.microsecondsSinceEpoch}',
-          authorName: customerName.trim(),
-          body: description.trim(),
-          createdAt: now,
-          isAgent: false,
+      messages: [message],
+      events: [
+        TicketEvent(
+          id: '$id-created',
+          action: 'Ticket created',
+          detail: 'Case opened · ${priority.label} priority',
+          actorName: customerName.trim(),
+          at: now,
+        ),
+        TicketEvent(
+          id: 'evt-${message.id}',
+          action: 'Customer message',
+          detail: message.body,
+          actorName: customerName.trim(),
+          at: now,
         ),
       ],
     );
@@ -269,20 +284,42 @@ class TicketListCubit extends Cubit<TicketListState> {
   }
 
   void updateStatus(String ticketId, TicketStatus status) {
-    _replace(
-      ticketId,
-      (ticket) => ticket.copyWith(status: status, updatedAt: DateTime.now()),
-    );
+    _replace(ticketId, (ticket) {
+      final now = DateTime.now();
+      final event = TicketEvent(
+        id: 'evt-${now.microsecondsSinceEpoch}',
+        action: 'Status changed',
+        detail: '${ticket.status.label} → ${status.label}',
+        actorName: 'Admin',
+        at: now,
+      );
+      return ticket.copyWith(
+        status: status,
+        updatedAt: now,
+        events: [...ticket.events, event],
+      );
+    });
   }
 
   void assign(String ticketId, String? assigneeName) {
-    _replace(
-      ticketId,
-      (ticket) => ticket.copyWith(
+    _replace(ticketId, (ticket) {
+      final now = DateTime.now();
+      final name = (assigneeName == null || assigneeName.isEmpty)
+          ? 'Unassigned'
+          : assigneeName;
+      final event = TicketEvent(
+        id: 'evt-${now.microsecondsSinceEpoch}',
+        action: 'Assigned',
+        detail: name == 'Unassigned' ? 'Cleared assignee' : 'Assigned to $name',
+        actorName: 'Admin',
+        at: now,
+      );
+      return ticket.copyWith(
         assigneeName: assigneeName ?? '',
-        updatedAt: DateTime.now(),
-      ),
-    );
+        updatedAt: now,
+        events: [...ticket.events, event],
+      );
+    });
   }
 
   void addReply({
@@ -294,19 +331,42 @@ class TicketListCubit extends Cubit<TicketListState> {
     if (trimmed.isEmpty) return;
 
     _replace(ticketId, (ticket) {
+      final now = DateTime.now();
       final message = TicketMessage(
-        id: 'm-${DateTime.now().microsecondsSinceEpoch}',
+        id: 'm-${now.microsecondsSinceEpoch}',
         authorName: agentName,
         body: trimmed,
-        createdAt: DateTime.now(),
+        createdAt: now,
         isAgent: true,
       );
+      final events = <TicketEvent>[
+        ...ticket.events,
+        TicketEvent(
+          id: 'evt-${message.id}',
+          action: 'Agent reply',
+          detail: trimmed,
+          actorName: agentName,
+          at: now,
+        ),
+      ];
+      var status = ticket.status;
+      if (status == TicketStatus.open) {
+        status = TicketStatus.inProgress;
+        events.add(
+          TicketEvent(
+            id: 'evt-status-${now.microsecondsSinceEpoch}',
+            action: 'Status changed',
+            detail: 'Open → In progress',
+            actorName: agentName,
+            at: now,
+          ),
+        );
+      }
       return ticket.copyWith(
         messages: [...ticket.messages, message],
-        updatedAt: DateTime.now(),
-        status: ticket.status == TicketStatus.open
-            ? TicketStatus.inProgress
-            : ticket.status,
+        updatedAt: now,
+        status: status,
+        events: events,
       );
     });
   }

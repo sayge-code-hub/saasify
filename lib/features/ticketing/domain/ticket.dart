@@ -51,6 +51,45 @@ class TicketMessage extends Equatable {
   List<Object?> get props => [id, authorName, body, createdAt, isAgent];
 }
 
+/// Ledger entry for the ticket activity timeline.
+class TicketEvent extends Equatable {
+  const TicketEvent({
+    required this.id,
+    required this.action,
+    required this.at,
+    this.detail,
+    this.actorName,
+  });
+
+  final String id;
+  final String action;
+  final String? detail;
+  final DateTime at;
+  final String? actorName;
+
+  @override
+  List<Object?> get props => [id, action, detail, at, actorName];
+}
+
+class TicketAttachment extends Equatable {
+  const TicketAttachment({
+    required this.id,
+    required this.name,
+    required this.sizeLabel,
+    required this.kind,
+  });
+
+  final String id;
+  final String name;
+  final String sizeLabel;
+
+  /// `image` | `pdf` | `file`
+  final String kind;
+
+  @override
+  List<Object?> get props => [id, name, sizeLabel, kind];
+}
+
 class Ticket extends Equatable {
   const Ticket({
     required this.id,
@@ -65,6 +104,8 @@ class Ticket extends Equatable {
     required this.messages,
     this.assigneeName,
     this.tags = const [],
+    this.events = const [],
+    this.attachments = const [],
   });
 
   final String id;
@@ -79,6 +120,8 @@ class Ticket extends Equatable {
   final DateTime updatedAt;
   final List<TicketMessage> messages;
   final List<String> tags;
+  final List<TicketEvent> events;
+  final List<TicketAttachment> attachments;
 
   Ticket copyWith({
     TicketStatus? status,
@@ -86,6 +129,8 @@ class Ticket extends Equatable {
     String? assigneeName,
     DateTime? updatedAt,
     List<TicketMessage>? messages,
+    List<TicketEvent>? events,
+    List<TicketAttachment>? attachments,
   }) {
     return Ticket(
       id: id,
@@ -100,6 +145,8 @@ class Ticket extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       messages: messages ?? this.messages,
       tags: tags,
+      events: events ?? this.events,
+      attachments: attachments ?? this.attachments,
     );
   }
 
@@ -117,5 +164,7 @@ class Ticket extends Equatable {
         updatedAt,
         messages,
         tags,
+        events,
+        attachments,
       ];
 }

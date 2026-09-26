@@ -6,7 +6,7 @@ abstract final class MockTickets {
 
   static List<Ticket> createCatalog() {
     return [
-      Ticket(
+      _ticket(
         id: 'TCK-1042',
         subject: 'Cannot reset password from mobile app',
         description:
@@ -15,7 +15,6 @@ abstract final class MockTickets {
         priority: TicketPriority.high,
         customerName: 'Maya Chen',
         customerEmail: 'maya.chen@northwind.io',
-        assigneeName: null,
         createdAt: _now.subtract(const Duration(hours: 5)),
         updatedAt: _now.subtract(const Duration(minutes: 40)),
         tags: const ['auth', 'mobile'],
@@ -30,7 +29,7 @@ abstract final class MockTickets {
           ),
         ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-1038',
         subject: 'Invoice PDF downloads corrupted',
         description: 'Billing page PDF opens as blank for invoices after Aug.',
@@ -59,8 +58,38 @@ abstract final class MockTickets {
                 'Reproduced on staging. Checking the PDF service change from Monday.',
           ),
         ],
+        extraEvents: [
+          TicketEvent(
+            id: 'e-1038-assign',
+            action: 'Assigned',
+            detail: 'Assigned to Alex Rivera',
+            actorName: 'System',
+            at: _now.subtract(const Duration(days: 1, hours: 2)),
+          ),
+          TicketEvent(
+            id: 'e-1038-status',
+            action: 'Status changed',
+            detail: 'Open → In progress',
+            actorName: 'Alex Rivera',
+            at: _now.subtract(const Duration(hours: 3)),
+          ),
+        ],
+        attachments: const [
+          TicketAttachment(
+            id: 'a1',
+            name: 'blank-invoice-aug.pdf',
+            sizeLabel: '248 KB',
+            kind: 'pdf',
+          ),
+          TicketAttachment(
+            id: 'a2',
+            name: 'billing-screenshot.png',
+            sizeLabel: '1.1 MB',
+            kind: 'image',
+          ),
+        ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-1031',
         subject: 'SSO login loop with Okta',
         description: 'Enterprise SSO redirects bounce between IdP and app.',
@@ -89,8 +118,32 @@ abstract final class MockTickets {
                 'Waiting on updated metadata XML from your IT team to finish.',
           ),
         ],
+        extraEvents: [
+          TicketEvent(
+            id: 'e-1031-assign',
+            action: 'Assigned',
+            detail: 'Assigned to Sam Ortiz',
+            actorName: 'System',
+            at: _now.subtract(const Duration(days: 1, hours: 20)),
+          ),
+          TicketEvent(
+            id: 'e-1031-status',
+            action: 'Status changed',
+            detail: 'In progress → Pending',
+            actorName: 'Sam Ortiz',
+            at: _now.subtract(const Duration(hours: 8)),
+          ),
+        ],
+        attachments: const [
+          TicketAttachment(
+            id: 'a3',
+            name: 'okta-metadata.xml',
+            sizeLabel: '12 KB',
+            kind: 'file',
+          ),
+        ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-1024',
         subject: 'Webhook deliveries delayed ~20 minutes',
         description: 'Outbound webhooks queue longer than SLA.',
@@ -111,8 +164,17 @@ abstract final class MockTickets {
             body: 'Seeing consistent lag since Tuesday deploy window.',
           ),
         ],
+        extraEvents: [
+          TicketEvent(
+            id: 'e-1024-assign',
+            action: 'Assigned',
+            detail: 'Assigned to Alex Rivera',
+            actorName: 'System',
+            at: _now.subtract(const Duration(hours: 10)),
+          ),
+        ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-1019',
         subject: 'Seat invite emails branded incorrectly',
         description: 'Invite template still shows previous workspace name.',
@@ -140,8 +202,17 @@ abstract final class MockTickets {
             body: 'Cache purged and template republished. Please re-test.',
           ),
         ],
+        extraEvents: [
+          TicketEvent(
+            id: 'e-1019-status',
+            action: 'Status changed',
+            detail: 'Pending → Resolved',
+            actorName: 'Jamie Fox',
+            at: _now.subtract(const Duration(days: 1)),
+          ),
+        ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-1012',
         subject: 'CSV export truncates Unicode names',
         description: 'Exported members CSV mangles accented characters.',
@@ -162,8 +233,16 @@ abstract final class MockTickets {
             body: 'Example: “José” becomes “JosÃ©” in Excel.',
           ),
         ],
+        attachments: const [
+          TicketAttachment(
+            id: 'a4',
+            name: 'members-export.csv',
+            sizeLabel: '86 KB',
+            kind: 'file',
+          ),
+        ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-1007',
         subject: 'Dark mode contrast on billing table',
         description: 'Secondary text fails WCAG on dark theme billing page.',
@@ -191,8 +270,24 @@ abstract final class MockTickets {
             body: 'Contrast tokens updated in 2.14. Closing after confirm.',
           ),
         ],
+        extraEvents: [
+          TicketEvent(
+            id: 'e-1007-resolved',
+            action: 'Status changed',
+            detail: 'In progress → Resolved',
+            actorName: 'Sam Ortiz',
+            at: _now.subtract(const Duration(days: 7)),
+          ),
+          TicketEvent(
+            id: 'e-1007-closed',
+            action: 'Status changed',
+            detail: 'Resolved → Closed',
+            actorName: 'Sam Ortiz',
+            at: _now.subtract(const Duration(days: 6)),
+          ),
+        ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-1001',
         subject: 'API rate limit headers missing on 429',
         description: 'Clients cannot back off correctly without Retry-After.',
@@ -200,7 +295,6 @@ abstract final class MockTickets {
         priority: TicketPriority.urgent,
         customerName: 'Diego Alvarez',
         customerEmail: 'diego@stackhaus.io',
-        assigneeName: null,
         createdAt: _now.subtract(const Duration(hours: 2)),
         updatedAt: _now.subtract(const Duration(minutes: 25)),
         tags: const ['api', 'platform'],
@@ -215,7 +309,7 @@ abstract final class MockTickets {
           ),
         ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-0994',
         subject: 'Notification digests arriving twice',
         description: 'Daily digest email sent in duplicate for two seats.',
@@ -237,7 +331,7 @@ abstract final class MockTickets {
           ),
         ],
       ),
-      Ticket(
+      _ticket(
         id: 'TCK-0988',
         subject: 'Workspace rename not reflected in audit log',
         description: 'Audit trail still shows previous workspace display name.',
@@ -260,6 +354,59 @@ abstract final class MockTickets {
         ],
       ),
     ];
+  }
+
+  static Ticket _ticket({
+    required String id,
+    required String subject,
+    required String description,
+    required TicketStatus status,
+    required TicketPriority priority,
+    required String customerName,
+    required String customerEmail,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    required List<TicketMessage> messages,
+    String? assigneeName,
+    List<String> tags = const [],
+    List<TicketEvent> extraEvents = const [],
+    List<TicketAttachment> attachments = const [],
+  }) {
+    final events = <TicketEvent>[
+      TicketEvent(
+        id: '$id-created',
+        action: 'Ticket created',
+        detail: 'Case opened · ${priority.label} priority',
+        actorName: customerName,
+        at: createdAt,
+      ),
+      for (final message in messages)
+        TicketEvent(
+          id: 'evt-${message.id}',
+          action: message.isAgent ? 'Agent reply' : 'Customer message',
+          detail: message.body,
+          actorName: message.authorName,
+          at: message.createdAt,
+        ),
+      ...extraEvents,
+    ]..sort((a, b) => a.at.compareTo(b.at));
+
+    return Ticket(
+      id: id,
+      subject: subject,
+      description: description,
+      status: status,
+      priority: priority,
+      customerName: customerName,
+      customerEmail: customerEmail,
+      assigneeName: assigneeName,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      tags: tags,
+      messages: messages,
+      events: events,
+      attachments: attachments,
+    );
   }
 
   static const assignees = <String>[
