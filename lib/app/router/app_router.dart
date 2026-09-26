@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/auth/presentation/pages/login_page.dart';
+import 'package:saasify/features/dynamic_ui/data/mock_dynamic_screens.dart';
+import 'package:saasify/features/dynamic_ui/presentation/pages/dynamic_screen_page.dart';
 import 'package:saasify/features/overview/presentation/pages/overview_page.dart';
 import 'package:saasify/features/releases/presentation/pages/release_history_page.dart';
 import 'package:saasify/features/settings/presentation/pages/settings_page.dart';
@@ -129,6 +131,15 @@ GoRouter createAppRouter({
             name: 'settings',
             pageBuilder: (context, state) => const NoTransitionPage<void>(
               child: SettingsPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/dynamic/create-ticket',
+            name: 'dynamic-create-ticket',
+            pageBuilder: (context, state) => const NoTransitionPage<void>(
+              child: DynamicScreenPage(
+                screenId: MockDynamicScreens.createTicketScreenId,
+              ),
             ),
           ),
         ],

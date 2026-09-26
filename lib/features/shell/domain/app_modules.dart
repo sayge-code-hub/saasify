@@ -92,7 +92,22 @@ abstract final class AppModules {
     ],
   );
 
-  static const List<NavModule> all = [ticketing];
+  static const dynamicUi = NavModule(
+    id: 'dynamic-ui',
+    label: 'Dynamic UI',
+    icon: Icons.dashboard_customize_outlined,
+    selectedIcon: Icons.dashboard_customize,
+    location: '/dynamic/create-ticket',
+    children: [
+      NavSubmodule(
+        id: 'dynamic-create-ticket',
+        label: 'BDUI Add Ticket',
+        location: '/dynamic/create-ticket',
+      ),
+    ],
+  );
+
+  static const List<NavModule> all = [ticketing, dynamicUi];
 
   static bool isLocationActive(String currentPath, String location) {
     if (currentPath == location) return true;
@@ -116,6 +131,9 @@ abstract final class AppModules {
     if (module.id == 'ticketing') {
       return currentPath == '/ticketing' ||
           currentPath.startsWith('/ticketing/');
+    }
+    if (module.id == 'dynamic-ui') {
+      return currentPath == '/dynamic' || currentPath.startsWith('/dynamic/');
     }
     return module.children.any(
       (child) =>

@@ -126,6 +126,7 @@ String dashboardTitleFor(String location) {
     return '';
   }
   if (location == '/ticketing/config') return 'Config';
+  if (location == '/dynamic/create-ticket') return 'Add Ticket (BDUI)';
   if (location == '/settings') return 'Settings';
   return 'Workspace';
 }

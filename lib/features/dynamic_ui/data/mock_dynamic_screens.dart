@@ -1,0 +1,229 @@
+import 'dart:convert';
+
+/// Embedded copy of [assets/dynamic_ui/create_ticket_screen.json]
+/// so tests and offline loads do not depend on asset bundling alone.
+abstract final class MockDynamicScreens {
+  static const createTicketScreenId = 'create-ticket';
+
+  static Map<String, dynamic> createTicketScreenJson() =>
+      jsonDecode(createTicketScreenJsonString) as Map<String, dynamic>;
+
+  static const createTicketScreenJsonString = r'''
+{
+  "id": "create-ticket",
+  "title": "Create Ticket",
+  "headerTitle": "Add Ticket (BDUI)",
+  "cardWidthFactor": 0.95,
+  "stickyActions": true,
+  "actionsAlign": "end",
+  "rows": [
+    {
+      "id": "row-header-app",
+      "fields": [
+        {
+          "key": "header",
+          "label": "Header",
+          "type": "text",
+          "required": true,
+          "hint": "",
+          "flex": 1
+        },
+        {
+          "key": "application",
+          "label": "Application",
+          "type": "dropdown",
+          "required": true,
+          "hint": "--- select application ---",
+          "flex": 1,
+          "options": [
+            { "value": "Billing", "label": "Billing" },
+            { "value": "Mobile App", "label": "Mobile App" },
+            { "value": "Web App", "label": "Web App" },
+            { "value": "SSO / Identity", "label": "SSO / Identity" },
+            { "value": "API Platform", "label": "API Platform" },
+            { "value": "Email / Notifications", "label": "Email / Notifications" },
+            { "value": "Admin Console", "label": "Admin Console" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "row-priority-bug",
+      "fields": [
+        {
+          "key": "priority",
+          "label": "Priority",
+          "type": "dropdown",
+          "required": true,
+          "hint": "--- select priority ---",
+          "flex": 1,
+          "options": [
+            { "value": "low", "label": "Low" },
+            { "value": "medium", "label": "Medium" },
+            { "value": "high", "label": "High" },
+            { "value": "urgent", "label": "Urgent" }
+          ]
+        },
+        {
+          "key": "bug",
+          "label": "Bug",
+          "type": "dropdown",
+          "required": true,
+          "defaultValue": "no",
+          "flex": 1,
+          "options": [
+            { "value": "no", "label": "No" },
+            { "value": "yes", "label": "Yes" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "row-resp-equip",
+      "fields": [
+        {
+          "key": "responsibility",
+          "label": "Responsibility",
+          "type": "text",
+          "required": false,
+          "flex": 1
+        },
+        {
+          "key": "affectedEquipment",
+          "label": "Affected Equipment",
+          "type": "text",
+          "required": false,
+          "flex": 1
+        }
+      ]
+    },
+    {
+      "id": "row-description",
+      "fields": [
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "textarea",
+          "required": true,
+          "maxLines": 6,
+          "flex": 1
+        }
+      ]
+    },
+    {
+      "id": "row-distribution",
+      "fields": [
+        {
+          "key": "distributionList",
+          "label": "Distribution List",
+          "type": "dropdown",
+          "required": true,
+          "hint": "Choose option",
+          "flex": 1,
+          "options": [
+            { "value": "Support On-Call", "label": "Support On-Call" },
+            { "value": "Engineering", "label": "Engineering" },
+            { "value": "Billing Ops", "label": "Billing Ops" },
+            { "value": "Security", "label": "Security" },
+            { "value": "Customer Success", "label": "Customer Success" },
+            { "value": "All Staff", "label": "All Staff" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "row-channel",
+      "fields": [
+        {
+          "key": "channel",
+          "label": "Channel",
+          "type": "radio",
+          "required": false,
+          "defaultValue": "email",
+          "flex": 1,
+          "options": [
+            { "value": "email", "label": "Email" },
+            { "value": "phone", "label": "Phone" },
+            { "value": "chat", "label": "Chat" }
+          ]
+        }
+      ]
+    }
+  ],
+  "buttons": [
+    {
+      "id": "cancel",
+      "label": "Cancel",
+      "variant": "outlined",
+      "onClick": {
+        "type": "navigate",
+        "route": "/ticketing"
+      }
+    },
+    {
+      "id": "save",
+      "label": "Save",
+      "variant": "filled",
+      "validateForm": true,
+      "onClick": {
+        "type": "dialog",
+        "dialog": {
+          "title": "Save ticket?",
+          "message": "Create this ticket with the details you entered?",
+          "barrierDismissible": true,
+          "actions": [
+            {
+              "id": "dialog-cancel",
+              "label": "Not now",
+              "variant": "text",
+              "onClick": { "type": "dismiss" }
+            },
+            {
+              "id": "dialog-confirm",
+              "label": "Confirm & save",
+              "variant": "filled",
+              "onClick": {
+                "type": "api",
+                "method": "POST",
+                "url": "/api/tickets",
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "header": "{{header}}",
+                  "application": "{{application}}",
+                  "priority": "{{priority}}",
+                  "bug": "{{bug}}",
+                  "responsibility": "{{responsibility}}",
+                  "affectedEquipment": "{{affectedEquipment}}",
+                  "description": "{{description}}",
+                  "distributionList": "{{distributionList}}",
+                  "channel": "{{channel}}"
+                },
+                "onSuccess": {
+                  "type": "sequence",
+                  "steps": [
+                    {
+                      "type": "toast",
+                      "message": "Ticket {{response.id}} created."
+                    },
+                    {
+                      "type": "navigate",
+                      "route": "/ticketing/tickets/{{response.id}}"
+                    }
+                  ]
+                },
+                "onError": {
+                  "type": "toast",
+                  "message": "{{error.message}}"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+''';
+}
