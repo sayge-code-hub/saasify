@@ -206,25 +206,26 @@ class _NavTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final foreground = active ? Colors.white : AppColors.inkSecondary;
+    final foreground = active ? AppColors.ink : AppColors.inkSecondary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: active ? AppColors.accentGradient : null,
-          color: active ? null : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            mouseCursor: SystemMouseCursors.click,
-            splashColor: Colors.white24,
-            highlightColor: Colors.white10,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          mouseCursor: SystemMouseCursors.click,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: active
+                  ? const Border(
+                      bottom: BorderSide(
+                        color: AppColors.accent,
+                        width: 2.5,
+                      ),
+                    )
+                  : null,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
               child: Padding(

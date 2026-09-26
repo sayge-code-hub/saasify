@@ -5,6 +5,15 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/presentation/widgets/ticket_badges.dart';
 
+/// Shared column widths so header labels sit above cell content.
+abstract final class TicketListColumns {
+  static const double checkbox = 40;
+  static const double id = 96;
+  static const double priority = 104;
+  static const double status = 112;
+  static const double assignee = 120;
+}
+
 class TicketListRow extends StatelessWidget {
   const TicketListRow({
     required this.ticket,
@@ -33,67 +42,61 @@ class TicketListRow extends StatelessWidget {
             vertical: AppSpacing.sm + 2,
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 40,
+                width: TicketListColumns.checkbox,
                 child: Checkbox(
                   value: selected,
                   onChanged: onSelectedChanged,
-                  side: const BorderSide(color: AppColors.border, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
               SizedBox(
-                width: 88,
+                width: TicketListColumns.id,
                 child: Text(
                   ticket.id,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: AppColors.accentHover,
+                    color: AppColors.ink,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
               Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ticket.subject,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${ticket.customerName} · ${ticket.customerEmail}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkTertiary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                child: Text(
+                  ticket.subject,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.ink,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              TicketPriorityBadge(priority: ticket.priority),
-              const SizedBox(width: AppSpacing.xs),
-              TicketStatusBadge(status: ticket.status),
-              const SizedBox(width: AppSpacing.sm),
               SizedBox(
-                width: 110,
+                width: TicketListColumns.priority,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: TicketPriorityBadge(priority: ticket.priority),
+                ),
+              ),
+              SizedBox(
+                width: TicketListColumns.status,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: TicketStatusBadge(status: ticket.status),
+                ),
+              ),
+              SizedBox(
+                width: TicketListColumns.assignee,
                 child: Text(
                   ticket.assigneeName ?? 'Unassigned',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.inkSecondary,
+                    color: AppColors.ink,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -133,45 +136,49 @@ class TicketListCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Checkbox(
                     value: selected,
                     onChanged: onSelectedChanged,
                     visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  Text(
-                    ticket.id,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: AppColors.accentHover,
-                      fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ticket.id,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: AppColors.ink,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          ticket.subject,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
-                  TicketStatusBadge(status: ticket.status),
                 ],
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                ticket.subject,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                ticket.customerName,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inkTertiary,
-                ),
-              ),
               const SizedBox(height: AppSpacing.sm),
-              Row(
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
                 children: [
                   TicketPriorityBadge(priority: ticket.priority),
-                  const Spacer(),
+                  TicketStatusBadge(status: ticket.status),
                   Text(
                     ticket.assigneeName ?? 'Unassigned',
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.ink,
+                    ),
                   ),
                 ],
               ),

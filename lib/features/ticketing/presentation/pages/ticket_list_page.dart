@@ -339,16 +339,27 @@ class _ListHeader extends StatelessWidget {
         AppSpacing.sm,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: 40),
-          SizedBox(width: 88, child: Text('ID', style: style)),
-          Expanded(flex: 3, child: Text('TICKET', style: style)),
+          const SizedBox(width: TicketListColumns.checkbox),
+          SizedBox(
+            width: TicketListColumns.id,
+            child: Text('ID', style: style),
+          ),
+          Expanded(child: Text('TICKET', style: style)),
           const SizedBox(width: AppSpacing.sm),
-          SizedBox(width: 72, child: Text('PRIORITY', style: style)),
-          const SizedBox(width: AppSpacing.xs),
-          SizedBox(width: 88, child: Text('STATUS', style: style)),
-          const SizedBox(width: AppSpacing.sm),
-          SizedBox(width: 110, child: Text('ASSIGNEE', style: style)),
+          SizedBox(
+            width: TicketListColumns.priority,
+            child: Text('PRIORITY', style: style),
+          ),
+          SizedBox(
+            width: TicketListColumns.status,
+            child: Text('STATUS', style: style),
+          ),
+          SizedBox(
+            width: TicketListColumns.assignee,
+            child: Text('ASSIGNEE', style: style),
+          ),
         ],
       ),
     );

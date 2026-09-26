@@ -14,7 +14,7 @@ Authenticated admin chrome with a Maglo-inspired layout: left module sidebar (wo
 |--------|------------|--------------|
 | Ticketing | Dashboard, Add Ticket, All Tickets, Open Tickets, Pending Tickets, Resolved Tickets, Priority Tickets, Config | `/ticketing…` |
 
-Clicking **Ticketing** opens the Dashboard (`/ticketing`) and expands the submodule list. **Settings** lives in the top header (gear icon), not the sidebar. Active nav uses a soft orange gradient with white labels.
+Clicking **Ticketing** opens the Dashboard (`/ticketing`) and expands the submodule list. **Settings** lives in the top header (gear icon), not the sidebar. Active nav is marked with a solid accent underline (not a filled pill).
 
 ## Acceptance criteria
 

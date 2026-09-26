@@ -19,7 +19,7 @@ class TicketStatusBadge extends StatelessWidget {
       TicketStatus.closed => (AppColors.surfaceMuted, AppColors.inkSecondary),
     };
 
-    return _Pill(label: status.label, background: bg, foreground: fg);
+    return _TagChip(label: status.label, background: bg, foreground: fg);
   }
 }
 
@@ -37,12 +37,12 @@ class TicketPriorityBadge extends StatelessWidget {
       TicketPriority.urgent => (AppColors.dangerMuted, AppColors.danger),
     };
 
-    return _Pill(label: priority.label, background: bg, foreground: fg);
+    return _TagChip(label: priority.label, background: bg, foreground: fg);
   }
 }
 
-class _Pill extends StatelessWidget {
-  const _Pill({
+class _TagChip extends StatelessWidget {
+  const _TagChip({
     required this.label,
     required this.background,
     required this.foreground,
@@ -56,15 +56,18 @@ class _Pill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xs,
-        vertical: 4,
+        horizontal: AppSpacing.sm,
+        vertical: 5,
       ),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(color: foreground.withValues(alpha: 0.18)),
       ),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: foreground,
               fontWeight: FontWeight.w600,
