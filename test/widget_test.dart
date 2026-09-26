@@ -37,6 +37,8 @@ void main() {
     expect(find.text('Overview'), findsNothing);
     expect(find.text('Ticketing'), findsOneWidget);
     expect(find.text('Dashboard'), findsWidgets);
+    expect(find.text('Ticket system'), findsNothing);
+    expect(find.byKey(const ValueKey('header-datetime')), findsOneWidget);
     expect(find.text('Add Ticket'), findsOneWidget);
     expect(find.text('Ticket by status'), findsOneWidget);
   });

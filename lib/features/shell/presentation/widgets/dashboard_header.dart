@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -136,3 +138,95 @@ class DashboardHeader extends StatelessWidget {
 }
 
 enum _HeaderAction { signOut }
+
+/// Live local date, time, and timezone for the shell header (dashboard home).
+class HeaderDateTime extends StatefulWidget {
+  const HeaderDateTime({super.key, this.now});
+
+  /// Optional clock override for tests.
+  final DateTime Function()? now;
+
+  @override
+  State<HeaderDateTime> createState() => _HeaderDateTimeState();
+}
+
+class _HeaderDateTimeState extends State<HeaderDateTime> {
+  late DateTime _now;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = (widget.now ?? DateTime.now)();
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!mounted) return;
+      setState(() => _now = (widget.now ?? DateTime.now)());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        key: const ValueKey('header-datetime'),
+        formatHeaderDateTime(_now),
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: AppColors.inkTertiary,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.15,
+          height: 1.2,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+/// Formats e.g. `Sat, 26 Sep 2026  ·  19:02 UTC+00:00`.
+String formatHeaderDateTime(DateTime dateTime) {
+  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  final weekday = weekdays[dateTime.weekday - 1];
+  final month = months[dateTime.month - 1];
+  final hour = dateTime.hour.toString().padLeft(2, '0');
+  final minute = dateTime.minute.toString().padLeft(2, '0');
+  final tz = formatTimezoneLabel(dateTime);
+  return '$weekday, ${dateTime.day} $month ${dateTime.year}  ·  '
+      '$hour:$minute $tz';
+}
+
+String formatTimezoneLabel(DateTime dateTime) {
+  final name = dateTime.timeZoneName.trim();
+  if (RegExp(r'^[A-Za-z]{2,5}$').hasMatch(name)) {
+    return name.toUpperCase();
+  }
+  final offset = dateTime.timeZoneOffset;
+  final totalMinutes = offset.inMinutes;
+  final sign = totalMinutes < 0 ? '-' : '+';
+  final abs = totalMinutes.abs();
+  final hours = (abs ~/ 60).toString().padLeft(2, '0');
+  final minutes = (abs % 60).toString().padLeft(2, '0');
+  return 'UTC$sign$hours:$minutes';
+}

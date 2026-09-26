@@ -26,6 +26,7 @@ class ShellPage extends StatelessWidget {
       _ => null,
     };
     final onTicketDetail = location.startsWith('/ticketing/tickets/');
+    final onDashboard = location == '/ticketing' || location == '/';
 
     return AppScaffold(
       backgroundColor: AppColors.canvas,
@@ -57,7 +58,9 @@ class ShellPage extends StatelessWidget {
                           ? _TicketDetailHeaderBack(
                               onPressed: () => context.go('/ticketing/all'),
                             )
-                          : null,
+                          : onDashboard
+                              ? const HeaderDateTime()
+                              : null,
                       userName: user?.name,
                       showMenu: compact,
                       onMenu: compact
@@ -108,7 +111,10 @@ class _TicketDetailHeaderBack extends StatelessWidget {
 }
 
 String dashboardTitleFor(String location) {
-  if (location == '/ticketing' || location == '/') return 'Dashboard';
+  if (location == '/ticketing' || location == '/') {
+    // Date/time leading replaces the title on the dashboard home.
+    return '';
+  }
   if (location.startsWith('/ticketing/tickets/')) {
     // Leading back control replaces the title on ticket detail.
     return '';
