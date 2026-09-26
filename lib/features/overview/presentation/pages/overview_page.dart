@@ -24,7 +24,7 @@ class OverviewPage extends StatelessWidget {
         final compact = context.isCompact;
 
         return ColoredBox(
-          color: AppColors.surfaceMuted,
+          color: AppColors.canvas,
           child: RefreshIndicator(
             color: AppColors.accent,
             onRefresh: () async {

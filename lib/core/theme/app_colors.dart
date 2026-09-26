@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 /// Semantic color tokens for Saasify. Prefer [ThemeData.colorScheme] in UI.
-/// Palette: pure white · black · soft coral orange.
+/// Palette: light grey canvas · white surfaces · black ink · soft coral.
 abstract final class AppColors {
-  static const Color canvas = Color(0xFFFFFFFF);
-  static const Color canvasTint = Color(0xFFFFFFFF);
+  /// Page / shell background (matches dashboard).
+  static const Color canvas = Color(0xFFFAFAFA);
+  static const Color canvasTint = Color(0xFFFAFAFA);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceMuted = Color(0xFFFAFAFA);
 

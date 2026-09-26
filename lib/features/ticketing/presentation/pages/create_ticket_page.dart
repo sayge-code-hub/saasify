@@ -77,7 +77,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
         : AppSpacing.pagePaddingExpanded;
 
     return ColoredBox(
-      color: AppColors.surfaceMuted,
+      color: AppColors.canvas,
       child: Form(
         key: _formKey,
         child: Column(

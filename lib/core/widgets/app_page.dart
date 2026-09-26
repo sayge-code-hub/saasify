@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:saasify/core/responsive/app_breakpoints.dart';
+import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 
 /// Constrains page content width and applies responsive padding.
@@ -36,7 +37,7 @@ class AppPage extends StatelessWidget {
       ),
     );
 
-    if (!scrollable) return content;
-    return SingleChildScrollView(child: content);
+    final body = scrollable ? SingleChildScrollView(child: content) : content;
+    return ColoredBox(color: AppColors.canvas, child: body);
   }
 }
