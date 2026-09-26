@@ -127,6 +127,12 @@ abstract final class AppModules {
       return true;
     }
 
+    // Config list editors keep Config highlighted.
+    if (location == '/ticketing/config' &&
+        currentPath.startsWith('/ticketing/config')) {
+      return true;
+    }
+
     return false;
   }
 
