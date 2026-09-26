@@ -42,7 +42,7 @@ class TicketListRow extends StatelessWidget {
             vertical: AppSpacing.sm + 2,
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
                 width: TicketListColumns.checkbox,
@@ -78,14 +78,14 @@ class TicketListRow extends StatelessWidget {
               SizedBox(
                 width: TicketListColumns.priority,
                 child: Align(
-                  alignment: Alignment.topLeft,
+                  alignment: Alignment.centerLeft,
                   child: TicketPriorityBadge(priority: ticket.priority),
                 ),
               ),
               SizedBox(
                 width: TicketListColumns.status,
                 child: Align(
-                  alignment: Alignment.topLeft,
+                  alignment: Alignment.centerLeft,
                   child: TicketStatusBadge(status: ticket.status),
                 ),
               ),

@@ -491,7 +491,7 @@ class _ListHeader extends StatelessWidget {
         AppSpacing.sm,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: TicketListColumns.checkbox,
@@ -524,12 +524,9 @@ class _ListHeader extends StatelessWidget {
             ),
           ] else
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  allSelected ? 'Deselect all' : 'Select all',
-                  style: style,
-                ),
+              child: Text(
+                allSelected ? 'Deselect all' : 'Select all',
+                style: style,
               ),
             ),
         ],
