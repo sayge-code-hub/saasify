@@ -173,26 +173,40 @@ class _HeaderDateTimeState extends State<HeaderDateTime> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: AppColors.inkTertiary,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.1,
+      height: 1.25,
+      fontSize: 12,
+    );
     return Align(
       alignment: Alignment.centerLeft,
-      child: Text(
+      child: Column(
         key: const ValueKey('header-datetime'),
-        formatHeaderDateTime(_now),
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: AppColors.inkTertiary,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.15,
-          height: 1.2,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            formatHeaderDate(_now),
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            formatHeaderTime(_now),
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Formats e.g. `Sat, 26 Sep 2026  ·  19:02 UTC+00:00`.
-String formatHeaderDateTime(DateTime dateTime) {
+/// Formats e.g. `Sat, 26 Sep 2026`.
+String formatHeaderDate(DateTime dateTime) {
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const months = [
     'Jan',
@@ -210,11 +224,20 @@ String formatHeaderDateTime(DateTime dateTime) {
   ];
   final weekday = weekdays[dateTime.weekday - 1];
   final month = months[dateTime.month - 1];
+  return '$weekday, ${dateTime.day} $month ${dateTime.year}';
+}
+
+/// Formats e.g. `19:02 UTC+00:00`.
+String formatHeaderTime(DateTime dateTime) {
   final hour = dateTime.hour.toString().padLeft(2, '0');
   final minute = dateTime.minute.toString().padLeft(2, '0');
   final tz = formatTimezoneLabel(dateTime);
-  return '$weekday, ${dateTime.day} $month ${dateTime.year}  ·  '
-      '$hour:$minute $tz';
+  return '$hour:$minute $tz';
+}
+
+/// Formats e.g. `Sat, 26 Sep 2026  ·  19:02 UTC+00:00`.
+String formatHeaderDateTime(DateTime dateTime) {
+  return '${formatHeaderDate(dateTime)}  ·  ${formatHeaderTime(dateTime)}';
 }
 
 String formatTimezoneLabel(DateTime dateTime) {

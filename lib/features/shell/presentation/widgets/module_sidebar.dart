@@ -7,10 +7,11 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_logo.dart';
 import 'package:saasify/core/widgets/powered_by_footer.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
+import 'package:saasify/features/settings/presentation/widgets/company_brand_logo.dart';
 import 'package:saasify/features/shell/domain/app_modules.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
 
-/// Maglo-inspired left rail: wordmark, orange active pills, help/logout footer.
+/// Maglo-inspired left rail: company brand, nav, Saasify + Sayge footer.
 class ModuleSidebar extends StatelessWidget {
   const ModuleSidebar({
     this.compact = false,
@@ -39,7 +40,7 @@ class ModuleSidebar extends StatelessWidget {
                 ),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: AppLogoWordmark(height: 28),
+                  child: CompanyBrandLogo(height: 28),
                 ),
               ),
               Expanded(
@@ -90,6 +91,14 @@ class ModuleSidebar extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     const Divider(height: 1, color: AppColors.border),
+                    const SizedBox(height: AppSpacing.sm),
+                    const Align(
+                      alignment: Alignment.center,
+                      child: AppLogoWordmark(
+                        key: ValueKey('sidebar-saasify-logo'),
+                        height: 22,
+                      ),
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     const PoweredByFooter(),
                     const SizedBox(height: AppSpacing.xs),

@@ -411,33 +411,213 @@ class _OptionList extends StatelessWidget {
   }
 }
 
-class _PrioritySection extends StatelessWidget {
+class _PrioritySection extends StatefulWidget {
   const _PrioritySection({required this.config});
 
   final TicketConfig config;
 
   @override
+  State<_PrioritySection> createState() => _PrioritySectionState();
+}
+
+class _PrioritySectionState extends State<_PrioritySection> {
+  bool _editing = false;
+  late List<TicketPriority> _draft;
+  late List<TicketPriority> _baseline;
+
+  @override
+  void initState() {
+    super.initState();
+    _baseline = List<TicketPriority>.from(widget.config.enabledPriorities);
+    _draft = List<TicketPriority>.from(_baseline);
+  }
+
+  @override
+  void didUpdateWidget(covariant _PrioritySection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_editing &&
+        !_samePriorities(
+          widget.config.enabledPriorities,
+          oldWidget.config.enabledPriorities,
+        )) {
+      _baseline = List<TicketPriority>.from(widget.config.enabledPriorities);
+      _draft = List<TicketPriority>.from(_baseline);
+    }
+  }
+
+  bool get _isDirty => !_samePriorities(_draft, _baseline);
+
+  static bool _samePriorities(List<TicketPriority> a, List<TicketPriority> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  void _enterEdit() {
+    setState(() {
+      _baseline = List<TicketPriority>.from(widget.config.enabledPriorities);
+      _draft = List<TicketPriority>.from(_baseline);
+      _editing = true;
+    });
+  }
+
+  Future<void> _cancel() async {
+    if (_isDirty) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Discard changes?'),
+          content: const Text(
+            'You have unsaved priority changes. If you cancel now, '
+            'those edits will be lost.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Keep editing'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.danger,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Discard'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
+    setState(() {
+      _draft = List<TicketPriority>.from(_baseline);
+      _editing = false;
+    });
+  }
+
+  Future<void> _save() async {
+    if (!_isDirty) {
+      setState(() => _editing = false);
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save priorities?'),
+        content: const Text(
+          'Apply the selected priorities to the Priority dropdown on '
+          'Add Ticket.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    context.read<TicketConfigCubit>().setEnabledPriorities(_draft);
+    setState(() {
+      _baseline = List<TicketPriority>.from(_draft);
+      _editing = false;
+    });
+  }
+
+  void _toggleDraft(TicketPriority priority, bool enabled) {
+    if (!_editing) return;
+    final current = [..._draft];
+    if (enabled) {
+      if (!current.contains(priority)) {
+        final next = [
+          for (final p in TicketPriority.values)
+            if (p == priority || current.contains(p)) p,
+        ];
+        setState(() => _draft = next);
+      }
+    } else {
+      if (current.length <= 1) return;
+      setState(
+        () => _draft = current.where((p) => p != priority).toList(),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cubit = context.read<TicketConfigCubit>();
+    final enabled = _editing
+        ? _draft.toSet()
+        : widget.config.enabledPriorities.toSet();
 
     return _ConfigCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Priorities',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Priorities',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      'Which priorities appear in the Priority dropdown on '
+                      'Add Ticket.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              if (_editing) ...[
+                AppButton(
+                  key: const ValueKey('config-priorities-cancel'),
+                  label: 'Cancel',
+                  variant: AppButtonVariant.outlined,
+                  onPressed: _cancel,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                AppButton(
+                  key: const ValueKey('config-priorities-save'),
+                  label: 'Save',
+                  onPressed: _save,
+                ),
+              ] else
+                AppButton(
+                  key: const ValueKey('config-edit-priorities'),
+                  label: 'Edit',
+                  variant: AppButtonVariant.outlined,
+                  onPressed: _enterEdit,
+                ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            'Which priorities appear in the Priority dropdown on Add Ticket.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkSecondary,
+          if (_editing && _isDirty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Unsaved changes',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: AppColors.accent,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: AppSpacing.md),
           DecoratedBox(
             decoration: BoxDecoration(
@@ -456,12 +636,10 @@ class _PrioritySection extends StatelessWidget {
                     ),
                   _PriorityListRow(
                     label: TicketPriority.values[i].label,
-                    enabled: config.enabledPriorities
-                        .contains(TicketPriority.values[i]),
-                    onChanged: (value) => cubit.togglePriority(
-                      TicketPriority.values[i],
-                      value,
-                    ),
+                    enabled: enabled.contains(TicketPriority.values[i]),
+                    editable: _editing,
+                    onChanged: (value) =>
+                        _toggleDraft(TicketPriority.values[i], value),
                   ),
                 ],
               ],
@@ -477,18 +655,20 @@ class _PriorityListRow extends StatelessWidget {
   const _PriorityListRow({
     required this.label,
     required this.enabled,
+    required this.editable,
     required this.onChanged,
   });
 
   final String label;
   final bool enabled;
+  final bool editable;
   final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      onTap: () => onChanged(!enabled),
+      onTap: editable ? () => onChanged(!enabled) : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
@@ -501,10 +681,12 @@ class _PriorityListRow extends StatelessWidget {
               activeColor: AppColors.accent,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               visualDensity: VisualDensity.compact,
-              onChanged: (value) {
-                if (value == null) return;
-                onChanged(value);
-              },
+              onChanged: editable
+                  ? (value) {
+                      if (value == null) return;
+                      onChanged(value);
+                    }
+                  : null,
             ),
             Expanded(
               child: Text(
@@ -684,22 +866,35 @@ class _HoursFieldState extends State<_HoursField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          widget.label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: AppColors.ink,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        TextField(
+          controller: _controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+          ],
+          decoration: const InputDecoration(
+            isDense: true,
+            suffixText: 'h',
+          ),
+          onChanged: (raw) {
+            final parsed = double.tryParse(raw);
+            if (parsed == null) return;
+            widget.onChanged(parsed);
+          },
+        ),
       ],
-      decoration: InputDecoration(
-        labelText: widget.label,
-        isDense: true,
-        suffixText: 'h',
-      ),
-      onChanged: (raw) {
-        final parsed = double.tryParse(raw);
-        if (parsed == null) return;
-        widget.onChanged(parsed);
-      },
     );
   }
 }

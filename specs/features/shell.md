@@ -6,7 +6,7 @@
 
 ## Summary
 
-Authenticated admin chrome with a Maglo-inspired layout: left module sidebar (wordmark, orange active pills, Help/Logout), top dashboard header (title, search, notifications, account), and page content filling the remaining column. Top-level modules expand to reveal submodules. Compact widths use a drawer with the same hierarchy.
+Authenticated admin chrome with a Maglo-inspired layout: left module sidebar (uploadable company logo, orange active underline, Help/Logout, Saasify wordmark + Powered by Sayge + version), top dashboard header (title or stacked date/time on home, search, notifications, settings, account), and page content filling the remaining column. Top-level modules expand to reveal submodules. Compact widths use a drawer with the same hierarchy.
 
 ## Modules (v1)
 
@@ -24,6 +24,8 @@ Clicking **Ticketing** opens the Dashboard (`/ticketing`) and expands the submod
 - [x] Active submodule highlighted from current route
 - [x] Sign-out control available in shell header
 - [x] No bottom-nav dual-destination pattern for admin
+- [x] Sidebar brand slot shows company logo (or placeholder); Saasify + Sayge footer at bottom
+- [x] Dashboard home header shows stacked date / time
 
 ## Out of scope
 

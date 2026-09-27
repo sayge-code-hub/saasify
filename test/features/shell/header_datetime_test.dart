@@ -24,7 +24,7 @@ void main() {
     expect(label, isNotEmpty);
   });
 
-  testWidgets('HeaderDateTime renders light grey clock', (tester) async {
+  testWidgets('HeaderDateTime renders stacked light grey clock', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light(),
@@ -40,5 +40,11 @@ void main() {
     expect(find.byKey(const ValueKey('header-datetime')), findsOneWidget);
     expect(find.textContaining('26 Sep 2026'), findsOneWidget);
     expect(find.textContaining('19:02'), findsOneWidget);
+
+    final column = tester.widget<Column>(
+      find.byKey(const ValueKey('header-datetime')),
+    );
+    expect(column.crossAxisAlignment, CrossAxisAlignment.start);
+    expect(column.children.whereType<Text>().length, 2);
   });
 }

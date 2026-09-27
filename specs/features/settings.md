@@ -1,19 +1,24 @@
-# Feature: Settings (placeholder)
+# Feature: Settings
 
 ## Status
 
-`done` (placeholder only)
+`in_progress`
 
 ## Summary
 
-Settings destination in the adaptive shell so navigation meets Material’s ≥2 destination requirement and future preference work has a route.
+Workspace settings for branding and future preferences. Reachable from the shell header gear icon at `/settings`.
 
-## Out of scope
+## Screens
 
-- Actual preference persistence
-- Account / billing settings
+1. **Settings** (`/settings`) — company logo upload (sidebar brand) and placeholder for later preference work.
 
 ## Acceptance criteria
 
-- [x] `/settings` route renders empty-state placeholder
-- [x] Reachable from shell navigation on compact and expanded
+- [x] `/settings` route reachable from shell header
+- [x] Upload / change / remove company logo shown in the sidebar brand slot
+- [x] Logo persists locally on web (localStorage); placeholder when none uploaded
+
+## Out of scope
+
+- Account / billing settings
+- Server-backed brand assets

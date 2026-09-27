@@ -24,7 +24,7 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
    - Change **Assignee** via dropdown (options from Config)
    - Categorized equal-size chips: Status, Priority, SLA, Tags
    - **SLA** panel: first response + resolution clocks
-5. **Config** (`/ticketing/config`) — editable dropdown lists, enabled priorities, SLA hours per priority
+5. **Config** (`/ticketing/config`) — editable dropdown lists, enabled priorities (edit mode only), SLA hours per priority (external field labels)
 
 ## SLA model
 

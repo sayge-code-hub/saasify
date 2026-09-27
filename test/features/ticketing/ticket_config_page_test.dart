@@ -38,9 +38,10 @@ void main() {
     expect(find.text('Bug options'), findsOneWidget);
     expect(find.text('Priorities'), findsOneWidget);
     expect(find.text('SLA targets'), findsOneWidget);
-    expect(find.text('Edit'), findsNWidgets(4));
+    expect(find.text('Edit'), findsNWidgets(5));
     expect(find.byKey(const ValueKey('config-edit-applications')), findsOneWidget);
     expect(find.byKey(const ValueKey('config-edit-assignees')), findsOneWidget);
+    expect(find.byKey(const ValueKey('config-edit-priorities')), findsOneWidget);
     expect(find.text('Add option…'), findsNothing);
     expect(find.text('Search config sections…'), findsOneWidget);
 
@@ -164,5 +165,113 @@ void main() {
     await tester.tap(find.text('Keep editing'));
     await tester.pumpAndSettle();
     expect(find.text('Temp App'), findsOneWidget);
+  });
+
+  testWidgets('priorities checkboxes are read-only until Edit', (tester) async {
+    tester.view.physicalSize = const Size(1200, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final config = TicketConfigCubit();
+    addTearDown(config.close);
+    final before = List.of(config.state.enabledPriorities);
+
+    await tester.pumpWidget(
+      BlocProvider.value(
+        value: config,
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const Scaffold(body: TicketConfigPage()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final checkboxes = find.byType(Checkbox);
+    expect(checkboxes, findsWidgets);
+    final firstBox = tester.widget<Checkbox>(checkboxes.first);
+    expect(firstBox.onChanged, isNull);
+
+    await tester.tap(find.byKey(const ValueKey('config-edit-priorities')));
+    await tester.pumpAndSettle();
+
+    final editable = tester.widget<Checkbox>(find.byType(Checkbox).first);
+    expect(editable.onChanged, isNotNull);
+
+    await tester.tap(find.byType(Checkbox).last);
+    await tester.pumpAndSettle();
+    expect(find.text('Unsaved changes'), findsOneWidget);
+    expect(config.state.enabledPriorities, before);
+
+    await tester.tap(find.byKey(const ValueKey('config-priorities-save')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Save').last);
+    await tester.pumpAndSettle();
+
+    expect(config.state.enabledPriorities, isNot(before));
+    expect(find.byKey(const ValueKey('config-edit-priorities')), findsOneWidget);
+  });
+
+  testWidgets('priority cancel confirms when dirty', (tester) async {
+    tester.view.physicalSize = const Size(1200, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final config = TicketConfigCubit();
+    addTearDown(config.close);
+
+    await tester.pumpWidget(
+      BlocProvider.value(
+        value: config,
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const Scaffold(body: TicketConfigPage()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('config-edit-priorities')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(Checkbox).last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('config-priorities-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.text('Discard changes?'), findsOneWidget);
+    await tester.tap(find.text('Keep editing'));
+    await tester.pumpAndSettle();
+    expect(find.text('Unsaved changes'), findsOneWidget);
+  });
+
+  testWidgets('SLA hour fields use external labels not floating', (tester) async {
+    tester.view.physicalSize = const Size(1200, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final config = TicketConfigCubit();
+    addTearDown(config.close);
+
+    await tester.pumpWidget(
+      BlocProvider.value(
+        value: config,
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const Scaffold(body: TicketConfigPage()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('First response (hours)'), findsWidgets);
+    expect(find.text('Resolution (hours)'), findsWidgets);
+
+    final fields = tester.widgetList<TextField>(find.byType(TextField));
+    for (final field in fields) {
+      expect(field.decoration?.labelText, isNull);
+    }
   });
 }
