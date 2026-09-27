@@ -613,42 +613,38 @@ class _TicketSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = theme.textTheme.bodySmall?.copyWith(
+    final textStyle = theme.textTheme.labelMedium?.copyWith(
       color: AppColors.ink,
       fontWeight: FontWeight.w400,
-      fontSize: 13,
-      height: 1.2,
+      fontSize: 12,
+      height: 1.15,
+      letterSpacing: 0,
     );
-    final hintStyle = theme.textTheme.bodySmall?.copyWith(
-      color: AppColors.inkTertiary,
-      fontWeight: FontWeight.w400,
-      fontSize: 13,
-      height: 1.2,
-    );
+    final hintStyle = textStyle?.copyWith(color: AppColors.inkTertiary);
 
     return SizedBox(
-      height: 36,
+      height: 34,
       child: TextField(
         controller: controller,
         onChanged: onChanged,
         style: textStyle,
         cursorColor: AppColors.accent,
-        cursorHeight: 14,
+        cursorHeight: 13,
         decoration: InputDecoration(
           isDense: true,
           filled: true,
           fillColor: AppColors.surface,
           hintText: 'Search by id, subject, or customer',
           hintStyle: hintStyle,
-          prefixIcon: const Icon(Icons.search, size: 18),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.sm, right: 4),
+            child: Icon(Icons.search, size: 16, color: AppColors.inkTertiary),
+          ),
           prefixIconConstraints: const BoxConstraints(
-            minWidth: 36,
-            minHeight: 36,
+            minWidth: 32,
+            minHeight: 34,
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: 0,
-          ),
+          contentPadding: const EdgeInsets.fromLTRB(0, 8, AppSpacing.sm, 8),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             borderSide: const BorderSide(color: AppColors.border),
@@ -699,7 +695,7 @@ class _ToolbarButton extends StatelessWidget {
           horizontal: AppSpacing.sm,
           vertical: 0,
         ),
-        minimumSize: const Size(0, 36),
+        minimumSize: const Size(0, 34),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         visualDensity: VisualDensity.compact,
         shape: RoundedRectangleBorder(
