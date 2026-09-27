@@ -13,6 +13,14 @@ class SpaHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, directory: str | None = None, **kwargs):
         super().__init__(*args, directory=directory, **kwargs)
 
+    def end_headers(self) -> None:
+        # Avoid stale Flutter builds / service-worker caches during local demos.
+        path = self.path.split('?', 1)[0]
+        if path.endswith(('.html', '/', '.js', '.json')) or path in ('', '/'):
+            self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+        super().end_headers()
+
     def do_GET(self) -> None:  # noqa: N802
         path = Path(self.translate_path(self.path))
         if path.is_file():
