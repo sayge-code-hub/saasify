@@ -6,6 +6,7 @@ import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/domain/ticket_config.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_config_cubit.dart';
@@ -71,7 +72,6 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final compact = context.isCompact;
 
     return BlocBuilder<TicketConfigCubit, TicketConfig>(
@@ -141,12 +141,9 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
-                                    Text(
+                                    const AppText(
                                       'Create Ticket',
-                                      style: theme.textTheme.titleLarge
-                                          ?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                      variant: AppTextVariant.pageTitle,
                                     ),
                                     const SizedBox(height: AppSpacing.xl),
                                     _FormGrid(
@@ -497,23 +494,17 @@ class _LabeledField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final compact = context.isCompact;
+    final labelStyle = AppText.styleFor(context, AppTextVariant.label);
     final labelText = Text.rich(
       TextSpan(
         text: label,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: AppColors.ink,
-          fontWeight: FontWeight.w500,
-        ),
+        style: labelStyle,
         children: [
           if (required)
-            const TextSpan(
+            TextSpan(
               text: '*',
-              style: TextStyle(
-                color: AppColors.ink,
-                fontWeight: FontWeight.w700,
-              ),
+              style: labelStyle.copyWith(fontWeight: FontWeight.w700),
             ),
         ],
       ),

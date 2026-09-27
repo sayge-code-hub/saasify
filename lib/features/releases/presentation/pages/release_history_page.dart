@@ -5,6 +5,7 @@ import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/releases/data/release_notes.dart';
 
 /// Lists deployed versions and their changelog entries.
@@ -13,7 +14,6 @@ class ReleaseHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final releases = ReleaseNotes.all;
 
     return SelectionArea(
@@ -30,20 +30,11 @@ class ReleaseHistoryPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Release history',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.ink,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Versions deployed for ${AppConstants.appName}, including features, '
-              'improvements, and bug fixes. Current: ${AppConstants.appVersionLabel}.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkSecondary,
-              ),
+            AppPageHeader(
+              title: 'Release history',
+              subtitle:
+                  'Versions deployed for ${AppConstants.appName}, including features, '
+                  'improvements, and bug fixes. Current: ${AppConstants.appVersionLabel}.',
             ),
             const SizedBox(height: AppSpacing.xl),
             for (var i = 0; i < releases.length; i++) ...[
@@ -85,12 +76,9 @@ class _ReleaseCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
+                AppText(
                   'v${release.version}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
+                  variant: AppTextVariant.sectionTitle,
                 ),
                 if (isCurrent) ...[
                   const SizedBox(width: AppSpacing.xs),

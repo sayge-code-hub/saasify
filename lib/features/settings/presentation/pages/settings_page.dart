@@ -7,6 +7,7 @@ import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/settings/presentation/bloc/company_logo_cubit.dart';
 import 'package:saasify/features/settings/presentation/bloc/workspace_settings_cubit.dart';
@@ -17,34 +18,23 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AppPage(
+    return const AppPage(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Settings',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w400,
-              color: AppColors.ink,
-            ),
+          AppPageHeader(
+            title: 'Settings',
+            subtitle:
+                'Workspace branding, profile, and notification preferences.',
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Workspace branding, profile, and notification preferences.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkSecondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          const _CompanyLogoSection(),
-          const SizedBox(height: AppSpacing.md),
-          const _WorkspaceProfileSection(),
-          const SizedBox(height: AppSpacing.md),
-          const _PreferencesSection(),
-          const SizedBox(height: AppSpacing.md),
-          const _NotificationsSection(),
+          SizedBox(height: AppSpacing.lg),
+          _CompanyLogoSection(),
+          SizedBox(height: AppSpacing.md),
+          _WorkspaceProfileSection(),
+          SizedBox(height: AppSpacing.md),
+          _PreferencesSection(),
+          SizedBox(height: AppSpacing.md),
+          _NotificationsSection(),
         ],
       ),
     );
@@ -97,7 +87,6 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -105,19 +94,9 @@ class _SectionHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+              AppText(title, variant: AppTextVariant.sectionTitle),
               const SizedBox(height: AppSpacing.xxs),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inkSecondary,
-                ),
-              ),
+              AppText(subtitle, variant: AppTextVariant.sectionSubtitle),
             ],
           ),
         ),
@@ -180,25 +159,20 @@ class _CompanyLogoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final hasLogo = context.watch<CompanyLogoCubit>().state != null;
 
     return _SettingsCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
+          const AppText(
             'Company logo',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w400,
-            ),
+            variant: AppTextVariant.sectionTitle,
           ),
           const SizedBox(height: AppSpacing.xxs),
-          Text(
+          const AppText(
             'Shown in the top-left of the sidebar. PNG or JPG works best.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkSecondary,
-            ),
+            variant: AppTextVariant.sectionSubtitle,
           ),
           const SizedBox(height: AppSpacing.md),
           Container(

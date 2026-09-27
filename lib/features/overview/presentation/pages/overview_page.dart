@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 
@@ -180,18 +181,10 @@ class _PageToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       children: [
-        Expanded(
-          child: Text(
-            'Dashboard',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.ink,
-            ),
-          ),
+        const Expanded(
+          child: AppText('Dashboard', variant: AppTextVariant.pageTitle),
         ),
         IconButton(
           tooltip: 'Refresh',
@@ -240,7 +233,6 @@ class _BreakdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final total = slices.fold<int>(0, (sum, s) => sum + s.count);
 
     return _DashboardCard(
@@ -252,13 +244,7 @@ class _BreakdownCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
-                    ),
-                  ),
+                  child: AppText(title, variant: AppTextVariant.sectionTitle),
                 ),
                 IconButton(
                   tooltip: 'Refresh',
@@ -274,13 +260,11 @@ class _BreakdownCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             if (total == 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                child: Text(
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                child: AppText(
                   'No tickets yet.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.inkSecondary,
-                  ),
+                  variant: AppTextVariant.pageSubtitle,
                 ),
               )
             else if (visualization == _BreakdownViz.donut)

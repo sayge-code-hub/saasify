@@ -8,6 +8,7 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
@@ -37,7 +38,6 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final compact = context.isCompact;
 
     return BlocBuilder<TicketListCubit, TicketListState>(
@@ -78,19 +78,15 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
+                  AppText(
                     ticket.id,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: AppColors.accent,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    variant: AppTextVariant.meta,
+                    color: AppColors.accent,
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  Text(
+                  AppText(
                     ticket.subject,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    variant: AppTextVariant.pageTitle,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   _TicketChipCategories(
@@ -298,7 +294,7 @@ class _DetailsSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Details', style: theme.textTheme.titleMedium),
+            const AppText('Details', variant: AppTextVariant.sectionTitle),
             const SizedBox(height: AppSpacing.md),
             LayoutBuilder(
               builder: (context, constraints) {
@@ -474,8 +470,6 @@ class _SlaPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -489,19 +483,20 @@ class _SlaPanel extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(
-                  child: Text('SLA', style: theme.textTheme.titleMedium),
+                const Expanded(
+                  child: AppText(
+                    'SLA',
+                    variant: AppTextVariant.sectionTitle,
+                  ),
                 ),
                 _SlaChip(snapshot: snapshot),
               ],
             ),
             const SizedBox(height: AppSpacing.xxs),
-            Text(
+            const AppText(
               'Service Level Agreement — promised time to first agent reply '
               'and to resolve the case.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkSecondary,
-              ),
+              variant: AppTextVariant.sectionSubtitle,
             ),
             const SizedBox(height: AppSpacing.md),
             _SlaClockRow(clock: snapshot.firstResponse),
@@ -656,7 +651,7 @@ class _CommentsPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Comments', style: theme.textTheme.titleMedium),
+            const AppText('Comments', variant: AppTextVariant.sectionTitle),
             const SizedBox(height: AppSpacing.sm),
             if (ticket.messages.isEmpty)
               Text(
@@ -766,7 +761,10 @@ class _AttachmentsSection extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Attachments', style: theme.textTheme.titleMedium),
+            const AppText(
+              'Attachments',
+              variant: AppTextVariant.sectionTitle,
+            ),
             const SizedBox(height: AppSpacing.sm),
             if (attachments.isEmpty)
               Text(
@@ -870,7 +868,10 @@ class _ActivityLedger extends StatelessWidget {
               AppSpacing.md,
               AppSpacing.sm,
             ),
-            child: Text('Timeline', style: theme.textTheme.titleMedium),
+            child: const AppText(
+              'Timeline',
+              variant: AppTextVariant.sectionTitle,
+            ),
           ),
           const Divider(height: 1, color: AppColors.border),
           if (ordered.isEmpty)

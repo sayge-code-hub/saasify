@@ -5,6 +5,7 @@ import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/help/domain/help_topics.dart';
 
@@ -48,7 +49,6 @@ class _HelpTopicPageState extends State<HelpTopicPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final topic = widget.topic;
 
     return AppPage(
@@ -74,22 +74,17 @@ class _HelpTopicPageState extends State<HelpTopicPage> {
               Icon(topic.icon, color: AppColors.inkSecondary, size: 28),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: Text(
+                child: AppText(
                   topic.title,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.ink,
-                  ),
+                  variant: AppTextVariant.pageTitle,
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
+          AppText(
             topic.description,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkSecondary,
-            ),
+            variant: AppTextVariant.pageSubtitle,
           ),
           const SizedBox(height: AppSpacing.lg),
           DecoratedBox(
@@ -103,12 +98,7 @@ class _HelpTopicPageState extends State<HelpTopicPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Message',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  const AppText('Message', variant: AppTextVariant.label),
                   const SizedBox(height: AppSpacing.xs),
                   AppTextField(
                     key: const ValueKey('help-topic-message'),

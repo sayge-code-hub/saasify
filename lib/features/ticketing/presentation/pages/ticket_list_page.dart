@@ -6,6 +6,7 @@ import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_empty_state.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/widgets/ticket_list_items.dart';
@@ -270,7 +271,6 @@ class _TicketListPageState extends State<TicketListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final compact = context.isCompact;
     final horizontal = compact
         ? AppSpacing.pagePaddingCompact
@@ -303,12 +303,9 @@ class _TicketListPageState extends State<TicketListPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
+                        const AppText(
                           'All Tickets',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.ink,
-                          ),
+                          variant: AppTextVariant.pageTitle,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         _ListToolbar(
@@ -711,7 +708,6 @@ class _ExportFormatDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Dialog(
       backgroundColor: AppColors.surface,
       elevation: 0,
@@ -736,20 +732,11 @@ class _ExportFormatDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Export',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              const AppText('Export', variant: AppTextVariant.pageTitle),
               const SizedBox(height: AppSpacing.xs),
-              Text(
+              const AppText(
                 'Choose a format for the current ticket list.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.inkTertiary,
-                  fontWeight: FontWeight.w400,
-                ),
+                variant: AppTextVariant.pageSubtitle,
               ),
               const SizedBox(height: AppSpacing.lg),
               _ExportFormatOption(

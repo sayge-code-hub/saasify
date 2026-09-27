@@ -7,6 +7,7 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/ticketing/domain/ticket_config.dart';
 import 'package:saasify/features/ticketing/domain/ticket_config_lists.dart';
@@ -280,37 +281,14 @@ class _TicketConfigListPageState extends State<TicketConfigListPage> {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.kind.title,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        widget.kind.subtitle,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.inkSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                AppButton(
-                  label: 'Save',
-                  isLoading: _saving,
-                  onPressed: _saving ? null : _save,
-                ),
-              ],
+            AppPageHeader(
+              title: widget.kind.title,
+              subtitle: widget.kind.subtitle,
+              trailing: AppButton(
+                label: 'Save',
+                isLoading: _saving,
+                onPressed: _saving ? null : _save,
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(

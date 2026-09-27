@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 
 /// Signed-in user profile summary.
@@ -22,19 +23,9 @@ class ProfilePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Profile',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w400,
-              color: AppColors.ink,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Your account details for this workspace.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkSecondary,
-            ),
+          const AppPageHeader(
+            title: 'Profile',
+            subtitle: 'Your account details for this workspace.',
           ),
           const SizedBox(height: AppSpacing.lg),
           DecoratedBox(
@@ -66,28 +57,22 @@ class ProfilePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        AppText(
                           user?.name ?? 'Agent',
                           key: const ValueKey('profile-name'),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w400,
-                          ),
+                          variant: AppTextVariant.sectionTitle,
                         ),
                         const SizedBox(height: AppSpacing.xxs),
-                        Text(
+                        AppText(
                           user?.email ?? '',
                           key: const ValueKey('profile-email'),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.inkSecondary,
-                          ),
+                          variant: AppTextVariant.pageSubtitle,
                         ),
                         if (user?.role != null) ...[
                           const SizedBox(height: AppSpacing.xxs),
-                          Text(
+                          AppText(
                             user!.role,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.inkTertiary,
-                            ),
+                            variant: AppTextVariant.meta,
                           ),
                         ],
                       ],

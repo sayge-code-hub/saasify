@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 
 /// Maglo-style top chrome inside the main column (title left, actions right).
@@ -51,12 +52,9 @@ class DashboardHeader extends StatelessWidget {
                 child: leading ??
                     (title.isEmpty
                         ? const SizedBox.shrink()
-                        : Text(
+                        : AppText(
                             title,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
-                            ),
+                            variant: AppTextVariant.pageTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           )),

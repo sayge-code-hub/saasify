@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/help/domain/help_topics.dart';
 
 /// Help hub with request tiles shared across the workspace.
@@ -12,25 +13,14 @@ class HelpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return AppPage(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Help',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w400,
-              color: AppColors.ink,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            'Get support, report issues, or request new capabilities.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkSecondary,
-            ),
+          const AppPageHeader(
+            title: 'Help',
+            subtitle:
+                'Get support, report issues, or request new capabilities.',
           ),
           const SizedBox(height: AppSpacing.lg),
           LayoutBuilder(
@@ -81,7 +71,6 @@ class _HelpTileState extends State<_HelpTile> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final topic = widget.topic;
     final accent = _hovered ? AppColors.accent : AppColors.inkSecondary;
     final borderColor = _hovered ? AppColors.accent : AppColors.border;
@@ -124,20 +113,11 @@ class _HelpTileState extends State<_HelpTile> {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    topic.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.ink,
-                    ),
-                  ),
+                  AppText(topic.title, variant: AppTextVariant.sectionTitle),
                   const SizedBox(height: AppSpacing.xs),
-                  Text(
+                  AppText(
                     topic.description,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkSecondary,
-                      height: 1.4,
-                    ),
+                    variant: AppTextVariant.sectionSubtitle,
                   ),
                 ],
               ),

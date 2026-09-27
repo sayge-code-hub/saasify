@@ -8,6 +8,7 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_page.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/domain/ticket_config.dart';
@@ -42,8 +43,6 @@ class _TicketConfigPageState extends State<TicketConfigPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return AppPage(
       child: BlocBuilder<TicketConfigCubit, TicketConfig>(
         builder: (context, config) {
@@ -72,37 +71,16 @@ class _TicketConfigPageState extends State<TicketConfigPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Config',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          'Manage dropdown options for Add Ticket and SLA '
-                          'targets by priority.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.inkSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  AppButton(
-                    label: 'Reset defaults',
-                    variant: AppButtonVariant.outlined,
-                    onPressed: () => _confirmReset(context, cubit),
-                  ),
-                ],
+              AppPageHeader(
+                title: 'Config',
+                subtitle:
+                    'Manage dropdown options for Add Ticket and SLA '
+                    'targets by priority.',
+                trailing: AppButton(
+                  label: 'Reset defaults',
+                  variant: AppButtonVariant.outlined,
+                  onPressed: () => _confirmReset(context, cubit),
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
               AppTextField(
@@ -289,7 +267,6 @@ class _OptionListSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final preview = values.take(_previewLimit).toList();
     final remaining = values.length - preview.length;
 
@@ -304,18 +281,11 @@ class _OptionListSectionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      kind.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    AppText(kind.title, variant: AppTextVariant.sectionTitle),
                     const SizedBox(height: AppSpacing.xxs),
-                    Text(
+                    AppText(
                       kind.subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkSecondary,
-                      ),
+                      variant: AppTextVariant.sectionSubtitle,
                     ),
                   ],
                 ),
@@ -331,20 +301,15 @@ class _OptionListSectionCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
+          AppText(
             '${values.length} option${values.length == 1 ? '' : 's'}',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: AppColors.inkTertiary,
-              fontWeight: FontWeight.w600,
-            ),
+            variant: AppTextVariant.meta,
           ),
           const SizedBox(height: AppSpacing.sm),
           if (values.isEmpty)
-            Text(
+            const AppText(
               'No options yet. Open Edit to add some.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkTertiary,
-              ),
+              variant: AppTextVariant.meta,
             )
           else
             _OptionList(
@@ -568,19 +533,15 @@ class _PrioritySectionState extends State<_PrioritySection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const AppText(
                       'Priorities',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      variant: AppTextVariant.sectionTitle,
                     ),
                     const SizedBox(height: AppSpacing.xxs),
-                    Text(
+                    const AppText(
                       'Which priorities appear in the Priority dropdown on '
                       'Add Ticket.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkSecondary,
-                      ),
+                      variant: AppTextVariant.sectionSubtitle,
                     ),
                   ],
                 ),
@@ -867,20 +828,16 @@ class _SlaSectionState extends State<_SlaSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const AppText(
                       'SLA targets',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      variant: AppTextVariant.sectionTitle,
                     ),
                     const SizedBox(height: AppSpacing.xxs),
-                    Text(
+                    const AppText(
                       'A Service Level Agreement is the promised time to first '
                       'agent reply and to resolve the case. Status becomes At '
                       'risk when ≤20% of the target remains.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkSecondary,
-                      ),
+                      variant: AppTextVariant.sectionSubtitle,
                     ),
                   ],
                 ),

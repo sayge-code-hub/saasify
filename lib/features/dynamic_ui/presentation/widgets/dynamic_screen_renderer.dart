@@ -7,6 +7,7 @@ import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_loading.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/dynamic_ui/domain/dynamic_screen.dart';
 import 'package:saasify/features/dynamic_ui/presentation/bloc/dynamic_screen_cubit.dart';
 import 'package:saasify/features/dynamic_ui/presentation/widgets/dynamic_action_handler.dart';
@@ -93,14 +94,9 @@ class _DynamicScreenRendererState extends State<DynamicScreenRenderer> {
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
                                   children: [
-                                    Text(
+                                    AppText(
                                       config.title,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                      variant: AppTextVariant.pageTitle,
                                     ),
                                     const SizedBox(height: AppSpacing.xl),
                                     for (final row in config.rows) ...[
