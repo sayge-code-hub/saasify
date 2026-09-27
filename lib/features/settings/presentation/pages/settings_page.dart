@@ -28,15 +28,68 @@ class SettingsPage extends StatelessWidget {
                 'Workspace branding, profile, and notification preferences.',
           ),
           SizedBox(height: AppSpacing.lg),
-          _CompanyLogoSection(),
-          SizedBox(height: AppSpacing.md),
-          _WorkspaceProfileSection(),
-          SizedBox(height: AppSpacing.md),
-          _PreferencesSection(),
-          SizedBox(height: AppSpacing.md),
-          _NotificationsSection(),
+          _SectionGrid(
+            children: [
+              _CompanyLogoSection(),
+              _WorkspaceProfileSection(),
+              _PreferencesSection(),
+              _NotificationsSection(),
+            ],
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Responsive two-up layout for settings section cards.
+class _SectionGrid extends StatelessWidget {
+  const _SectionGrid({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoCol = constraints.maxWidth >= AppSpacing.sectionGridMinWidth;
+        if (!twoCol) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) const SizedBox(height: AppSpacing.md),
+                children[i],
+              ],
+            ],
+          );
+        }
+
+        final rows = <Widget>[];
+        for (var i = 0; i < children.length; i += 2) {
+          final left = children[i];
+          final right = i + 1 < children.length ? children[i + 1] : null;
+          rows.add(
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: i + 2 < children.length ? AppSpacing.md : 0,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: left),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: right ?? const SizedBox.shrink()),
+                ],
+              ),
+            ),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: rows,
+        );
+      },
     );
   }
 }
