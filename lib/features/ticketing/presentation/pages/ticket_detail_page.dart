@@ -88,14 +88,14 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     ticket.subject,
                     variant: AppTextVariant.pageTitle,
                   ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.md),
                   _TicketChipCategories(
                     status: ticket.status,
                     priority: ticket.priority,
                     sla: sla,
                     tags: ticket.tags,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.lg),
                   if (compact) ...[
                     mainColumn,
                     const SizedBox(height: AppSpacing.lg),
@@ -119,7 +119,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
   }
 }
 
-/// Grouped, equal-width chips under the ticket title.
+/// Compact status / priority / SLA / tags strip in a single card.
 class _TicketChipCategories extends StatelessWidget {
   const _TicketChipCategories({
     required this.status,
@@ -135,40 +135,53 @@ class _TicketChipCategories extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.xl,
-      runSpacing: AppSpacing.md,
-      crossAxisAlignment: WrapCrossAlignment.start,
-      children: [
-        _ChipCategory(
-          label: 'Status',
-          child: TicketStatusBadge(status: status),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
         ),
-        _ChipCategory(
-          label: 'Priority',
-          child: TicketPriorityBadge(priority: priority),
-        ),
-        _ChipCategory(
-          label: 'SLA',
-          child: _SlaChip(snapshot: sla),
-        ),
-        if (tags.isNotEmpty)
-          _ChipCategory(
-            label: 'Tags',
-            child: Wrap(
-              spacing: AppSpacing.xs,
-              runSpacing: AppSpacing.xs,
-              children: [
-                for (final tag in tags)
-                  TicketTagChip(
-                    label: tag,
-                    background: AppColors.surfaceMuted,
-                    foreground: AppColors.inkSecondary,
-                  ),
-              ],
+        child: Wrap(
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            _ChipCategory(
+              label: 'Status',
+              child: TicketStatusBadge(status: status),
             ),
-          ),
-      ],
+            _ChipCategory(
+              label: 'Priority',
+              child: TicketPriorityBadge(priority: priority),
+            ),
+            _ChipCategory(
+              label: 'SLA',
+              child: _SlaChip(snapshot: sla),
+            ),
+            if (tags.isNotEmpty)
+              _ChipCategory(
+                label: 'Tags',
+                child: Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    for (final tag in tags)
+                      TicketTagChip(
+                        label: tag,
+                        background: AppColors.surfaceMuted,
+                        foreground: AppColors.inkSecondary,
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -185,8 +198,9 @@ class _ChipCategory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           label.toUpperCase(),
@@ -194,9 +208,11 @@ class _ChipCategory extends StatelessWidget {
             color: AppColors.inkTertiary,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.6,
+            fontSize: 10,
+            height: 1,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(width: AppSpacing.xs),
         child,
       ],
     );
@@ -392,7 +408,7 @@ class _DetailsSection extends StatelessWidget {
   }
 }
 
-class _AssigneeRow extends StatelessWidget {
+class _AssigneeRow extends StatefulWidget {
   const _AssigneeRow({
     required this.value,
     required this.options,
@@ -404,59 +420,134 @@ class _AssigneeRow extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   @override
+  State<_AssigneeRow> createState() => _AssigneeRowState();
+}
+
+class _AssigneeRowState extends State<_AssigneeRow> {
+  bool _editing = false;
+
+  void _finishEditing([String? next]) {
+    setState(() => _editing = false);
+    if (next != widget.value) {
+      widget.onChanged(next);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final displayName = widget.value?.isNotEmpty == true
+        ? widget.value!
+        : 'Unassigned';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              'Assignee',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: AppColors.inkSecondary,
-                fontWeight: FontWeight.w700,
-              ),
+          Text(
+            'Assignee',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.ink,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          Expanded(
-            child: DropdownButtonFormField<String?>(
-              key: const ValueKey('ticket-assignee'),
-              // ignore: deprecated_member_use
-              value: value,
-              isExpanded: true,
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-              ),
-              items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Unassigned'),
-                ),
-                for (final name in options)
-                  DropdownMenuItem<String?>(
-                    value: name,
-                    child: Text(name, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 2),
+          if (_editing)
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    key: const ValueKey('ticket-assignee'),
+                    // ignore: deprecated_member_use
+                    value: widget.value,
+                    isExpanded: true,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSm),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusSm),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                    ),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('Unassigned'),
+                      ),
+                      for (final name in widget.options)
+                        DropdownMenuItem<String?>(
+                          value: name,
+                          child: Text(name, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: _finishEditing,
                   ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                TextButton(
+                  key: const ValueKey('ticket-assignee-cancel'),
+                  onPressed: () => setState(() => _editing = false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.inkTertiary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: const Text('Cancel'),
+                ),
               ],
-              onChanged: onChanged,
+            )
+          else
+            Row(
+              children: [
+                Icon(
+                  Icons.person_outline,
+                  size: 18,
+                  color: AppColors.inkSecondary,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(
+                  child: Text(
+                    displayName,
+                    key: const ValueKey('ticket-assignee-display'),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.inkSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                TextButton(
+                  key: const ValueKey('ticket-assignee-change'),
+                  onPressed: () => setState(() => _editing = true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xxs,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: const Text('Change'),
+                ),
+              ],
             ),
-          ),
         ],
       ),
     );

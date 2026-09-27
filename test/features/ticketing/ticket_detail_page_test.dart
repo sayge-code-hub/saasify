@@ -12,7 +12,7 @@ import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.d
 import 'package:saasify/features/ticketing/presentation/pages/ticket_detail_page.dart';
 
 void main() {
-  testWidgets('ticket detail shows 70/30 details, SLA, and assignee control', (
+  testWidgets('ticket detail shows compact chips card and assignee change UX', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1440, 1100);
@@ -82,9 +82,20 @@ void main() {
     expect(find.text('Assigned'), findsWidgets);
     expect(find.text('Status changed'), findsWidgets);
     expect(find.text('Invoice PDF downloads corrupted'), findsOneWidget);
-    expect(find.byKey(const ValueKey('ticket-assignee')), findsOneWidget);
 
-    await tester.ensureVisible(find.byKey(const ValueKey('ticket-assignee')));
+    // Compact assignee display by default (no dropdown until Change).
+    expect(find.byKey(const ValueKey('ticket-assignee-display')), findsOneWidget);
+    expect(find.byIcon(Icons.person_outline), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-assignee-change')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-assignee')), findsNothing);
+
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('ticket-assignee-change')),
+    );
+    await tester.tap(find.byKey(const ValueKey('ticket-assignee-change')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('ticket-assignee')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('ticket-assignee')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Riley Nguyen').last);
@@ -95,5 +106,7 @@ void main() {
       tickets.state.byId('TCK-1038')!.events.last.detail,
       'Assigned to Riley Nguyen',
     );
+    expect(find.byKey(const ValueKey('ticket-assignee-display')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ticket-assignee')), findsNothing);
   });
 }
