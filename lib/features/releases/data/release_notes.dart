@@ -44,6 +44,11 @@ abstract final class ReleaseNotes {
         ReleaseChange(
           type: ReleaseChangeType.improvement,
           summary:
+              'All Tickets Export opens a centered dialog with Excel, PDF, and Raw JSON options.',
+        ),
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary:
               'Ticket titles and Export / Email / Filter / Sort actions use regular weight; list and detail tops are more spacious.',
         ),
         ReleaseChange(
