@@ -63,6 +63,12 @@ void main() {
     expect(find.byKey(const ValueKey('sidebar-saasify-logo')), findsOneWidget);
     expect(find.byType(AppLogoWordmark), findsOneWidget);
     expect(find.textContaining('Powered by'), findsOneWidget);
+    expect(find.byKey(const ValueKey('app-version-link')), findsOneWidget);
+
+    final wordmark = tester.widget<AppLogoWordmark>(
+      find.byKey(const ValueKey('sidebar-saasify-logo')),
+    );
+    expect(wordmark.height, lessThanOrEqualTo(14));
   });
 
   testWidgets('sidebar shows uploaded company logo bytes', (tester) async {

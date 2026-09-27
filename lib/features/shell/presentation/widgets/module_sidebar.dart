@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_logo.dart';
-import 'package:saasify/core/widgets/powered_by_footer.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/settings/presentation/widgets/company_brand_logo.dart';
 import 'package:saasify/features/shell/domain/app_modules.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Maglo-inspired left rail: company brand, nav, Saasify + Sayge footer.
 class ModuleSidebar extends StatelessWidget {
@@ -89,19 +90,10 @@ class ModuleSidebar extends StatelessWidget {
                         onNavigate?.call();
                       },
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    const Divider(height: 1, color: AppColors.border),
-                    const SizedBox(height: AppSpacing.sm),
-                    const Align(
-                      alignment: Alignment.center,
-                      child: AppLogoWordmark(
-                        key: ValueKey('sidebar-saasify-logo'),
-                        height: 22,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    const PoweredByFooter(),
                     const SizedBox(height: AppSpacing.xs),
+                    const Divider(height: 1, color: AppColors.border),
+                    const SizedBox(height: AppSpacing.xs),
+                    const _SidebarBrandFooter(),
                   ],
                 ),
               ),
@@ -109,6 +101,95 @@ class ModuleSidebar extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Tiny left-aligned Saasify mark + version, with Powered by Sayge under it.
+class _SidebarBrandFooter extends StatelessWidget {
+  const _SidebarBrandFooter();
+
+  Future<void> _openSayge() async {
+    final uri = Uri.parse(AppConstants.saygeUrl);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final micro = theme.textTheme.labelSmall?.copyWith(
+      color: AppColors.inkTertiary,
+      fontSize: 9,
+      height: 1.15,
+      fontWeight: FontWeight.w400,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xs,
+        0,
+        AppSpacing.xs,
+        AppSpacing.xs,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const AppLogoWordmark(
+                key: ValueKey('sidebar-saasify-logo'),
+                height: 12,
+              ),
+              const SizedBox(width: 6),
+              GestureDetector(
+                key: const ValueKey('app-version-link'),
+                onTap: () => context.go('/releases'),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Text(
+                    AppConstants.appVersionLabel,
+                    style: micro?.copyWith(
+                      color: AppColors.inkSecondary,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.inkTertiary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text.rich(
+            TextSpan(
+              style: micro,
+              children: [
+                const TextSpan(text: AppConstants.poweredByPrefix),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.baseline,
+                  baseline: TextBaseline.alphabetic,
+                  child: GestureDetector(
+                    key: const ValueKey('powered-by-sayge'),
+                    onTap: _openSayge,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: Text(
+                        AppConstants.saygeLabel,
+                        style: micro?.copyWith(
+                          color: AppColors.accent,
+                          decoration: TextDecoration.underline,
+                          decorationColor: AppColors.accent,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            textAlign: TextAlign.left,
+          ),
+        ],
+      ),
     );
   }
 }

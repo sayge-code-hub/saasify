@@ -18,13 +18,13 @@ void main() {
   });
 
   test('formatTimezoneLabel prefers short abbreviations', () {
-    // Offset-only path uses a fixed UTC instant; label still returns UTC±hh:mm
-    // when the platform timezone name is not a short abbreviation.
     final label = formatTimezoneLabel(DateTime.utc(2026, 1, 1));
     expect(label, isNotEmpty);
   });
 
-  testWidgets('HeaderDateTime renders stacked light grey clock', (tester) async {
+  testWidgets('HeaderDateTime renders single-line light grey clock', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.light(),
@@ -40,11 +40,9 @@ void main() {
     expect(find.byKey(const ValueKey('header-datetime')), findsOneWidget);
     expect(find.textContaining('26 Sep 2026'), findsOneWidget);
     expect(find.textContaining('19:02'), findsOneWidget);
-
-    final column = tester.widget<Column>(
-      find.byKey(const ValueKey('header-datetime')),
+    expect(
+      tester.widget(find.byKey(const ValueKey('header-datetime'))),
+      isA<Text>(),
     );
-    expect(column.crossAxisAlignment, CrossAxisAlignment.start);
-    expect(column.children.whereType<Text>().length, 2);
   });
 }

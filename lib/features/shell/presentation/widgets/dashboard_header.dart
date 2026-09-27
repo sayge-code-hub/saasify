@@ -173,33 +173,19 @@ class _HeaderDateTimeState extends State<HeaderDateTime> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = theme.textTheme.bodySmall?.copyWith(
-      color: AppColors.inkTertiary,
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-      height: 1.25,
-      fontSize: 12,
-    );
     return Align(
       alignment: Alignment.centerLeft,
-      child: Column(
+      child: Text(
         key: const ValueKey('header-datetime'),
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            formatHeaderDate(_now),
-            style: style,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            formatHeaderTime(_now),
-            style: style,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        formatHeaderDateTime(_now),
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: AppColors.inkTertiary,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.15,
+          height: 1.2,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
