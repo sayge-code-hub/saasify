@@ -1,47 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
-import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_page.dart';
-import 'package:saasify/core/widgets/app_text_field.dart';
+import 'package:saasify/features/help/domain/help_topics.dart';
 
 /// Help hub with request tiles shared across the workspace.
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
-
-  static const tiles = <_HelpTileData>[
-    _HelpTileData(
-      keyName: 'help-tile-bug',
-      title: 'Raise a bug',
-      description:
-          'Report something broken in the product so engineering can investigate.',
-      icon: Icons.bug_report_outlined,
-      formTitle: 'Raise a bug',
-      formHint: 'Describe the issue, steps to reproduce, and expected result…',
-      submitLabel: 'Submit bug',
-    ),
-    _HelpTileData(
-      keyName: 'help-tile-contact',
-      title: 'Contact us',
-      description:
-          'Reach the Saasify team for account questions, billing, or general support.',
-      icon: Icons.mail_outline,
-      formTitle: 'Contact us',
-      formHint: 'How can we help you today?',
-      submitLabel: 'Send message',
-    ),
-    _HelpTileData(
-      keyName: 'help-tile-feature',
-      title: 'New feature request',
-      description:
-          'Suggest an improvement or capability that would help your team work faster.',
-      icon: Icons.lightbulb_outline,
-      formTitle: 'New feature request',
-      formHint: 'Tell us the problem and the feature you would like to see…',
-      submitLabel: 'Submit request',
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -68,13 +35,15 @@ class HelpPage extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           LayoutBuilder(
             builder: (context, constraints) {
-              final wide = constraints.maxWidth >= AppSpacing.sectionGridMinWidth;
+              final wide =
+                  constraints.maxWidth >= AppSpacing.sectionGridMinWidth;
+              const tiles = HelpTopic.values;
               if (!wide) {
                 return Column(
                   children: [
                     for (var i = 0; i < tiles.length; i++) ...[
                       if (i > 0) const SizedBox(height: AppSpacing.md),
-                      _HelpTile(data: tiles[i]),
+                      _HelpTile(topic: tiles[i]),
                     ],
                   ],
                 );
@@ -84,7 +53,7 @@ class HelpPage extends StatelessWidget {
                 children: [
                   for (var i = 0; i < tiles.length; i++) ...[
                     if (i > 0) const SizedBox(width: AppSpacing.md),
-                    Expanded(child: _HelpTile(data: tiles[i])),
+                    Expanded(child: _HelpTile(topic: tiles[i])),
                   ],
                 ],
               );
@@ -96,116 +65,84 @@ class HelpPage extends StatelessWidget {
   }
 }
 
-class _HelpTileData {
-  const _HelpTileData({
-    required this.keyName,
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.formTitle,
-    required this.formHint,
-    required this.submitLabel,
-  });
+class _HelpTile extends StatefulWidget {
+  const _HelpTile({required this.topic});
 
-  final String keyName;
-  final String title;
-  final String description;
-  final IconData icon;
-  final String formTitle;
-  final String formHint;
-  final String submitLabel;
+  final HelpTopic topic;
+
+  @override
+  State<_HelpTile> createState() => _HelpTileState();
 }
 
-class _HelpTile extends StatelessWidget {
-  const _HelpTile({required this.data});
+class _HelpTileState extends State<_HelpTile> {
+  bool _hovered = false;
 
-  final _HelpTileData data;
-
-  Future<void> _openForm(BuildContext context) async {
-    final controller = TextEditingController();
-    final submitted = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(data.formTitle),
-          content: SizedBox(
-            width: 420,
-            child: AppTextField(
-              controller: controller,
-              hint: data.formHint,
-              maxLines: 5,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (controller.text.trim().isEmpty) return;
-                Navigator.of(context).pop(true);
-              },
-              child: Text(data.submitLabel),
-            ),
-          ],
-        );
-      },
-    );
-    final text = controller.text.trim();
-    controller.dispose();
-    if (submitted == true && context.mounted && text.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${data.title} submitted (mock).'),
-        ),
-      );
-    }
-  }
+  void _open() => context.go('/help/${widget.topic.pathSegment}');
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final topic = widget.topic;
+    final accent = _hovered ? AppColors.accent : AppColors.inkSecondary;
+    final borderColor = _hovered ? AppColors.accent : AppColors.border;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Icon(data.icon, color: AppColors.inkSecondary, size: 28),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              data.title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w400,
-                color: AppColors.ink,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 140),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(color: borderColor, width: _hovered ? 1.5 : 1),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: ValueKey('help-tile-${topic.pathSegment}'),
+            onTap: _open,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            hoverColor: AppColors.accentSoft,
+            splashColor: AppColors.accentMuted,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(topic.icon, color: accent, size: 28),
+                      const Spacer(),
+                      Icon(
+                        Icons.arrow_forward,
+                        key: ValueKey('help-arrow-${topic.pathSegment}'),
+                        color: accent,
+                        size: 22,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    topic.title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    topic.description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.inkSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              data.description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkSecondary,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: AppButton(
-                key: ValueKey(data.keyName),
-                label: 'Open',
-                variant: AppButtonVariant.outlined,
-                onPressed: () => _openForm(context),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

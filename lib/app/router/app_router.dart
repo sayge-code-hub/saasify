@@ -7,7 +7,9 @@ import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/auth/presentation/pages/login_page.dart';
 import 'package:saasify/features/dynamic_ui/data/mock_dynamic_screens.dart';
 import 'package:saasify/features/dynamic_ui/presentation/pages/dynamic_screen_page.dart';
+import 'package:saasify/features/help/domain/help_topics.dart';
 import 'package:saasify/features/help/presentation/pages/help_page.dart';
+import 'package:saasify/features/help/presentation/pages/help_topic_page.dart';
 import 'package:saasify/features/overview/presentation/pages/overview_page.dart';
 import 'package:saasify/features/releases/presentation/pages/release_history_page.dart';
 import 'package:saasify/features/settings/presentation/pages/settings_page.dart';
@@ -131,6 +133,25 @@ GoRouter createAppRouter({
             pageBuilder: (context, state) => const NoTransitionPage<void>(
               child: HelpPage(),
             ),
+            routes: [
+              GoRoute(
+                path: ':topic',
+                name: 'help-topic',
+                pageBuilder: (context, state) {
+                  final topic = HelpTopicX.tryParse(
+                    state.pathParameters['topic'] ?? '',
+                  );
+                  if (topic == null) {
+                    return const NoTransitionPage<void>(
+                      child: HelpPage(),
+                    );
+                  }
+                  return NoTransitionPage<void>(
+                    child: HelpTopicPage(topic: topic),
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: '/dynamic/create-ticket',

@@ -6,7 +6,6 @@ import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_logo.dart';
-import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/settings/presentation/widgets/company_brand_logo.dart';
 import 'package:saasify/features/shell/domain/app_modules.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
@@ -61,8 +60,8 @@ class ModuleSidebar extends StatelessWidget {
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
+              const Padding(
+                padding: EdgeInsets.fromLTRB(
                   AppSpacing.sm,
                   AppSpacing.sm,
                   AppSpacing.sm,
@@ -70,27 +69,9 @@ class ModuleSidebar extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    _NavTile(
-                      label: 'Help',
-                      icon: Icons.help_outline,
-                      active: state.location == '/help',
-                      onTap: () {
-                        context.go('/help');
-                        onNavigate?.call();
-                      },
-                    ),
-                    _NavTile(
-                      label: 'Logout',
-                      icon: Icons.logout,
-                      onTap: () {
-                        context.read<AuthCubit>().logout();
-                        onNavigate?.call();
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    const Divider(height: 1, color: AppColors.border),
-                    const SizedBox(height: AppSpacing.xs),
-                    const _SidebarBrandFooter(),
+                    Divider(height: 1, color: AppColors.border),
+                    SizedBox(height: AppSpacing.xs),
+                    _SidebarBrandFooter(),
                   ],
                 ),
               ),
