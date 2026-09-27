@@ -11,6 +11,7 @@ import 'package:saasify/features/help/domain/help_topics.dart';
 import 'package:saasify/features/help/presentation/pages/help_page.dart';
 import 'package:saasify/features/help/presentation/pages/help_topic_page.dart';
 import 'package:saasify/features/overview/presentation/pages/overview_page.dart';
+import 'package:saasify/features/profile/presentation/pages/profile_page.dart';
 import 'package:saasify/features/releases/presentation/pages/release_history_page.dart';
 import 'package:saasify/features/settings/presentation/pages/settings_page.dart';
 import 'package:saasify/features/shell/presentation/pages/shell_page.dart';
@@ -125,6 +126,13 @@ GoRouter createAppRouter({
             name: 'settings',
             pageBuilder: (context, state) => const NoTransitionPage<void>(
               child: SettingsPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/profile',
+            name: 'profile',
+            pageBuilder: (context, state) => const NoTransitionPage<void>(
+              child: ProfilePage(),
             ),
           ),
           GoRoute(

@@ -32,7 +32,6 @@ class DashboardHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final path = GoRouterState.of(context).uri.path;
     final onSettings = path == '/settings';
-    final onHelp = path == '/help' || path.startsWith('/help/');
 
     return Material(
       color: AppColors.surface,
@@ -74,9 +73,9 @@ class DashboardHeader extends StatelessWidget {
                 key: const ValueKey('header-help'),
                 tooltip: 'Help',
                 onPressed: () => context.go('/help'),
-                icon: Icon(
-                  onHelp ? Icons.help : Icons.help_outline,
-                  color: onHelp ? AppColors.accent : AppColors.ink,
+                icon: const Icon(
+                  Icons.help_outline,
+                  color: AppColors.ink,
                 ),
               ),
               IconButton(
@@ -88,40 +87,61 @@ class DashboardHeader extends StatelessWidget {
                   color: onSettings ? AppColors.accent : AppColors.ink,
                 ),
               ),
-              IconButton(
-                key: const ValueKey('header-logout'),
-                tooltip: 'Logout',
-                onPressed: () => context.read<AuthCubit>().logout(),
-                icon: const Icon(Icons.logout, color: AppColors.ink),
-              ),
               const SizedBox(width: AppSpacing.xs),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppColors.accentMuted,
-                    foregroundColor: AppColors.accentHover,
-                    child: Text(
-                      (userName != null && userName!.isNotEmpty)
-                          ? userName![0].toUpperCase()
-                          : 'A',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: AppColors.accentHover,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+              PopupMenuButton<_ProfileMenuAction>(
+                key: const ValueKey('header-profile-menu'),
+                tooltip: 'Account',
+                offset: const Offset(0, 48),
+                onSelected: (action) {
+                  switch (action) {
+                    case _ProfileMenuAction.profile:
+                      context.go('/profile');
+                    case _ProfileMenuAction.logout:
+                      context.read<AuthCubit>().logout();
+                  }
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: _ProfileMenuAction.profile,
+                    child: Text('Profile'),
                   ),
-                  if (userName != null) ...[
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      userName!,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: AppColors.ink,
-                        fontWeight: FontWeight.w600,
+                  PopupMenuItem(
+                    value: _ProfileMenuAction.logout,
+                    child: Text('Logout'),
+                  ),
+                ],
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: AppColors.accentMuted,
+                      foregroundColor: AppColors.accentHover,
+                      child: Text(
+                        (userName != null && userName!.isNotEmpty)
+                            ? userName![0].toUpperCase()
+                            : 'A',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: AppColors.accentHover,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
+                    if (userName != null) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        userName!,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: AppColors.ink,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ],
           ),
@@ -130,6 +150,8 @@ class DashboardHeader extends StatelessWidget {
     );
   }
 }
+
+enum _ProfileMenuAction { profile, logout }
 
 /// Live local date, time, and timezone for the shell header on every route.
 class HeaderDateTime extends StatefulWidget {
