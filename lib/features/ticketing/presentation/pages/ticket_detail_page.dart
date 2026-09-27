@@ -143,12 +143,12 @@ class _TicketChipCategories extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.sm + 2,
+          vertical: AppSpacing.xs + 2,
         ),
         child: Wrap(
-          spacing: AppSpacing.lg,
-          runSpacing: AppSpacing.sm,
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             _ChipCategory(
