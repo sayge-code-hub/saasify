@@ -514,7 +514,7 @@ class _AssigneeRowState extends State<_AssigneeRow> {
           else
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.person_outline,
                   size: 18,
                   color: AppColors.inkSecondary,
@@ -952,14 +952,14 @@ class _ActivityLedger extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
+          const Padding(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.md,
               AppSpacing.md,
               AppSpacing.md,
               AppSpacing.sm,
             ),
-            child: const AppText(
+            child: AppText(
               'Timeline',
               variant: AppTextVariant.sectionTitle,
             ),
