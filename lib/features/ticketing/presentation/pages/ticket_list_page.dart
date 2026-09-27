@@ -6,7 +6,6 @@ import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_empty_state.dart';
-import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/features/ticketing/domain/ticket.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/widgets/ticket_list_items.dart';
@@ -311,15 +310,11 @@ class _TicketListPageState extends State<TicketListPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-                        AppTextField(
-                          controller: _searchController,
-                          hint: 'Search by id, subject, or customer',
-                          prefixIcon: const Icon(Icons.search),
-                          onChanged: cubit.setQuery,
-                        ),
                         const SizedBox(height: AppSpacing.md),
                         _ListToolbar(
+                          compact: compact,
+                          searchController: _searchController,
+                          onSearchChanged: cubit.setQuery,
                           hasTickets: tickets.isNotEmpty,
                           selectedCount: selectedCount,
                           onExport: () => _pickExport(_exportTargets(state)),
@@ -502,6 +497,9 @@ class _ListHeader extends StatelessWidget {
 
 class _ListToolbar extends StatelessWidget {
   const _ListToolbar({
+    required this.compact,
+    required this.searchController,
+    required this.onSearchChanged,
     required this.hasTickets,
     required this.selectedCount,
     required this.onExport,
@@ -511,6 +509,9 @@ class _ListToolbar extends StatelessWidget {
     required this.onDelete,
   });
 
+  final bool compact;
+  final TextEditingController searchController;
+  final ValueChanged<String> onSearchChanged;
   final bool hasTickets;
   final int selectedCount;
   final VoidCallback onExport;
@@ -521,27 +522,29 @@ class _ListToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final actions = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (selectedCount > 0) ...[
           Text(
             '$selectedCount selected',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: AppColors.inkSecondary,
                   fontWeight: FontWeight.w400,
                 ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.xs),
           TextButton.icon(
             onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline, size: 18),
+            icon: const Icon(Icons.delete_outline, size: 16),
             label: const Text('Delete'),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.danger,
+              visualDensity: VisualDensity.compact,
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
         ],
-        const Spacer(),
         _ToolbarButton(
           icon: Icons.ios_share_outlined,
           label: 'Export',
@@ -567,6 +570,100 @@ class _ListToolbar extends StatelessWidget {
         ),
       ],
     );
+
+    final search = _TicketSearchField(
+      controller: searchController,
+      onChanged: onSearchChanged,
+    );
+
+    if (compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          search,
+          const SizedBox(height: AppSpacing.sm),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: actions,
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(child: search),
+        const SizedBox(width: AppSpacing.md),
+        actions,
+      ],
+    );
+  }
+}
+
+class _TicketSearchField extends StatelessWidget {
+  const _TicketSearchField({
+    required this.controller,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle = theme.textTheme.bodySmall?.copyWith(
+      color: AppColors.ink,
+      fontWeight: FontWeight.w400,
+      fontSize: 13,
+      height: 1.2,
+    );
+    final hintStyle = theme.textTheme.bodySmall?.copyWith(
+      color: AppColors.inkTertiary,
+      fontWeight: FontWeight.w400,
+      fontSize: 13,
+      height: 1.2,
+    );
+
+    return SizedBox(
+      height: 36,
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        style: textStyle,
+        cursorColor: AppColors.accent,
+        cursorHeight: 14,
+        decoration: InputDecoration(
+          isDense: true,
+          filled: true,
+          fillColor: AppColors.surface,
+          hintText: 'Search by id, subject, or customer',
+          hintStyle: hintStyle,
+          prefixIcon: const Icon(Icons.search, size: 18),
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 36,
+            minHeight: 36,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: 0,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            borderSide: const BorderSide(color: AppColors.accent, width: 1),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -586,22 +683,25 @@ class _ToolbarButton extends StatelessWidget {
     final theme = Theme.of(context);
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 18, color: AppColors.ink),
+      icon: Icon(icon, size: 16, color: AppColors.ink),
       label: Text(
         label,
-        style: theme.textTheme.labelLarge?.copyWith(
+        style: theme.textTheme.labelMedium?.copyWith(
           color: AppColors.ink,
           fontWeight: FontWeight.w400,
+          fontSize: 13,
         ),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.ink,
         side: const BorderSide(color: AppColors.border),
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.sm,
+          vertical: 0,
         ),
-        minimumSize: const Size(0, 40),
+        minimumSize: const Size(0, 36),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         ),
