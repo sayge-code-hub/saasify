@@ -139,7 +139,7 @@ class DashboardHeader extends StatelessWidget {
 
 enum _HeaderAction { signOut }
 
-/// Live local date, time, and timezone for the shell header (dashboard home).
+/// Live local date, time, and timezone for the shell header on every route.
 class HeaderDateTime extends StatefulWidget {
   const HeaderDateTime({super.key, this.now});
 

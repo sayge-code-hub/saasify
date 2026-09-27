@@ -105,8 +105,11 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                     builder: (context, constraints) {
                       final cardWidth = constraints.maxWidth * 0.95;
                       return SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.lg,
+                        padding: const EdgeInsets.fromLTRB(
+                          0,
+                          AppSpacing.pageContentTop,
+                          0,
+                          AppSpacing.lg,
                         ),
                         child: Align(
                           alignment: Alignment.topCenter,

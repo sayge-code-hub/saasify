@@ -15,7 +15,7 @@ Admin-facing customer-support ticketing UI. Data and workflows are mocked in mem
    - Application, Priority, Bug, and Distribution List options come from **Config**
 3. **Ticket list** (`/ticketing/all`)
    - Search by subject / customer / id
-   - Export Excel / PDF / Email (mocked)
+   - Export Excel / PDF / Raw JSON / Email (mocked; export via centered dialog)
    - Select all / deselect all / per-row selection
    - Bulk delete when selection is non-empty
    - Clean list: id, subject, customer, priority, status, assignee

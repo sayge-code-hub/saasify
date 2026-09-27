@@ -131,34 +131,18 @@ class _TicketListPageState extends State<TicketListPage> {
   }
 
   Future<void> _pickExport(List<Ticket> tickets) async {
-    final format = await showModalBottomSheet<String>(
+    final format = await showDialog<String>(
       context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.table_view_outlined),
-                title: const Text('Excel'),
-                subtitle: const Text('Spreadsheet (.xlsx)'),
-                onTap: () => Navigator.of(context).pop('excel'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf_outlined),
-                title: const Text('PDF'),
-                subtitle: const Text('Document (.pdf)'),
-                onTap: () => Navigator.of(context).pop('pdf'),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-          ),
-        );
-      },
+      barrierDismissible: true,
+      builder: (context) => const _ExportFormatDialog(),
     );
     if (format == null || !mounted) return;
-    final label = format == 'excel' ? 'Excel' : 'PDF';
+    final label = switch (format) {
+      'excel' => 'Excel',
+      'pdf' => 'PDF',
+      'json' => 'Raw JSON',
+      _ => format,
+    };
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -313,7 +297,7 @@ class _TicketListPageState extends State<TicketListPage> {
                   Padding(
                     padding: EdgeInsets.fromLTRB(
                       horizontal,
-                      AppSpacing.xxl,
+                      AppSpacing.pageContentTop,
                       horizontal,
                       AppSpacing.md,
                     ),
@@ -620,6 +604,151 @@ class _ToolbarButton extends StatelessWidget {
         minimumSize: const Size(0, 40),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExportFormatDialog extends StatelessWidget {
+  const _ExportFormatDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Dialog(
+      backgroundColor: AppColors.surface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        side: const BorderSide(color: AppColors.border),
+      ),
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.xxl,
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.xl,
+            AppSpacing.xl,
+            AppSpacing.xl,
+            AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Export',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Choose a format for the current ticket list.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.inkTertiary,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _ExportFormatOption(
+                icon: Icons.table_view_outlined,
+                title: 'Excel',
+                subtitle: 'Spreadsheet (.xlsx)',
+                onTap: () => Navigator.of(context).pop('excel'),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              _ExportFormatOption(
+                icon: Icons.picture_as_pdf_outlined,
+                title: 'PDF',
+                subtitle: 'Document (.pdf)',
+                onTap: () => Navigator.of(context).pop('pdf'),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              _ExportFormatOption(
+                icon: Icons.data_object_outlined,
+                title: 'Raw JSON',
+                subtitle: 'Structured data (.json)',
+                onTap: () => Navigator.of(context).pop('json'),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExportFormatOption extends StatelessWidget {
+  const _ExportFormatOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        hoverColor: AppColors.surfaceMuted,
+        splashColor: AppColors.accentMuted.withValues(alpha: 0.35),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: 28, color: AppColors.inkSecondary),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkTertiary,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

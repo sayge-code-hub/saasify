@@ -71,6 +71,7 @@ void main() {
 
     expect(find.text('All Tickets'), findsWidgets);
     expect(find.textContaining('TCK-'), findsWidgets);
+    expect(find.byKey(const ValueKey('header-datetime')), findsOneWidget);
 
     await tester.tap(find.text('TCK-1042').first);
     await tester.pumpAndSettle();
@@ -82,6 +83,7 @@ void main() {
     expect(find.text('Workflow'), findsNothing);
     expect(find.textContaining('Ticket:'), findsNothing);
     expect(find.byKey(const ValueKey('header-back-all-tickets')), findsOneWidget);
+    expect(find.byKey(const ValueKey('header-datetime')), findsOneWidget);
 
     tickets.updateStatus('TCK-1042', TicketStatus.inProgress);
     await tester.pumpAndSettle();
@@ -116,10 +118,12 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('nav-ticketing-all')));
     await tester.pumpAndSettle();
     expect(find.text('All Tickets'), findsWidgets);
+    expect(find.byKey(const ValueKey('header-datetime')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('nav-ticketing-new')));
     await tester.pumpAndSettle();
     expect(find.text('Create Ticket'), findsOneWidget);
+    expect(find.byKey(const ValueKey('header-datetime')), findsOneWidget);
     expect(find.byKey(const ValueKey('ticket-header')), findsOneWidget);
     expect(find.byKey(const ValueKey('ticket-application')), findsOneWidget);
     expect(find.byKey(const ValueKey('ticket-priority')), findsOneWidget);

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:saasify/core/responsive/app_breakpoints.dart';
 import 'package:saasify/core/theme/app_colors.dart';
+import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_scaffold.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
@@ -26,7 +27,6 @@ class ShellPage extends StatelessWidget {
       _ => null,
     };
     final onTicketDetail = location.startsWith('/ticketing/tickets/');
-    final onDashboard = location == '/ticketing' || location == '/';
 
     return AppScaffold(
       backgroundColor: AppColors.canvas,
@@ -53,14 +53,13 @@ class ShellPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DashboardHeader(
-                      title: dashboardTitleFor(location),
+                      // Page titles live in content; header left is always the clock.
+                      title: '',
                       leading: onTicketDetail
-                          ? _TicketDetailHeaderBack(
-                              onPressed: () => context.go('/ticketing/all'),
+                          ? _TicketDetailHeaderLeading(
+                              onBack: () => context.go('/ticketing/all'),
                             )
-                          : onDashboard
-                              ? const HeaderDateTime()
-                              : null,
+                          : const HeaderDateTime(),
                       userName: user?.name,
                       showMenu: compact,
                       onMenu: compact
@@ -79,6 +78,24 @@ class ShellPage extends StatelessWidget {
   }
 }
 
+/// Back control + live clock so ticket detail matches other shell routes.
+class _TicketDetailHeaderLeading extends StatelessWidget {
+  const _TicketDetailHeaderLeading({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _TicketDetailHeaderBack(onPressed: onBack),
+        const SizedBox(width: AppSpacing.md),
+        const Expanded(child: HeaderDateTime()),
+      ],
+    );
+  }
+}
+
 class _TicketDetailHeaderBack extends StatelessWidget {
   const _TicketDetailHeaderBack({required this.onPressed});
 
@@ -87,51 +104,27 @@ class _TicketDetailHeaderBack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: TextButton.icon(
-        key: const ValueKey('header-back-all-tickets'),
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.accent,
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-        ),
-        icon: const Icon(Icons.arrow_back, size: 20),
-        label: Text(
-          'All tickets',
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: AppColors.accent,
-            fontWeight: FontWeight.w600,
-          ),
+    return TextButton.icon(
+      key: const ValueKey('header-back-all-tickets'),
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.accent,
+        padding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: const Icon(Icons.arrow_back, size: 20),
+      label: Text(
+        'All tickets',
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: AppColors.accent,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 }
 
-String dashboardTitleFor(String location) {
-  if (location == '/ticketing' || location == '/') {
-    // Date/time leading replaces the title on the dashboard home.
-    return '';
-  }
-  if (location.startsWith('/ticketing/tickets/')) {
-    // Leading back control replaces the title on ticket detail.
-    return '';
-  }
-  if (location == '/ticketing/new') return 'Add Ticket';
-  // List views and Config keep the page title in content; header stays clean.
-  if (location == '/ticketing/all' ||
-      location == '/ticketing/config' ||
-      location.startsWith('/ticketing/config/')) {
-    return '';
-  }
-  if (location == '/dynamic/create-ticket') return 'Add Ticket (BDUI)';
-  if (location == '/settings') return 'Settings';
-  return 'Workspace';
-}
-
-/// Syncs [ShellCubit] with the active router location.
 class ShellLocationSync extends StatefulWidget {
   const ShellLocationSync({
     required this.location,

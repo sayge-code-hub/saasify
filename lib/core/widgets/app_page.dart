@@ -30,7 +30,7 @@ class AppPage extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             horizontal,
-            AppSpacing.xxl,
+            AppSpacing.pageContentTop,
             horizontal,
             AppSpacing.lg,
           ),

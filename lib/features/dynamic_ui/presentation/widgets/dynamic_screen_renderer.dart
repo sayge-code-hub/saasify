@@ -57,8 +57,11 @@ class _DynamicScreenRendererState extends State<DynamicScreenRenderer> {
                       final cardWidth =
                           constraints.maxWidth * config.cardWidthFactor;
                       return SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.lg,
+                        padding: const EdgeInsets.fromLTRB(
+                          0,
+                          AppSpacing.pageContentTop,
+                          0,
+                          AppSpacing.lg,
                         ),
                         child: Align(
                           alignment: Alignment.topCenter,

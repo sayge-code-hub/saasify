@@ -20,6 +20,11 @@ abstract final class AppSpacing {
   static const double pagePaddingCompact = md;
   static const double pagePaddingExpanded = xl;
 
+  /// Gap from the shell [DashboardHeader] to the page title / first toolbar.
+  /// Use for [AppPage] and any shell body that lays out its own padding
+  /// (Dashboard, All Tickets) so every screen aligns.
+  static const double pageContentTop = md;
+
   /// Breakpoint for two-up section grids (Config, etc.).
   static const double sectionGridMinWidth = 720;
 }

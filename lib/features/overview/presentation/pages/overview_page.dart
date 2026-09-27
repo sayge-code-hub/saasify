@@ -34,9 +34,13 @@ class OverviewPage extends StatelessWidget {
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(
-                compact ? AppSpacing.md : AppSpacing.xl,
-                AppSpacing.md,
-                compact ? AppSpacing.md : AppSpacing.xl,
+                compact
+                    ? AppSpacing.pagePaddingCompact
+                    : AppSpacing.pagePaddingExpanded,
+                AppSpacing.pageContentTop,
+                compact
+                    ? AppSpacing.pagePaddingCompact
+                    : AppSpacing.pagePaddingExpanded,
                 AppSpacing.xl,
               ),
               child: Column(
