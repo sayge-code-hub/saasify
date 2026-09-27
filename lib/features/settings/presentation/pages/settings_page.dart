@@ -328,15 +328,7 @@ class _WorkspaceProfileSectionState extends State<_WorkspaceProfileSection> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final settings = context.watch<WorkspaceSettingsCubit>().state;
-    final titleStyle = theme.textTheme.labelLarge?.copyWith(
-      fontWeight: FontWeight.w500,
-    );
-    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: AppColors.ink,
-      fontWeight: FontWeight.w400,
-    );
 
     return _SettingsCard(
       child: Column(
@@ -355,7 +347,7 @@ class _WorkspaceProfileSectionState extends State<_WorkspaceProfileSection> {
             saveKey: const ValueKey('settings-profile-save'),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text('Workspace name', style: titleStyle),
+          const AppText('Workspace name', variant: AppTextVariant.label),
           const SizedBox(height: AppSpacing.xs),
           if (_editing)
             AppTextField(
@@ -364,13 +356,13 @@ class _WorkspaceProfileSectionState extends State<_WorkspaceProfileSection> {
               hint: 'Acme Support',
             )
           else
-            Text(
+            AppText(
               settings.workspaceName,
               key: const ValueKey('settings-workspace-name'),
-              style: valueStyle,
+              variant: AppTextVariant.body,
             ),
           const SizedBox(height: AppSpacing.md),
-          Text('Support email', style: titleStyle),
+          const AppText('Support email', variant: AppTextVariant.label),
           const SizedBox(height: AppSpacing.xs),
           if (_editing)
             AppTextField(
@@ -380,10 +372,10 @@ class _WorkspaceProfileSectionState extends State<_WorkspaceProfileSection> {
               keyboardType: TextInputType.emailAddress,
             )
           else
-            Text(
+            AppText(
               settings.supportEmail,
               key: const ValueKey('settings-support-email'),
-              style: valueStyle,
+              variant: AppTextVariant.body,
             ),
         ],
       ),
@@ -442,7 +434,6 @@ class _PreferencesSectionState extends State<_PreferencesSection> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final settings = context.watch<WorkspaceSettingsCubit>().state;
     final timezone = _editing ? _timezone : settings.timezone;
     final language = _editing ? _language : settings.language;
@@ -463,12 +454,7 @@ class _PreferencesSectionState extends State<_PreferencesSection> {
             saveKey: const ValueKey('settings-prefs-save'),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            'Timezone',
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          const AppText('Timezone', variant: AppTextVariant.label),
           const SizedBox(height: AppSpacing.xs),
           DropdownButtonFormField<String>(
             key: ValueKey('settings-timezone-$timezone-$_editing'),
@@ -486,12 +472,7 @@ class _PreferencesSectionState extends State<_PreferencesSection> {
                 : null,
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            'Language',
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          const AppText('Language', variant: AppTextVariant.label),
           const SizedBox(height: AppSpacing.xs),
           DropdownButtonFormField<String>(
             key: ValueKey('settings-language-$language-$_editing'),

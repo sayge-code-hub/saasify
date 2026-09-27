@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 
 /// Standard error presentation with optional retry.
 class AppErrorView extends StatelessWidget {
@@ -33,15 +34,15 @@ class AppErrorView extends StatelessWidget {
                 color: theme.colorScheme.error,
               ),
               const SizedBox(height: AppSpacing.md),
-              Text(
+              AppText(
                 title,
-                style: theme.textTheme.titleLarge,
+                variant: AppTextVariant.sectionTitle,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xs),
-              Text(
+              AppText(
                 message,
-                style: theme.textTheme.bodyMedium,
+                variant: AppTextVariant.pageSubtitle,
                 textAlign: TextAlign.center,
               ),
               if (onRetry != null) ...[

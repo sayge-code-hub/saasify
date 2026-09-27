@@ -6,6 +6,7 @@ import 'package:saasify/core/theme/app_colors.dart';
 import 'package:saasify/core/theme/app_spacing.dart';
 import 'package:saasify/core/widgets/app_button.dart';
 import 'package:saasify/core/widgets/app_logo.dart';
+import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/core/widgets/app_text_field.dart';
 import 'package:saasify/core/widgets/powered_by_footer.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
@@ -101,11 +102,9 @@ class _LoginPageState extends State<LoginPage>
                                   child: AppLogoWordmark(height: 48),
                                 ),
                                 const SizedBox(height: AppSpacing.md),
-                                Text(
+                                const AppText(
                                   'Sign in to the admin workspace',
-                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                    color: AppColors.inkSecondary,
-                                  ),
+                                  variant: AppTextVariant.pageSubtitle,
                                 ),
                                 const SizedBox(height: AppSpacing.xxl),
                                 Form(
@@ -177,12 +176,9 @@ class _LoginPageState extends State<LoginPage>
                                         onPressed: loading ? null : _submit,
                                       ),
                                       const SizedBox(height: AppSpacing.md),
-                                      Text(
+                                      const AppText(
                                         'Mock auth — any non-empty credentials work.',
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                              color: AppColors.inkTertiary,
-                                            ),
+                                        variant: AppTextVariant.meta,
                                       ),
                                     ],
                                   ),

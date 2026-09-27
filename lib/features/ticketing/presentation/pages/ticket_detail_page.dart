@@ -288,7 +288,6 @@ class _DetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final cubit = context.read<TicketListCubit>();
     final currentAssignee = ticket.assigneeName?.isNotEmpty == true
         ? ticket.assigneeName
@@ -392,15 +391,12 @@ class _DetailsSection extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: AppSpacing.md),
-            Text(
+            const AppText(
               'Description',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: AppColors.inkSecondary,
-                fontWeight: FontWeight.w600,
-              ),
+              variant: AppTextVariant.sectionTitle,
             ),
             const SizedBox(height: AppSpacing.xs),
-            Text(ticket.description, style: theme.textTheme.bodyMedium),
+            AppText(ticket.description, variant: AppTextVariant.body),
           ],
         ),
       ),
@@ -607,7 +603,6 @@ class _SlaClockRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final now = DateTime.now();
     final String timing;
     if (clock.completedAt != null) {
@@ -638,25 +633,16 @@ class _SlaClockRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    clock.label,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  AppText(clock.label, variant: AppTextVariant.label),
                   const SizedBox(height: 2),
-                  Text(
+                  AppText(
                     'Target ${TicketSla.formatDuration(clock.target)} · '
                     'Due ${_formatDate(clock.dueAt)}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkSecondary,
-                    ),
+                    variant: AppTextVariant.sectionSubtitle,
                   ),
-                  Text(
+                  AppText(
                     timing,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkTertiary,
-                    ),
+                    variant: AppTextVariant.meta,
                   ),
                 ],
               ),
