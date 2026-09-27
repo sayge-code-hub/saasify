@@ -704,41 +704,229 @@ class _PriorityListRow extends StatelessWidget {
   }
 }
 
-class _SlaSection extends StatelessWidget {
+class _SlaSection extends StatefulWidget {
   const _SlaSection({required this.config});
 
   final TicketConfig config;
 
   @override
+  State<_SlaSection> createState() => _SlaSectionState();
+}
+
+class _SlaSectionState extends State<_SlaSection> {
+  bool _editing = false;
+  late Map<TicketPriority, SlaTarget> _draft;
+  late Map<TicketPriority, SlaTarget> _baseline;
+
+  @override
+  void initState() {
+    super.initState();
+    _baseline = _copySla(widget.config.slaByPriority);
+    _draft = _copySla(_baseline);
+  }
+
+  @override
+  void didUpdateWidget(covariant _SlaSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_editing &&
+        !_sameSla(widget.config.slaByPriority, oldWidget.config.slaByPriority)) {
+      _baseline = _copySla(widget.config.slaByPriority);
+      _draft = _copySla(_baseline);
+    }
+  }
+
+  bool get _isDirty => !_sameSla(_draft, _baseline);
+
+  static Map<TicketPriority, SlaTarget> _copySla(
+    Map<TicketPriority, SlaTarget> source,
+  ) {
+    return {
+      for (final entry in source.entries) entry.key: entry.value,
+    };
+  }
+
+  static bool _sameSla(
+    Map<TicketPriority, SlaTarget> a,
+    Map<TicketPriority, SlaTarget> b,
+  ) {
+    if (a.length != b.length) return false;
+    for (final priority in TicketPriority.values) {
+      final left = a[priority];
+      final right = b[priority];
+      if (left == null || right == null) return false;
+      if (left.firstResponse != right.firstResponse ||
+          left.resolution != right.resolution) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _enterEdit() {
+    setState(() {
+      _baseline = _copySla(widget.config.slaByPriority);
+      _draft = _copySla(_baseline);
+      _editing = true;
+    });
+  }
+
+  Future<void> _cancel() async {
+    if (_isDirty) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Discard changes?'),
+          content: const Text(
+            'You have unsaved SLA changes. If you cancel now, '
+            'those edits will be lost.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Keep editing'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.danger,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Discard'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
+    setState(() {
+      _draft = _copySla(_baseline);
+      _editing = false;
+    });
+  }
+
+  Future<void> _save() async {
+    if (!_isDirty) {
+      setState(() => _editing = false);
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save SLA targets?'),
+        content: const Text(
+          'Apply the first-response and resolution targets for each priority.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final cubit = context.read<TicketConfigCubit>();
+    for (final priority in TicketPriority.values) {
+      final target = _draft[priority];
+      if (target != null) cubit.setSlaTarget(priority, target);
+    }
+    setState(() {
+      _baseline = _copySla(_draft);
+      _editing = false;
+    });
+  }
+
+  void _updateDraft(TicketPriority priority, SlaTarget target) {
+    if (!_editing) return;
+    setState(() {
+      _draft = {
+        ..._draft,
+        priority: target,
+      };
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final targets = _editing ? _draft : widget.config.slaByPriority;
 
     return _ConfigCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'SLA targets',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'SLA targets',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      'A Service Level Agreement is the promised time to first '
+                      'agent reply and to resolve the case. Status becomes At '
+                      'risk when ≤20% of the target remains.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              if (_editing) ...[
+                AppButton(
+                  key: const ValueKey('config-sla-cancel'),
+                  label: 'Cancel',
+                  variant: AppButtonVariant.outlined,
+                  onPressed: _cancel,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                AppButton(
+                  key: const ValueKey('config-sla-save'),
+                  label: 'Save',
+                  onPressed: _save,
+                ),
+              ] else
+                AppButton(
+                  key: const ValueKey('config-edit-sla'),
+                  label: 'Edit',
+                  variant: AppButtonVariant.outlined,
+                  onPressed: _enterEdit,
+                ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            'A Service Level Agreement is the promised time to first agent '
-            'reply and to resolve the case. Status becomes At risk when ≤20% '
-            'of the target remains.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkSecondary,
+          if (_editing && _isDirty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Unsaved changes',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: AppColors.accent,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: AppSpacing.md),
           for (final priority in TicketPriority.values) ...[
             if (priority != TicketPriority.values.first)
               const SizedBox(height: AppSpacing.sm),
             _SlaPriorityCard(
               priority: priority,
-              target: config.slaFor(priority),
+              target: targets[priority] ?? widget.config.slaFor(priority),
+              editable: _editing,
+              onChanged: (target) => _updateDraft(priority, target),
             ),
           ],
         ],
@@ -751,15 +939,18 @@ class _SlaPriorityCard extends StatelessWidget {
   const _SlaPriorityCard({
     required this.priority,
     required this.target,
+    required this.editable,
+    required this.onChanged,
   });
 
   final TicketPriority priority;
   final SlaTarget target;
+  final bool editable;
+  final ValueChanged<SlaTarget> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cubit = context.read<TicketConfigCubit>();
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -785,14 +976,26 @@ class _SlaPriorityCard extends StatelessWidget {
                 final first = _HoursField(
                   label: 'First response (hours)',
                   hours: target.firstResponse.inMinutes / 60,
-                  onChanged: (hours) =>
-                      cubit.setFirstResponseHours(priority, hours),
+                  enabled: editable,
+                  onChanged: (hours) => onChanged(
+                    target.copyWith(
+                      firstResponse: Duration(
+                        minutes: (hours * 60).round().clamp(1, 60 * 24 * 30),
+                      ),
+                    ),
+                  ),
                 );
                 final resolution = _HoursField(
                   label: 'Resolution (hours)',
                   hours: target.resolution.inMinutes / 60,
-                  onChanged: (hours) =>
-                      cubit.setResolutionHours(priority, hours),
+                  enabled: editable,
+                  onChanged: (hours) => onChanged(
+                    target.copyWith(
+                      resolution: Duration(
+                        minutes: (hours * 60).round().clamp(1, 60 * 24 * 30),
+                      ),
+                    ),
+                  ),
                 );
                 if (stacked) {
                   return Column(
@@ -824,11 +1027,13 @@ class _HoursField extends StatefulWidget {
     required this.label,
     required this.hours,
     required this.onChanged,
+    this.enabled = true,
   });
 
   final String label;
   final double hours;
   final ValueChanged<double> onChanged;
+  final bool enabled;
 
   @override
   State<_HoursField> createState() => _HoursFieldState();
@@ -880,6 +1085,8 @@ class _HoursFieldState extends State<_HoursField> {
         const SizedBox(height: AppSpacing.xs),
         TextField(
           controller: _controller,
+          enabled: widget.enabled,
+          readOnly: !widget.enabled,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
@@ -888,11 +1095,13 @@ class _HoursFieldState extends State<_HoursField> {
             isDense: true,
             suffixText: 'h',
           ),
-          onChanged: (raw) {
-            final parsed = double.tryParse(raw);
-            if (parsed == null) return;
-            widget.onChanged(parsed);
-          },
+          onChanged: widget.enabled
+              ? (raw) {
+                  final parsed = double.tryParse(raw);
+                  if (parsed == null) return;
+                  widget.onChanged(parsed);
+                }
+              : null,
         ),
       ],
     );

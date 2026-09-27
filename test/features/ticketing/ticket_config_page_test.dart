@@ -38,10 +38,11 @@ void main() {
     expect(find.text('Bug options'), findsOneWidget);
     expect(find.text('Priorities'), findsOneWidget);
     expect(find.text('SLA targets'), findsOneWidget);
-    expect(find.text('Edit'), findsNWidgets(5));
+    expect(find.text('Edit'), findsNWidgets(6));
     expect(find.byKey(const ValueKey('config-edit-applications')), findsOneWidget);
     expect(find.byKey(const ValueKey('config-edit-assignees')), findsOneWidget);
     expect(find.byKey(const ValueKey('config-edit-priorities')), findsOneWidget);
+    expect(find.byKey(const ValueKey('config-edit-sla')), findsOneWidget);
     expect(find.text('Add option…'), findsNothing);
     expect(find.text('Search config sections…'), findsOneWidget);
 

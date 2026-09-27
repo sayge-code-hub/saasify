@@ -7,6 +7,7 @@ import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/theme/app_theme.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/settings/presentation/bloc/company_logo_cubit.dart';
+import 'package:saasify/features/settings/presentation/bloc/workspace_settings_cubit.dart';
 import 'package:saasify/features/shell/presentation/bloc/shell_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_config_cubit.dart';
 import 'package:saasify/features/ticketing/presentation/bloc/ticket_list_cubit.dart';
@@ -19,6 +20,7 @@ class SaasifyApp extends StatefulWidget {
     this.ticketConfigCubit,
     this.shellCubit,
     this.companyLogoCubit,
+    this.workspaceSettingsCubit,
   });
 
   final AuthCubit? authCubit;
@@ -26,6 +28,7 @@ class SaasifyApp extends StatefulWidget {
   final TicketConfigCubit? ticketConfigCubit;
   final ShellCubit? shellCubit;
   final CompanyLogoCubit? companyLogoCubit;
+  final WorkspaceSettingsCubit? workspaceSettingsCubit;
 
   @override
   State<SaasifyApp> createState() => _SaasifyAppState();
@@ -37,6 +40,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
   late final TicketConfigCubit _ticketConfigCubit;
   late final ShellCubit _shellCubit;
   late final CompanyLogoCubit _companyLogoCubit;
+  late final WorkspaceSettingsCubit _workspaceSettingsCubit;
   late final AuthRouterRefresh _authRefresh;
   late final GoRouter _router;
   late final bool _ownsAuth;
@@ -44,6 +48,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
   late final bool _ownsConfig;
   late final bool _ownsShell;
   late final bool _ownsCompanyLogo;
+  late final bool _ownsWorkspaceSettings;
 
   @override
   void initState() {
@@ -53,11 +58,14 @@ class _SaasifyAppState extends State<SaasifyApp> {
     _ownsConfig = widget.ticketConfigCubit == null;
     _ownsShell = widget.shellCubit == null;
     _ownsCompanyLogo = widget.companyLogoCubit == null;
+    _ownsWorkspaceSettings = widget.workspaceSettingsCubit == null;
     _authCubit = widget.authCubit ?? AuthCubit();
     _ticketListCubit = widget.ticketListCubit ?? TicketListCubit();
     _ticketConfigCubit = widget.ticketConfigCubit ?? TicketConfigCubit();
     _shellCubit = widget.shellCubit ?? ShellCubit();
     _companyLogoCubit = widget.companyLogoCubit ?? CompanyLogoCubit();
+    _workspaceSettingsCubit =
+        widget.workspaceSettingsCubit ?? WorkspaceSettingsCubit();
     _authRefresh = AuthRouterRefresh(_authCubit);
     _router = createAppRouter(
       authCubit: _authCubit,
@@ -73,6 +81,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
     if (_ownsConfig) _ticketConfigCubit.close();
     if (_ownsShell) _shellCubit.close();
     if (_ownsCompanyLogo) _companyLogoCubit.close();
+    if (_ownsWorkspaceSettings) _workspaceSettingsCubit.close();
     _router.dispose();
     super.dispose();
   }
@@ -86,6 +95,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
         BlocProvider.value(value: _ticketConfigCubit),
         BlocProvider.value(value: _shellCubit),
         BlocProvider.value(value: _companyLogoCubit),
+        BlocProvider.value(value: _workspaceSettingsCubit),
       ],
       child: MaterialApp.router(
         title: AppConstants.appName,

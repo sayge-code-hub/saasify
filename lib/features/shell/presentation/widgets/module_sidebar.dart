@@ -73,12 +73,9 @@ class ModuleSidebar extends StatelessWidget {
                     _NavTile(
                       label: 'Help',
                       icon: Icons.help_outline,
+                      active: state.location == '/help',
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Help center coming soon.'),
-                          ),
-                        );
+                        context.go('/help');
                         onNavigate?.call();
                       },
                     ),
