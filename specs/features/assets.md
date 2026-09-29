@@ -6,12 +6,13 @@
 
 ## Summary
 
-Admin module for tracking physical/logical assets (name, tag, type, location, parent, status). MVP 1 ships a mocked **Asset List** with search and CRUD, **Add Asset**, and a simple **Asset Tree** from parent links. Responsive for phone, tablet, and web.
+Admin module for tracking physical/logical assets (name, tag, type, location, parent, status). MVP 1 ships a mocked **Asset List** with search and CRUD, **Add Asset**, a simple **Asset Tree**, and **PM Schedule** (see `pm_schedule.md`). Responsive for phone, tablet, and web.
 
 ## Out of scope (later steps)
 
 - Asset reports / summary / maintenance KPI reports
-- Excel import, PM schedule, Change Management, Equipment Failure, Parts & Storage
+- Excel import, Change Management, Equipment Failure, Parts & Storage
+- Work orders from PM Due
 - Real API / persistence
 
 ## Screens (MVP 1)
@@ -21,6 +22,7 @@ Admin module for tracking physical/logical assets (name, tag, type, location, pa
 | Asset List | `/assets` |
 | Add Asset | `/assets/new` |
 | Asset Tree | `/assets/tree` |
+| PM Schedule | `/assets/pm…` |
 | Asset detail (edit) | `/assets/:id` |
 
 ## Acceptance criteria

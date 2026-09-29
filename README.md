@@ -23,7 +23,7 @@ If you see “Loading workspace…” forever, hard-refresh to clear a stale Flu
 - **Shell** — left module bar with expandable **Ticketing** submodules (drawer on compact)
 - **Overview** — ticket pulse stats + urgent queue
 - **Ticketing admin** — list/search/filters, detail with assignee + SLA, reply thread, configurable dropdowns (all mocked)
-- **Asset Management (MVP 1)** — Asset List, Add Asset, Asset Tree (mocked, responsive)
+- **Asset Management (MVP 1)** — Asset List, Add Asset, Asset Tree, PM Schedule (mocked, responsive)
 
 ## Spec-driven workflow
 

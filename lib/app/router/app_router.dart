@@ -7,6 +7,9 @@ import 'package:saasify/features/assets/presentation/pages/asset_detail_page.dar
 import 'package:saasify/features/assets/presentation/pages/asset_form_page.dart';
 import 'package:saasify/features/assets/presentation/pages/asset_list_page.dart';
 import 'package:saasify/features/assets/presentation/pages/asset_tree_page.dart';
+import 'package:saasify/features/assets/presentation/pages/pm_detail_page.dart';
+import 'package:saasify/features/assets/presentation/pages/pm_form_page.dart';
+import 'package:saasify/features/assets/presentation/pages/pm_list_page.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/auth/presentation/pages/login_page.dart';
 import 'package:saasify/features/dynamic_ui/data/mock_dynamic_screens.dart';
@@ -145,6 +148,45 @@ GoRouter createAppRouter({
                 pageBuilder: (context, state) => const NoTransitionPage<void>(
                   child: AssetTreePage(),
                 ),
+              ),
+              GoRoute(
+                path: 'pm',
+                name: 'assets-pm',
+                pageBuilder: (context, state) => NoTransitionPage<void>(
+                  child: PmListPage(
+                    initialAssetId: state.uri.queryParameters['asset'],
+                  ),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    name: 'assets-pm-new',
+                    pageBuilder: (context, state) =>
+                        const NoTransitionPage<void>(
+                      child: PmFormPage(),
+                    ),
+                  ),
+                  GoRoute(
+                    path: ':pmId',
+                    name: 'assets-pm-detail',
+                    pageBuilder: (context, state) => NoTransitionPage<void>(
+                      child: PmDetailPage(
+                        planId: state.pathParameters['pmId']!,
+                      ),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'edit',
+                        name: 'assets-pm-edit',
+                        pageBuilder: (context, state) => NoTransitionPage<void>(
+                          child: PmFormPage(
+                            planId: state.pathParameters['pmId']!,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               GoRoute(
                 path: ':id',

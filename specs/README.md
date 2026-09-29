@@ -16,6 +16,7 @@ Specs define what agents and humans may build. Code follows specs, not the other
 | [features/overview.md](./features/overview.md) | Post-login dashboard |
 | [features/ticketing.md](./features/ticketing.md) | Admin ticketing UI (mocked) |
 | [features/assets.md](./features/assets.md) | Asset Management MVP 1 (mocked) |
+| [features/pm_schedule.md](./features/pm_schedule.md) | Preventive maintenance / PM Schedule |
 | [features/settings.md](./features/settings.md) | Settings placeholder |
 
 ## How to add a requirement

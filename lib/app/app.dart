@@ -6,6 +6,7 @@ import 'package:saasify/app/router/app_router.dart';
 import 'package:saasify/core/constants/app_constants.dart';
 import 'package:saasify/core/theme/app_theme.dart';
 import 'package:saasify/features/assets/presentation/bloc/asset_list_cubit.dart';
+import 'package:saasify/features/assets/presentation/bloc/pm_plan_cubit.dart';
 import 'package:saasify/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:saasify/features/settings/presentation/bloc/company_logo_cubit.dart';
 import 'package:saasify/features/settings/presentation/bloc/workspace_settings_cubit.dart';
@@ -20,6 +21,7 @@ class SaasifyApp extends StatefulWidget {
     this.ticketListCubit,
     this.ticketConfigCubit,
     this.assetListCubit,
+    this.pmPlanCubit,
     this.shellCubit,
     this.companyLogoCubit,
     this.workspaceSettingsCubit,
@@ -29,6 +31,7 @@ class SaasifyApp extends StatefulWidget {
   final TicketListCubit? ticketListCubit;
   final TicketConfigCubit? ticketConfigCubit;
   final AssetListCubit? assetListCubit;
+  final PmPlanCubit? pmPlanCubit;
   final ShellCubit? shellCubit;
   final CompanyLogoCubit? companyLogoCubit;
   final WorkspaceSettingsCubit? workspaceSettingsCubit;
@@ -42,6 +45,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
   late final TicketListCubit _ticketListCubit;
   late final TicketConfigCubit _ticketConfigCubit;
   late final AssetListCubit _assetListCubit;
+  late final PmPlanCubit _pmPlanCubit;
   late final ShellCubit _shellCubit;
   late final CompanyLogoCubit _companyLogoCubit;
   late final WorkspaceSettingsCubit _workspaceSettingsCubit;
@@ -51,6 +55,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
   late final bool _ownsTickets;
   late final bool _ownsConfig;
   late final bool _ownsAssets;
+  late final bool _ownsPmPlans;
   late final bool _ownsShell;
   late final bool _ownsCompanyLogo;
   late final bool _ownsWorkspaceSettings;
@@ -62,6 +67,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
     _ownsTickets = widget.ticketListCubit == null;
     _ownsConfig = widget.ticketConfigCubit == null;
     _ownsAssets = widget.assetListCubit == null;
+    _ownsPmPlans = widget.pmPlanCubit == null;
     _ownsShell = widget.shellCubit == null;
     _ownsCompanyLogo = widget.companyLogoCubit == null;
     _ownsWorkspaceSettings = widget.workspaceSettingsCubit == null;
@@ -69,6 +75,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
     _ticketListCubit = widget.ticketListCubit ?? TicketListCubit();
     _ticketConfigCubit = widget.ticketConfigCubit ?? TicketConfigCubit();
     _assetListCubit = widget.assetListCubit ?? AssetListCubit();
+    _pmPlanCubit = widget.pmPlanCubit ?? PmPlanCubit();
     _shellCubit = widget.shellCubit ?? ShellCubit();
     _companyLogoCubit = widget.companyLogoCubit ?? CompanyLogoCubit();
     _workspaceSettingsCubit =
@@ -87,6 +94,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
     if (_ownsTickets) _ticketListCubit.close();
     if (_ownsConfig) _ticketConfigCubit.close();
     if (_ownsAssets) _assetListCubit.close();
+    if (_ownsPmPlans) _pmPlanCubit.close();
     if (_ownsShell) _shellCubit.close();
     if (_ownsCompanyLogo) _companyLogoCubit.close();
     if (_ownsWorkspaceSettings) _workspaceSettingsCubit.close();
@@ -102,6 +110,7 @@ class _SaasifyAppState extends State<SaasifyApp> {
         BlocProvider.value(value: _ticketListCubit),
         BlocProvider.value(value: _ticketConfigCubit),
         BlocProvider.value(value: _assetListCubit),
+        BlocProvider.value(value: _pmPlanCubit),
         BlocProvider.value(value: _shellCubit),
         BlocProvider.value(value: _companyLogoCubit),
         BlocProvider.value(value: _workspaceSettingsCubit),

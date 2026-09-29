@@ -9,9 +9,12 @@ import 'package:saasify/core/widgets/app_empty_state.dart';
 import 'package:saasify/core/widgets/app_page.dart';
 import 'package:saasify/core/widgets/app_text.dart';
 import 'package:saasify/features/assets/domain/asset.dart';
+import 'package:saasify/features/assets/domain/pm_plan.dart';
 import 'package:saasify/features/assets/presentation/bloc/asset_list_cubit.dart';
+import 'package:saasify/features/assets/presentation/bloc/pm_plan_cubit.dart';
 import 'package:saasify/features/assets/presentation/pages/asset_form_page.dart';
 import 'package:saasify/features/assets/presentation/widgets/asset_status_chip.dart';
+import 'package:saasify/features/assets/presentation/widgets/pm_status_chip.dart';
 
 class AssetDetailPage extends StatelessWidget {
   const AssetDetailPage({required this.assetId, super.key});
@@ -38,6 +41,8 @@ class AssetDetailPage extends StatelessWidget {
         }
 
         final children = state.childrenOf(asset.id);
+        final pmPlans = context.watch<PmPlanCubit>().state.forAsset(asset.id);
+        final now = DateTime.now();
 
         return AppPage(
           child: Column(
@@ -127,6 +132,56 @@ class AssetDetailPage extends StatelessWidget {
                   ),
                 ),
               ],
+              const SizedBox(height: AppSpacing.md),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: AppText(
+                              'Preventive maintenance',
+                              variant: AppTextVariant.sectionTitle,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => context.go(
+                              '/assets/pm?asset=$assetId',
+                            ),
+                            child: const Text('View all'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      if (pmPlans.isEmpty)
+                        const AppText(
+                          'No PM plans for this asset yet.',
+                          variant: AppTextVariant.meta,
+                        )
+                      else
+                        for (final plan in pmPlans.take(3))
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(plan.maintenanceType),
+                            subtitle: Text(
+                              '${plan.frequency.label} · Next '
+                              '${formatPmDate(plan.nextDueDate)}',
+                            ),
+                            trailing: PmStatusChip(status: plan.statusAt(now)),
+                            onTap: () => context.go('/assets/pm/${plan.id}'),
+                          ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: AppSpacing.lg),
               Wrap(
                 spacing: AppSpacing.sm,
@@ -137,6 +192,12 @@ class AssetDetailPage extends StatelessWidget {
                     label: 'Edit',
                     icon: Icons.edit_outlined,
                     onPressed: () => context.go('/assets/$assetId/edit'),
+                  ),
+                  AppButton(
+                    label: 'PM Schedule',
+                    variant: AppButtonVariant.outlined,
+                    icon: Icons.event_available_outlined,
+                    onPressed: () => context.go('/assets/pm?asset=$assetId'),
                   ),
                   AppButton(
                     label: 'Asset Tree',

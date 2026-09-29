@@ -94,6 +94,11 @@ abstract final class AppModules {
         label: 'Asset Tree',
         location: '/assets/tree',
       ),
+      NavSubmodule(
+        id: 'assets-pm',
+        label: 'PM Schedule',
+        location: '/assets/pm',
+      ),
     ],
   );
 
