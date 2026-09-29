@@ -1,0 +1,49 @@
+# On every push to main (except the bump commit itself), bump the patch
+# version and push a chore(release) commit. Netlify should be connected to
+# this GitHub repo with production branch = main so that commit deploys.
+name: Bump version on main
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-version-main
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump patch version
+        id: bump
+        run: |
+          chmod +x tool/bump_version.sh
+          NEW_VERSION="$(tool/bump_version.sh | tail -1)"
+          echo "version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml \
+            lib/core/constants/app_constants.dart \
+            lib/features/releases/data/release_notes.dart
+          if git diff --staged --quiet; then
+            echo "No version changes to commit"
+            exit 0
+          fi
+          VERSION="${{ steps.bump.outputs.version }}"
+          git commit -m "chore(release): v${VERSION}"
+          git push origin main
