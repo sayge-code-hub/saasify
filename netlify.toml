@@ -1,0 +1,42 @@
+# Flutter web (mocked SaaS UI) on Netlify.
+# Connect this GitHub repo in Netlify → Deploy settings use this file.
+
+[build]
+  # Install Flutter stable, then build the release web bundle.
+  command = """
+    set -e
+    if [ ! -d "$HOME/flutter/bin" ]; then
+      git clone https://github.com/flutter/flutter.git -b stable --depth 1 "$HOME/flutter"
+    fi
+    export PATH="$HOME/flutter/bin:$PATH"
+    flutter config --no-analytics --enable-web
+    flutter pub get
+    flutter build web --release --no-wasm-dry-run
+  """
+  publish = "build/web"
+
+[build.environment]
+  # Give Flutter enough time/memory on Netlify's build image.
+  NODE_VERSION = "20"
+
+# SPA: every client route (e.g. /ticketing/tickets/TCK-1012) → index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Avoid sticky stale Flutter JS after deploys
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/flutter_bootstrap.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/flutter_service_worker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
