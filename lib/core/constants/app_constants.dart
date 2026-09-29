@@ -5,7 +5,7 @@ abstract final class AppConstants {
       'Customer support and operations workspace for modern teams.';
 
   /// Display version (matches pubspec `version` name segment).
-  static const String appVersion = '1.1.3';
+  static const String appVersion = '1.1.4';
 
   /// Full version label shown in UI footers.
   static const String appVersionLabel = 'v$appVersion';

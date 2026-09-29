@@ -33,9 +33,20 @@ class AppRelease {
 
 /// Mock deployment history for the Release History screen.
 abstract final class ReleaseNotes {
-  static const currentVersion = '1.1.3';
+  static const currentVersion = '1.1.4';
 
   static final List<AppRelease> all = [
+    AppRelease(
+      version: '1.1.4',
+      releasedAt: DateTime.utc(2026, 9, 29),
+      title: 'Production deploy',
+      changes: const [
+        ReleaseChange(
+          type: ReleaseChangeType.improvement,
+          summary: 'Automated release 1.1.4 published to production.',
+        ),
+      ],
+    ),
     AppRelease(
       version: '1.1.3',
       releasedAt: DateTime.utc(2026, 9, 29),
