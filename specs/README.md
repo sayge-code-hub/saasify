@@ -15,6 +15,7 @@ Specs define what agents and humans may build. Code follows specs, not the other
 | [features/shell.md](./features/shell.md) | SaaS module sidebar + submodules |
 | [features/overview.md](./features/overview.md) | Post-login dashboard |
 | [features/ticketing.md](./features/ticketing.md) | Admin ticketing UI (mocked) |
+| [features/assets.md](./features/assets.md) | Asset Management MVP 1 (mocked) |
 | [features/settings.md](./features/settings.md) | Settings placeholder |
 
 ## How to add a requirement

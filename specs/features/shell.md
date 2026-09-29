@@ -13,6 +13,7 @@ Authenticated admin chrome with a Maglo-inspired layout: left module sidebar (up
 | Module | Submodules | Route prefix |
 |--------|------------|--------------|
 | Ticketing | Dashboard, Add Ticket, All Tickets, Config | `/ticketing…` |
+| Asset Management (MVP 1) | Asset List, Add Asset, Asset Tree | `/assets…` |
 | Dynamic UI | BDUI Add Ticket (backend-driven form demo) | `/dynamic/create-ticket` |
 
 Clicking **Ticketing** opens the Dashboard (`/ticketing`) and expands the submodule list. **Settings** lives in the top header (gear icon), not the sidebar. Active nav is marked with a solid accent underline (not a filled pill).

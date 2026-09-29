@@ -72,6 +72,31 @@ abstract final class AppModules {
     ],
   );
 
+  static const assets = NavModule(
+    id: 'assets',
+    label: 'Asset Management',
+    icon: Icons.precision_manufacturing_outlined,
+    selectedIcon: Icons.precision_manufacturing,
+    location: '/assets',
+    children: [
+      NavSubmodule(
+        id: 'assets-list',
+        label: 'Asset List',
+        location: '/assets',
+      ),
+      NavSubmodule(
+        id: 'assets-new',
+        label: 'Add Asset',
+        location: '/assets/new',
+      ),
+      NavSubmodule(
+        id: 'assets-tree',
+        label: 'Asset Tree',
+        location: '/assets/tree',
+      ),
+    ],
+  );
+
   static const dynamicUi = NavModule(
     id: 'dynamic-ui',
     label: 'Dynamic UI',
@@ -89,6 +114,7 @@ abstract final class AppModules {
 
   static const List<NavModule> all = [
     ticketing,
+    assets,
     // Frozen: BDUI experiment kept in code/routes, hidden from nav.
     // dynamicUi,
   ];
@@ -113,6 +139,11 @@ abstract final class AppModules {
       return true;
     }
 
+    // Asset List is only the /assets root (not /new, /tree, or detail).
+    if (location == '/assets') {
+      return currentPath == '/assets';
+    }
+
     return false;
   }
 
@@ -121,6 +152,9 @@ abstract final class AppModules {
     if (module.id == 'ticketing') {
       return currentPath == '/ticketing' ||
           currentPath.startsWith('/ticketing/');
+    }
+    if (module.id == 'assets') {
+      return currentPath == '/assets' || currentPath.startsWith('/assets/');
     }
     if (module.id == 'dynamic-ui') {
       return currentPath == '/dynamic' || currentPath.startsWith('/dynamic/');
