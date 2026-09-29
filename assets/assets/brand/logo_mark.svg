@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Raster mark is preferred in app; SVG kept as brand source -->
+  <text x="60" y="78" text-anchor="middle" font-family="Arial Black, Helvetica, Arial, sans-serif" font-size="92" font-weight="900" fill="#0A0A0A">S</text>
+  <circle cx="92" cy="92" r="10" fill="#FF6542"/>
+</svg>
